@@ -310,10 +310,10 @@ void ImageSynth::rectangle(cv::Mat& image, int page) {
 void ImageSynth::synthesis(cv::Mat& image, nlohmann::json data, int page) {
   set_data(data);
 
-  if(data["type"] == "fill") fill(image, data);
-  if(data["type"] == "noise") noise(image, data);
-  if(data["type"] == "walker") walker(image, data);
-  if(data["type"] == "gradient") gradient(image, data, page);
-  if(data["type"] == "rectangle") rectangle(image, data, page);
+  if(data["type"] == "fill") fill(image);
+  if(data["type"] == "noise") noise(image);
+  if(data["type"] == "walker") walker(image);
+  if(data["type"] == "gradient") gradient(image, page);
+  if(data["type"] == "rectangle") rectangle(image, page);
 
 } // synthesis
