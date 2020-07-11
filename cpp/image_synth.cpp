@@ -107,8 +107,7 @@ double ImageSynth::point_gradient(unsigned int y, unsigned int x, unsigned int w
     return wtc::number::normDouble(-1, 1, sinus);
 } // point_gradient
 
-void ImageSynth::fill(cv::Mat& image, nlohmann::json data) {
-  set_data(data);
+void ImageSynth::fill(cv::Mat& image) {
 
   uchar r, g, b, value;
 
@@ -129,8 +128,7 @@ void ImageSynth::fill(cv::Mat& image, nlohmann::json data) {
   image = temp;
 } // fill openCV
 
-void ImageSynth::noise(cv::Mat& image, nlohmann::json data) {
-  set_data(data);
+void ImageSynth::noise(cv::Mat& image) {
 
   unsigned int width, height;
   uchar r, g, b, value;
@@ -163,8 +161,7 @@ void ImageSynth::noise(cv::Mat& image, nlohmann::json data) {
 
 } // noise
 
-void ImageSynth::walker(cv::Mat& image, nlohmann::json data) {
-  set_data(data);
+void ImageSynth::walker(cv::Mat& image) {
 
   double value;
   unsigned int n, y, x, temp, width, height;
@@ -221,8 +218,7 @@ void ImageSynth::walker(cv::Mat& image, nlohmann::json data) {
 
 } // walker
 
-void ImageSynth::gradient(cv::Mat& image, nlohmann::json data, int page) {
-  set_data(data);
+void ImageSynth::gradient(cv::Mat& image, int page) {
 
   double value, pm;
   unsigned int width, height;
@@ -267,8 +263,7 @@ void ImageSynth::gradient(cv::Mat& image, nlohmann::json data, int page) {
 
 } // gm_color_adient
 
-void ImageSynth::rectangle(cv::Mat& image, nlohmann::json data, int page) {
-  set_data(data);
+void ImageSynth::rectangle(cv::Mat& image, int page) {
 
   double value;
   unsigned int w, wr, left, right, width, height;
@@ -313,6 +308,7 @@ void ImageSynth::rectangle(cv::Mat& image, nlohmann::json data, int page) {
 } // rectangle
 
 void ImageSynth::synthesis(cv::Mat& image, nlohmann::json data, int page) {
+  set_data(data);
 
   if(data["type"] == "fill") fill(image, data);
   if(data["type"] == "noise") noise(image, data);
