@@ -26,6 +26,7 @@ public:
     void spectogramm(stk::StkFrames& audio, cv::Mat& image);
 
     void stereo_spectogramm(stk::StkFrames& audio, cv::Mat& image);
+    void stereo_shape(stk::StkFrames& audio, cv::Mat& image);
 };
 
 #endif /* audio_out_h */

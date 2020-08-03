@@ -247,14 +247,21 @@ Napi::Value NodeIA::WrapPreview(const Napi::CallbackInfo& info) { // wrapped pre
 
   Napi::Uint8Array buffer = info[0].As<Napi::Uint8Array>();
 
+  // Napi::ArrayBuffer buffer = info[0].As<Napi::ArrayBuffer>();
+
   Napi::Float32Array audioL = info[1].As<Napi::Float32Array>();
   Napi::Float32Array audioR = info[2].As<Napi::Float32Array>();
+
+  // Napi::ArrayBuffer audioL = info[1].As<Napi::ArrayBuffer>();
+  // Napi::ArrayBuffer audioR = info[2].As<Napi::ArrayBuffer>();
 
   unsigned int width = info[3].As<Napi::Number>().Uint32Value();
   unsigned int height = info[4].As<Napi::Number>().Uint32Value();
   unsigned int pages = info[5].As<Napi::Number>().Uint32Value();
 
   bool audioPreview = info[6].As<Napi::Boolean>().Value();
+
+  // Napi::ArrayConsumer(reinterpret_cast<uchar*>(buffer.Data()), buffer.ByteLength() / sizeof(uchar));
 
   std::vector< std::vector< std::vector< std::vector<unsigned char> > > > vector;
 
@@ -284,9 +291,18 @@ Napi::Value NodeIA::WrapPreview(const Napi::CallbackInfo& info) { // wrapped pre
 
   }
 
+  // ArrayConsumer(reinterpret_cast<float*>(audioL.Data()), audioL.ByteLength() / sizeof(float));
+
+  // ArrayConsumer(reinterpret_cast<float*>(audioR.Data()), audioR.ByteLength() / sizeof(float));
+
   std::vector<double> vectorL, vectorR;
   unsigned int length = audioL.ElementLength();
+
+  // double arrayL[length], arrayR[length];
+
   for (unsigned int i = 0; i < length; i++) {
+    // arrayL[i] = audioL[i];
+    // arrayR[i] = audioR[i];
     vectorL.push_back(audioL[i]);
     vectorR.push_back(audioR[i]);
   }

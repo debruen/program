@@ -1,6 +1,16 @@
 
 #include "ia.h"
 
+/**
+ * A brief history of JavaDoc-style (C-style) comments.
+ *
+ * This is the typical JavaDoc-style C-style comment. It starts with two
+ * asterisks.
+ *
+ * @param theory Even if there is only one possible unified theory. it is just a
+ *               set of rules and equations.
+ */
+ 
 Program::Program(std::string data) {
 
   nlohmann::json temp = nlohmann::json::parse(data);
@@ -15,8 +25,6 @@ Program::Program(std::string data) {
   m_data["files"] = nlohmann::json::array();
   m_data["processes"] = nlohmann::json::array();
   m_data["out"] = m_imageout.get_default();
-
-  std::cout << m_data.dump() << std::endl;
 
   init();
 }
@@ -83,7 +91,7 @@ void Program::init(SIZE size) {
   // image out
 
   m_image_out["mode"] = m_mode;
-  m_image_out["out_mode"] = "base_tone_shift";
+  m_image_out["out_mode"] = "hsl_to_signal";
   m_image_out["time"] = 2.96;
   m_image_out["pages"] = 1;
   m_image_out["time_image"] = 2.96;
@@ -110,7 +118,6 @@ bool Program::set_data(std::string data) {
 std::string Program::get_data() {
   std::string data = m_data.dump();
 
-  std::cout << data << std::endl;
   return data;
 }
 
@@ -128,7 +135,6 @@ std::string& Program::get_mode() {
 
 bool Program::set_image_in(std::string in) {
   m_image_in = nlohmann::json::parse(in);
-  // std::cout << m_image_in << std::endl;
   return true;
 }
 std::string Program::get_image_in() {
@@ -489,8 +495,11 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
       m_prelistening.resize(pageframes, 2);
 
       if(audio) {
-          m_imageout.HsltoSignal(m_premap, m_prelistening, m_image_out, i);
-          // m_imageout.HsltoSignal(m_premap, m_prelistening, m_image_out["channel_a"], m_image_out["channel_b"], m_image_out["channel_c"], m_image_out["keyboard"], bands, m_image_out["narrowing"], i);
+        if(m_image_out["out_mode"] == "hsl_to_signal") {
+          m_imageout.hsl_to_signal(m_premap, m_prelistening, m_image_out, i);
+        }  else if(m_image_out["out_mode"] == "rgb_to_chord") {
+          m_imageout.rgb_to_chord(m_premap, m_prelistening, m_image_out, i);
+        }
       }
 
       stk::StkFrames framesL(pageframes, 1), framesR(pageframes, 1);
@@ -564,8 +573,6 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
 
     stk::StkFrames framesL(pageframes, 1), framesR(pageframes, 1), audio_comp(pageframes, 2);
 
-    // m_preview.assign(width, height, 1, 3, 0);
-
     cv::Size size(width, height);
     cv::Mat img(size, CV_8UC3);
     img = 0;
@@ -588,7 +595,10 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
 
       if(m_audio_out["out_mode"] == "stereo_spectogram") {
         m_audioout.stereo_spectogramm(audio_comp, m_premap);
+      } else if(m_audio_out["out_mode"] == "stereo_shape") {
+        m_audioout.stereo_shape(audio_comp, m_premap);
       }
+
 
       unsigned int c;
       uchar* ptr;
@@ -644,15 +654,12 @@ bool Program::run() {
 
       if(m_image_in["files"].size() > 0) {
         std::string file = m_image_in["files"][i];
-        // m_image.assign(file.c_str());
-        // crop(m_image, width, height);
-        // color(m_image);
         cv::Mat img;
+
         img = cv::imread(m_image_in["files"][i], cv::IMREAD_COLOR);
         crop(img, width, height);
         m_map = img;
       } else {
-        // m_image.assign(width, height, 1, 3, 0);
         cv::Size size(width, height);
         cv::Mat img(size, CV_8UC3);
         img = 0;
@@ -673,9 +680,11 @@ bool Program::run() {
       stk::StkFrames audio(pageframes, 2);
       audio.setDataRate(sample_rate);
 
-      m_imageout.HsltoSignal(m_map, audio, m_image_out, i);
-      // m_imageout.HsltoSignal(m_map, audio, m_image_out["channel_a"], m_image_out["channel_b"], m_image_out["channel_c"], m_image_out["keyboard"], bands, m_image_out["narrowing"], i);
-
+      if(m_image_out["out_mode"] == "hsl_to_signal") {
+        m_imageout.hsl_to_signal(m_map, audio, m_image_out, i);
+      }  else if(m_image_out["out_mode"] == "rgb_to_chord") {
+        m_imageout.rgb_to_chord(m_map, audio, m_image_out, i);
+      }
       stk::StkFrames audioL(pageframes, 1), audioR(pageframes, 1);
 
       audioL.setChannel(0, audio, 0);
@@ -763,7 +772,10 @@ bool Program::run() {
 
       if(m_audio_out["out_mode"] == "stereo_spectogram") {
         m_audioout.stereo_spectogramm(audio_comp, m_map);
+      }  else if(m_audio_out["out_mode"] == "stereo_shape") {
+        m_audioout.stereo_shape(audio_comp, m_map);
       }
+
       save_image(i);
     } // page loop
 

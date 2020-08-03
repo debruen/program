@@ -154,31 +154,18 @@ void AudioOut::stereo_spectogramm(stk::StkFrames& audio, cv::Mat& image) { // --
       for (unsigned int j = 0; j < fftL[0].size(); ++j) {
 
         // y position
-        yN = static_cast<double>(i) / fftL.size();
-        if(size_diff > 1) yP = distribution(generator);
-        y = height - round(yN * (height - 1)) + yP;
+        yN = static_cast<double>(i) / static_cast<double>(fftL.size());
+        // if(size_diff > 1) yP = distribution(generator);
+        y = height - round(yN * static_cast<double>(height - 1)) + yP;
         if(y > height - 1) y = height - 1;
 
         // x position
-        // xN = std::fabs(pow(fftL[i][j], 0.1) - pow(fftR[i][j], 0.1));
         xN = static_cast<double>(j) / fftL[0].size() / 2;
         x1 = round(pow(xN, 0.6) * (width - 1));
         x2 = width - x1 - 1;
 
-        // h = static_cast<double>(j) / fftL[0].size(); // color
-        // s = pow(fftL[i][j], 0.1);
-        // l = pow(fftR[i][j], 0.1);
-
         valL = round(pow(fftL[i][j], 0.3) * 255);
         valR = round(pow(fftR[i][j], 0.3) * 255);
-
-        // if(i > fftL.size() - 100) {
-        //   std::cout << i << ": x " << x << " y " << y << " h " << h << " s " << s << " l " << l << std::endl;
-        // }
-
-        // hsl = {h, s, l};
-        //
-        // rgb = wtc::color::hslToRgb(hsl);
 
         _I(y,x1)[2] = valL + _I(y,x1)[2] / 2; // R
         _I(y,x1)[1] = valL + _I(y,x1)[1] / 2; // G
@@ -195,4 +182,122 @@ void AudioOut::stereo_spectogramm(stk::StkFrames& audio, cv::Mat& image) { // --
     image = _I;
 
     std::cout << "stereo spectogramm END" << std::endl;
+}
+
+void AudioOut::stereo_shape(stk::StkFrames& audio, cv::Mat& image) {
+    std::cout << "stereo shape" << std::endl;
+
+    // settings
+    const unsigned int max_bands{2048};
+
+    unsigned int width, height, area, frames, bands{0}, cut, steps, index{0};
+
+    width  = static_cast<unsigned int>(image.cols);
+    height = static_cast<unsigned int>(image.rows);
+    area = width * height;
+
+    frames = audio.frames();
+
+    stk::StkFrames framesL(frames, 1), framesR(frames, 1);
+
+    framesL.setChannel(0, audio, 0);
+    framesR.setChannel(0, audio, 1);
+
+    if(frames < max_bands) {
+      bands = frames / 2;
+    } else {
+      bands = max_bands;
+    }
+
+    cut = frames - bands;
+    steps = area / bands * 2;
+
+    std::vector< std::vector<double> > fftL, fftR;
+
+    std::vector< std::vector< std::vector<double> > > fft;
+
+    for(unsigned int i = 0; i < steps; i++) {
+
+      index = round(static_cast<double>(cut) / steps * i);
+
+      std::vector<double> bandInL, bandInR, bandOutL, bandOutR;
+      for (unsigned int f = 0; f < bands; f++) {
+        bandInL.push_back(framesL[index + f]);
+        bandInR.push_back(framesR[index + f]);
+      }
+
+      bandOutL = wtc::v1d::fft(bandInL);
+      bandOutR = wtc::v1d::fft(bandInR);
+
+      fftL.push_back(bandOutL);
+      fftR.push_back(bandOutR);
+
+    }
+
+    fft.push_back(fftL);
+    fft.push_back(fftR);
+
+    wtc::v3d::norm3dDouble(fft);
+
+    fftL = fft[0];
+    fftR = fft[1];
+
+    unsigned int size_diff, y, yP{0}, x, z;
+    double yN, volume, tone, position;
+    bool even;
+    uchar valL, valR;
+
+    size_diff = round(static_cast<double>(height) / fftL.size());
+
+    std::cout << fftL.size() << " " << height << " " << size_diff << std::endl;
+
+    std::mt19937 generator(8);
+    std::uniform_int_distribution<int> distribution(0, size_diff);
+
+    cv::Mat_<cv::Vec3b> _I = image;
+
+    std::vector<double> hsl;
+    std::vector<unsigned char> rgb;
+
+    for (unsigned int i = 0; i < fftL.size(); ++i) {
+      even = (i % 1);
+      for (unsigned int j = 0; j < fftL[0].size(); ++j) {
+
+        // y position
+        yN = static_cast<double>(i) / fftL.size();
+        if(size_diff > 1) yP = distribution(generator);
+        y = height - round(yN * (height - 1)) + yP;
+        if(y > height - 1) y = height - 1;
+
+        volume = fftL[i][j] + fftR[i][j];
+        tone = static_cast<double>(j) / fftL[0].size();
+        position = fftL[i][j];
+        z = 0;
+        if (position < fftR[i][j]) {
+          position = fftR[i][j];
+          z = 1;
+        }
+        position = position / volume;
+
+        // x position
+        if(z) {
+          x = round(position * (width - 1));
+        } else {
+          x = width - round(position * (width - 1));
+        }
+
+        valL = round(pow(fftL[i][j], 0.3) * 255);
+        valR = round(pow(fftR[i][j], 0.3) * 255);
+
+        _I(y,x)[2] = valL + _I(y,x)[2] / 2; // R
+        _I(y,x)[1] = valL + _I(y,x)[1] / 2; // G
+        _I(y,x)[0] = valL + _I(y,x)[0] / 2; // B
+
+      }
+
+    }
+
+    image = _I;
+
+    std::cout << "stereo shape END" << std::endl;
 }

@@ -38,7 +38,8 @@ public:
   nlohmann::json get_default();
   void set_data(nlohmann::json data);
 
-  void HsltoSignal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page);
+  void hsl_to_signal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page);
+  void rgb_to_chord(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page);
 
 };
 

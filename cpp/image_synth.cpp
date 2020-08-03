@@ -14,8 +14,8 @@ blendchar ImageSynth::get_blend(std::string blend) {
   if(blend == "harmonic") function = who::blend::harmonic;
   if(blend == "darken") function = who::blend::darken;
   if(blend == "multiply") function = who::blend::multiply;
-  if(blend == "colom_color_durn") function = who::blend::colorburn;
-  if(blend == "lineam_color_durn") function = who::blend::linearburn;
+  if(blend == "colom_temp_color_durn") function = who::blend::colorburn;
+  if(blend == "lineam_temp_color_durn") function = who::blend::linearburn;
   if(blend == "lighten") function = who::blend::lighten;
   if(blend == "screen") function = who::blend::screen;
   if(blend == "colordodge") function = who::blend::colordodge;
@@ -35,24 +35,24 @@ blendchar ImageSynth::get_blend(std::string blend) {
 
 void ImageSynth::set_data(nlohmann::json data) {
 
-  m_opacity = data["opacity"];
+  m_temp_opacity = data["opacity"];
 
-  m_blend = get_blend(data["blend"]);
+  m_temp_blend = get_blend(data["blend"]);
 
-  m_color_a = data["color"][0];
-  m_color_b = data["color"][1];
-  m_color_c = data["color"][2];
-  m_color_d = data["color"][3];
-  m_color_e = data["color"][4];
-  m_color_f = data["color"][5];
+  m_temp_color_a = data["color"][0];
+  m_temp_color_b = data["color"][1];
+  m_temp_color_c = data["color"][2];
+  m_temp_color_d = data["color"][3];
+  m_temp_color_e = data["color"][4];
+  m_temp_color_f = data["color"][5];
 
-  m_frequency = data["gradient"][0];
-  m_phase = data["gradient"][1];
-  m_tilt = data["gradient"][2];
+  m_temp_frequency = data["gradient"][0];
+  m_temp_phase = data["gradient"][1];
+  m_temp_tilt = data["gradient"][2];
 
-  m_width = data["rectangle"][0];
-  m_height = data["rectangle"][1];
-  m_center = data["rectangle"][2];
+  m_temp_width = data["rectangle"][0];
+  m_temp_height = data["rectangle"][1];
+  m_temp_center = data["rectangle"][2];
 
 }
 
@@ -116,9 +116,9 @@ void ImageSynth::fill(cv::Mat& image) {
   for (int i = 0; i < 256; ++i) {
     value = static_cast<uchar>(i);
 
-    r = m_blend(value, m_color_a, m_opacity);
-    g = m_blend(value, m_color_b, m_opacity);
-    b = m_blend(value, m_color_c, m_opacity);
+    r = m_temp_blend(value, m_temp_color_a, m_temp_opacity);
+    g = m_temp_blend(value, m_temp_color_b, m_temp_opacity);
+    b = m_temp_blend(value, m_temp_color_c, m_temp_opacity);
 
     table.at<cv::Vec3b>(0,i) = cv::Vec3b(b, g, r);
   }
@@ -149,13 +149,13 @@ void ImageSynth::noise(cv::Mat& image) {
 
       value = distribution(generator);
 
-      r = wtc::scale::projectChar(m_color_a, m_color_d, value);
-      g = wtc::scale::projectChar(m_color_b, m_color_e, value);
-      b = wtc::scale::projectChar(m_color_c, m_color_f, value);
+      r = wtc::scale::projectChar(m_temp_color_a, m_temp_color_d, value);
+      g = wtc::scale::projectChar(m_temp_color_b, m_temp_color_e, value);
+      b = wtc::scale::projectChar(m_temp_color_c, m_temp_color_f, value);
 
-      ptr[c + 2] = m_blend(ptr[c + 2], r, m_opacity);
-      ptr[c + 1] = m_blend(ptr[c + 1], g, m_opacity);
-      ptr[c] = m_blend(ptr[c], b, m_opacity);
+      ptr[c + 2] = m_temp_blend(ptr[c + 2], r, m_temp_opacity);
+      ptr[c + 1] = m_temp_blend(ptr[c + 1], g, m_temp_opacity);
+      ptr[c] = m_temp_blend(ptr[c], b, m_temp_opacity);
     }
   }
 
@@ -206,13 +206,13 @@ void ImageSynth::walker(cv::Mat& image) {
         c = x * 3;
 
         value = sqrt(static_cast<double>(vector[y][x]) / 255);
-        r = wtc::scale::projectChar(m_color_a, m_color_d, value);
-        g = wtc::scale::projectChar(m_color_b, m_color_e, value);
-        b = wtc::scale::projectChar(m_color_c, m_color_f, value);
+        r = wtc::scale::projectChar(m_temp_color_a, m_temp_color_d, value);
+        g = wtc::scale::projectChar(m_temp_color_b, m_temp_color_e, value);
+        b = wtc::scale::projectChar(m_temp_color_c, m_temp_color_f, value);
 
-        ptr[c + 2] = m_blend(ptr[c + 2], r, m_opacity);
-        ptr[c + 1] = m_blend(ptr[c + 1], g, m_opacity);
-        ptr[c] = m_blend(ptr[c], b, m_opacity);
+        ptr[c + 2] = m_temp_blend(ptr[c + 2], r, m_temp_opacity);
+        ptr[c + 1] = m_temp_blend(ptr[c + 1], g, m_temp_opacity);
+        ptr[c] = m_temp_blend(ptr[c], b, m_temp_opacity);
       }
     }
 
@@ -224,19 +224,19 @@ void ImageSynth::gradient(cv::Mat& image, int page) {
   unsigned int width, height;
   uchar r, g, b;
 
-  m_tilt = wtc::number::circle(0, 1, m_tilt);
+  m_temp_tilt = wtc::number::circle(0, 1, m_temp_tilt);
 
     for (int i = 0; i < page; i++) {
-      if(m_tilt <= 0.25) {
-          pm = 1 - m_tilt * 4;
-      } else if (m_tilt <= 0.5) {
-          pm = (m_tilt - 0.25) * (-4);
-      } else if (m_tilt <= 0.75) {
-          pm = 1 - (m_tilt - 0.5) * 4;
+      if(m_temp_tilt <= 0.25) {
+          pm = 1 - m_temp_tilt * 4;
+      } else if (m_temp_tilt <= 0.5) {
+          pm = (m_temp_tilt - 0.25) * (-4);
+      } else if (m_temp_tilt <= 0.75) {
+          pm = 1 - (m_temp_tilt - 0.5) * 4;
       } else {
-          pm = (m_tilt - 0.75) * (-4);
+          pm = (m_temp_tilt - 0.75) * (-4);
       }
-      m_phase += m_frequency * pm;
+      m_temp_phase += m_temp_frequency * pm;
     }
 
     width = static_cast<unsigned int>(image.cols);
@@ -250,18 +250,18 @@ void ImageSynth::gradient(cv::Mat& image, int page) {
       for (unsigned int x = 0; x < width; x++) {
         c = x * 3;
 
-        value = point_gradient(y, x, width, height, m_frequency, m_phase, m_tilt);
-        r = wtc::scale::projectChar(m_color_a, m_color_d, value);
-        g = wtc::scale::projectChar(m_color_b, m_color_e, value);
-        b = wtc::scale::projectChar(m_color_c, m_color_f, value);
+        value = point_gradient(y, x, width, height, m_temp_frequency, m_temp_phase, m_temp_tilt);
+        r = wtc::scale::projectChar(m_temp_color_a, m_temp_color_d, value);
+        g = wtc::scale::projectChar(m_temp_color_b, m_temp_color_e, value);
+        b = wtc::scale::projectChar(m_temp_color_c, m_temp_color_f, value);
 
-        ptr[c + 2] = m_blend(ptr[c + 2], r, m_opacity);
-        ptr[c + 1] = m_blend(ptr[c + 1], g, m_opacity);
-        ptr[c] = m_blend(ptr[c], b, m_opacity);
+        ptr[c + 2] = m_temp_blend(ptr[c + 2], r, m_temp_opacity);
+        ptr[c + 1] = m_temp_blend(ptr[c + 1], g, m_temp_opacity);
+        ptr[c] = m_temp_blend(ptr[c], b, m_temp_opacity);
       }
     }
 
-} // gm_color_adient
+} // gm_temp_color_adient
 
 void ImageSynth::rectangle(cv::Mat& image, int page) {
 
@@ -270,15 +270,15 @@ void ImageSynth::rectangle(cv::Mat& image, int page) {
   uchar r, g, b;
 
   for (int i = 0; i < page; i++) {
-    m_phase += m_frequency;
+    m_temp_phase += m_temp_frequency;
   }
 
   width = static_cast<unsigned int>(image.cols);
   height = static_cast<unsigned int>(image.rows);
 
   w = static_cast<double>(width) - 1;
-  wr = w * m_width;
-  left = round((w - wr) * m_center);
+  wr = w * m_temp_width;
+  left = round((w - wr) * m_temp_center);
   right = round(wr + left);
 
   unsigned int c;
@@ -289,20 +289,20 @@ void ImageSynth::rectangle(cv::Mat& image, int page) {
     for (unsigned int x = 0; x < width; x++) {
       c = x * 3;
 
-      value = point_gradient(y, x, width, height, m_frequency, m_phase, 0);
-      if(value < m_height && x >= left && x <= right) {
-          r = m_color_d;
-          g = m_color_e;
-          b = m_color_f;
+      value = point_gradient(y, x, width, height, m_temp_frequency, m_temp_phase, 0);
+      if(value < m_temp_height && x >= left && x <= right) {
+          r = m_temp_color_d;
+          g = m_temp_color_e;
+          b = m_temp_color_f;
       } else {
-          r = m_color_a;
-          g = m_color_b;
-          b = m_color_c;
+          r = m_temp_color_a;
+          g = m_temp_color_b;
+          b = m_temp_color_c;
       }
 
-      ptr[c + 2] = m_blend(ptr[c + 2], r, m_opacity);
-      ptr[c + 1] = m_blend(ptr[c + 1], g, m_opacity);
-      ptr[c]     = m_blend(ptr[c],     b, m_opacity);
+      ptr[c + 2] = m_temp_blend(ptr[c + 2], r, m_temp_opacity);
+      ptr[c + 1] = m_temp_blend(ptr[c + 1], g, m_temp_opacity);
+      ptr[c]     = m_temp_blend(ptr[c],     b, m_temp_opacity);
     }
   }
 } // rectangle

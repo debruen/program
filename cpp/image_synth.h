@@ -23,10 +23,10 @@ class ImageSynth {
 
 private:
 
-  uchar m_color_a, m_color_b, m_color_c, m_color_d, m_color_e, m_color_f;
-  double m_opacity, m_frequency, m_phase, m_tilt, m_width, m_height, m_center;
+  uchar m_temp_color_a, m_temp_color_b, m_temp_color_c, m_temp_color_d, m_temp_color_e, m_temp_color_f;
+  double m_temp_opacity, m_temp_frequency, m_temp_phase, m_temp_tilt, m_temp_width, m_temp_height, m_temp_center;
 
-  blendchar m_blend;
+  blendchar m_temp_blend;
 
   blendchar get_blend(std::string blend);
   void set_data(nlohmann::json data);

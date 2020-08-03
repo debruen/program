@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <napi.h>
+
+#include "opencv2/core.hpp"
+
 #include "ia.h"
 
 class NodeIA : public Napi::ObjectWrap<NodeIA> {

@@ -2,7 +2,7 @@
 
 ImageOut::ImageOut() {
 
-  m_default["type"] = "base_tone_shift";
+  m_default["type"] = "hsl_to_signal";
   m_default["narrowing"] = 0.0;
   m_default["channel_a"] = 0;
   m_default["channel_b"] = 1;
@@ -47,7 +47,7 @@ void ImageOut::setSine(unsigned int bands) {
     }
 }
 
-void ImageOut::HsltoSignal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page) { // ------------------ Image -> Audio
+void ImageOut::hsl_to_signal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page) { // ------------------ Image -> Audio
     std::cout << "HsltoSignal: resize" << std::endl;
 
     set_data(data);
@@ -57,8 +57,6 @@ void ImageOut::HsltoSignal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json
     // get dimensions
     length = audio.frames();
     bands = image.cols / 2;
-
-    std::cout << "length: " << length << "bands: " << bands << std::endl;
 
     double table_H[181], table_sl[256], H, s, l, /* table_top[181][256][256][2], */ table_lr[bands][2], freq, base, left, right, xcorrection, basefreq, tonefreq, discreteL, discreteR, chanA, volume, chanC, shiftKeys;
     cv::Mat imgImage;
@@ -121,7 +119,6 @@ void ImageOut::HsltoSignal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json
       table_lr[i][0] = static_cast<double>(narrow) / (bands - 1) * xcorrection;
       table_lr[i][1] = (1 - static_cast<double>(narrow) / (bands - 1)) * xcorrection;
 
-      std::cout << "left: " << table_lr[i][0] << " right: " << table_lr[i][1] << std::endl;
     }
 
     // image conversion
@@ -191,6 +188,105 @@ void ImageOut::HsltoSignal(cv::Mat& image, stk::StkFrames& audio, nlohmann::json
       framesR[y] = right;
     }
     std::cout << "HsltoSignal: done" << std::endl;
+    audio.setChannel(0, framesL, 0);
+    audio.setChannel(1, framesR, 0);
+
+}
+
+void ImageOut::rgb_to_chord(cv::Mat& image, stk::StkFrames& audio, nlohmann::json data, unsigned int page) { // ------------------ Image -> Audio
+    std::cout << "rgb_to_chord: resize" << std::endl;
+
+    set_data(data);
+
+    // set sine
+    if(page == 0) {
+      setSine(3);
+    }
+
+    unsigned int length, bands, nlength, narrow, index;
+
+    // get dimensions
+    length = audio.frames();
+    bands = image.cols / 2;
+
+    double freqA{261.626}, freqB{329.628}, freqC{391.995}, table_color[256], table_lr[bands][2], leftA, leftB, leftC, rightA, rightB, rightC, xcorrection;
+
+    sineL[0].setFrequency(freqA);
+    sineL[1].setFrequency(freqB);
+    sineL[2].setFrequency(freqC);
+
+    sineR[0].setFrequency(freqA);
+    sineR[1].setFrequency(freqB);
+    sineR[2].setFrequency(freqC);
+
+    cv::Mat imgImage;
+
+    image.copyTo(imgImage);
+
+    cv::flip(imgImage, imgImage, -1);
+    if(static_cast<unsigned int>(imgImage.cols) != bands && static_cast<unsigned int>(imgImage.rows) != length) {
+        cv::Size size(bands, length);
+        cv::resize(imgImage, imgImage, size, 0, 0, cv::INTER_CUBIC);
+    }
+
+    // init frames
+    stk::StkFrames framesL(length, 1), framesR(length, 1);
+
+    // stereo distribution
+    nlength = round(m_narrowing * bands / 2);
+    xcorrection = 1.0 / (static_cast<double>(bands) * 1.5);
+    for (unsigned int i = 0; i < bands; ++i) {
+      if(nlength == 0) {
+        narrow = i;
+      } else if(i < nlength) {
+        narrow = 0;
+      } else if (i > bands - nlength) {
+        narrow = bands - 1;
+      } else {
+        narrow = (static_cast<double>(i) - nlength) / m_narrowing;
+      }
+
+      table_lr[i][0] = static_cast<double>(narrow) / (bands - 1) * xcorrection;
+      table_lr[i][1] = (1 - static_cast<double>(narrow) / (bands - 1)) * xcorrection;
+
+    }
+
+    for (int i = 0; i < 256; ++i)
+      table_color[i] = static_cast<double>(i) / 255;
+
+    std::cout << "rgb_to_chord: read" << std::endl;
+
+    uchar* ptr;
+    for (unsigned int y = 0; y < length; ++y) {
+
+      leftA = 0;
+      leftB = 0;
+      leftC = 0;
+
+      rightA = 0;
+      rightB = 0;
+      rightC = 0;
+
+      ptr = imgImage.ptr<uchar>(y);
+      for (unsigned int x = 0; x < bands; ++x) {
+        index = x + x + x;
+
+        leftA = leftA + table_color[ptr[index]] * table_lr[x][0];
+        leftB = leftB + table_color[ptr[index + 2]] * table_lr[x][0];
+        leftC = leftC + table_color[ptr[index + 1]] * table_lr[x][0];
+
+        rightA = rightA + table_color[ptr[index]] * table_lr[x][1];
+        rightB = rightB + table_color[ptr[index + 2]] * table_lr[x][1];
+        rightC = rightC + table_color[ptr[index + 1]] * table_lr[x][1];
+
+      }
+
+      framesL[y] = (sineL[0].tick() * leftA + sineL[1].tick() * leftB + sineL[2].tick() * leftC);
+      framesR[y] = (sineR[0].tick() * rightA + sineR[1].tick() * rightB + sineR[2].tick() * rightC);
+    }
+
+    std::cout << "rgb_to_chord: done" << std::endl;
+
     audio.setChannel(0, framesL, 0);
     audio.setChannel(1, framesR, 0);
 
