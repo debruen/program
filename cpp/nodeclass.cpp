@@ -7,8 +7,8 @@ Napi::Object NodeIA::Init(Napi::Env env, Napi::Object exports) {
 
   Napi::Function func = DefineClass(env, "NodeIA", {
 
-    InstanceMethod("set_data", &NodeIA::WrapSetData),
-    InstanceMethod("get_data", &NodeIA::WrapGetData),
+    // InstanceMethod("set_data", &NodeIA::WrapSetData),
+    // InstanceMethod("get_data", &NodeIA::WrapGetData),
 
     // ------------------------------------------------------------------------- main settings
 
@@ -73,31 +73,31 @@ NodeIA::NodeIA(const Napi::CallbackInfo& info) : Napi::ObjectWrap<NodeIA>(info) 
   this->ia_ = new Program(data);
 }
 
-Napi::Value NodeIA::WrapSetData(const Napi::CallbackInfo& info) { // wrapped set_data
-  Napi::Env env = info.Env();
-  Napi::HandleScope scope(env);
-
-  Napi::Object json_object = info[0].As<Napi::Object>();
-  Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
-  Napi::Function stringify = json.Get("stringify").As<Napi::Function>();
-
-  std::string data = stringify.Call(json, { json_object }).As<Napi::String>();
-
-  bool bol = this->ia_->set_data(data);
-  return Napi::Boolean::New(env, bol);
-}
-Napi::Value NodeIA::WrapGetData(const Napi::CallbackInfo& info) { // wrapped get_data
-  Napi::Env env = info.Env();
-  Napi::HandleScope scope(env);
-
-  std::string data = this->ia_->get_data();
-
-  Napi::String json_string = Napi::String::New(env, data);
-  Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
-  Napi::Function parse = json.Get("parse").As<Napi::Function>();
-
-  return parse.Call(json, { json_string }).As<Napi::Object>();
-}
+// Napi::Value NodeIA::WrapSetData(const Napi::CallbackInfo& info) { // wrapped set_data
+//   Napi::Env env = info.Env();
+//   Napi::HandleScope scope(env);
+//
+//   Napi::Object json_object = info[0].As<Napi::Object>();
+//   Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
+//   Napi::Function stringify = json.Get("stringify").As<Napi::Function>();
+//
+//   std::string data = stringify.Call(json, { json_object }).As<Napi::String>();
+//
+//   bool bol = this->ia_->set_data(data);
+//   return Napi::Boolean::New(env, bol);
+// }
+// Napi::Value NodeIA::WrapGetData(const Napi::CallbackInfo& info) { // wrapped get_data
+//   Napi::Env env = info.Env();
+//   Napi::HandleScope scope(env);
+//
+//   std::string data = this->ia_->get_data();
+//
+//   Napi::String json_string = Napi::String::New(env, data);
+//   Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
+//   Napi::Function parse = json.Get("parse").As<Napi::Function>();
+//
+//   return parse.Call(json, { json_string }).As<Napi::Object>();
+// }
 
 // ----------------------------------------------------------------------------- main settings
 

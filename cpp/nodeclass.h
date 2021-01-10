@@ -14,8 +14,8 @@ class NodeIA : public Napi::ObjectWrap<NodeIA> {
   private:
     static Napi::FunctionReference constructor; // reference to store the class definition that needs to be exported to JS
 
-    Napi::Value WrapSetData(const Napi::CallbackInfo& info);
-    Napi::Value WrapGetData(const Napi::CallbackInfo& info);
+    // Napi::Value WrapSetData(const Napi::CallbackInfo& info);
+    // Napi::Value WrapGetData(const Napi::CallbackInfo& info);
 
     // ------------------------------------------------------------------------- main settings
 

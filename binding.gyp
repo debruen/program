@@ -22,7 +22,9 @@
             "cpp/image_out.cpp",
             "cpp/audio_filter.cpp",
             "cpp/audio_synth.cpp",
-            "cpp/audio_out.cpp"
+            "cpp/audio_out.cpp",
+            "cpp/synthesis/functions.cpp",
+            "cpp/synthesis/sine.cpp"
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",

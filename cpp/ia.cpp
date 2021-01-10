@@ -10,7 +10,7 @@
  * @param theory Even if there is only one possible unified theory. it is just a
  *               set of rules and equations.
  */
- 
+
 Program::Program(std::string data) {
 
   nlohmann::json temp = nlohmann::json::parse(data);
@@ -110,16 +110,21 @@ void Program::init(SIZE size) {
   m_audio_out["image_time"] = 1;
 }
 
-bool Program::set_data(std::string data) {
-
-  return true;
-}
-
-std::string Program::get_data() {
-  std::string data = m_data.dump();
+std::string Program::data(std::string data) {
 
   return data;
 }
+
+// bool Program::set_data(std::string data) {
+//
+//   return true;
+// }
+//
+// std::string Program::get_data() {
+//   std::string data = m_data.dump();
+//
+//   return data;
+// }
 
 // ----------------------------------------------------------------------------- main settings
 
@@ -465,7 +470,6 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
 
     for (unsigned int i = 0; i < pages; i++) { // page loop
 
-
       if(m_image_in["files"].size() > 0) {
         std::string file = m_image_in["files"][i];
 
@@ -599,7 +603,6 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
         m_audioout.stereo_shape(audio_comp, m_premap);
       }
 
-
       unsigned int c;
       uchar* ptr;
       for (unsigned int y = 0; y < height; y++) {
@@ -619,7 +622,6 @@ void Program::preview(std::vector< std::vector< std::vector< std::vector<unsigne
       vectorL[i] = preL[i];
       vectorR[i] = preR[i];
     }
-
 
   } // mode audio
 
@@ -650,7 +652,6 @@ bool Program::run() {
     stk::StkFrames framesL(frames, 1), framesR(frames, 1);
 
     for (unsigned int i = 0; i < pages; i++) { // page loop
-
 
       if(m_image_in["files"].size() > 0) {
         std::string file = m_image_in["files"][i];

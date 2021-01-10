@@ -23,7 +23,14 @@ class ImageSynth {
 
 private:
 
-  uchar m_temp_color_a, m_temp_color_b, m_temp_color_c, m_temp_color_d, m_temp_color_e, m_temp_color_f;
+  uchar m_temp_color_a,
+        m_temp_color_b,
+        m_temp_color_c,
+
+        m_temp_color_d,
+        m_temp_color_e,
+        m_temp_color_f;
+
   double m_temp_opacity, m_temp_frequency, m_temp_phase, m_temp_tilt, m_temp_width, m_temp_height, m_temp_center;
 
   blendchar m_temp_blend;
@@ -38,6 +45,9 @@ private:
   void walker(cv::Mat& image);
   void gradient(cv::Mat& image, int page = 0);
   void rectangle(cv::Mat& image, int page = 0);
+
+  void triangle(cv::Mat& image, int page = 0);
+  void ellipse(cv::Mat& image, int page = 0);
 
 public:
 

@@ -27,6 +27,8 @@
 #include "audio_synth.h"
 #include "audio_out.h"
 
+#include "synthesis.h"
+
 class Program {
 
   private:
@@ -102,8 +104,10 @@ class Program {
   public:
     Program(std::string data); // constructor
 
-    bool set_data(std::string data);
-    std::string get_data();
+    std::string data(std::string data);
+
+    // bool set_data(std::string data);
+    // std::string get_data();
 
     // ------------------------------------------------------------------------- main settings
 
