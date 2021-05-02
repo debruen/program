@@ -292,7 +292,7 @@ void Program::crop(cv::Mat& image, unsigned int width, unsigned int height) {
 
   if (static_cast<unsigned int>(image.cols) != width || static_cast<unsigned int>(image.rows) != height) {
 
-    cv:: Mat temp;
+    cv::Mat temp;
 
     double a = width / static_cast<double>(height);
     double b = image.cols / static_cast<double>(image.rows);
