@@ -1,273 +1,246 @@
 
 #include "gradient.h"
 
-Gradient::Gradient(std::string type) {
+Gradient::Gradient() {
 
-  gradient_data = init(type);
+  m_data = get_data();
 
-  gradient_data[0]["value"] = "gradient";
+  std::vector<std::string> shape_values{"sine", "saw", "square", "triangle"};
+  m_data.push_back(data::init_str("shape", shape_values, m_shape));
+  m_data.push_back(data::init_1d_float_data("frequency range", {m_freq_min, m_freq_max}));
 
-  gradient_data.push_back(get_fillA(type));
-  gradient_data.push_back(get_fillB(type));
+  m_data.push_back(data::data_value("frequency gamma", m_frq_gamma));
 
-  /// 6: frequency
-  nlohmann::json frequency;
-  frequency["label"] = "frequency";
-  frequency["select"] = "range";  // select, range, files
-  frequency["type"] = "float";
-  frequency["min"] = 0;
-  frequency["max"] = 100;
-  frequency["default"] = 1;
-  frequency["value"] = frequency["default"];
+  m_data.push_back(data::data_float("frequency", 0, 1, m_frequency));
 
-  gradient_data.push_back(frequency);
+  m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
 
-  /// 7: phase
-  nlohmann::json phase;
-  phase["label"] = "phase";
-  phase["select"] = "range";  // select, range, files
-  phase["min"] = 0;
-  phase["max"] = 1;
-  phase["type"] = "float";
-  phase["default"] = phase["min"];
-  phase["value"] = phase["default"];
+  m_data.push_back(data::data_float("phase", -1, 1, m_phase));
 
-  gradient_data.push_back(phase);
+  m_data.push_back(data::data_float("tilt", 0, 1, m_tilt));
 
-  /// 8: tilt
-  nlohmann::json tilt;
-  tilt["label"] = "tilt";
-  tilt["select"] = "range";  // select, range, files
-  tilt["min"] = 0;
-  tilt["max"] = 1;
-  tilt["type"] = "float";
-  tilt["default"] = tilt["min"];
-  tilt["value"] = tilt["default"];
+  std::vector<std::string> filter_options{"none", "frequency", "amplitude", "phase", "tilt"};
+  m_data.push_back(data::init_str("filter", filter_options, m_filter));
 
-  gradient_data.push_back(tilt);
-
-  // /// 9: pattern
-  // nlohmann::json pattern;
-  // pattern["label"] = "pattern";
-  // pattern["select"] = "rule";  // select, range, files, rule
-  // pattern["min"] = 0;
-  // pattern["max"] = 1;
-  // pattern["type"] = "float";
-  // pattern["default"] = pattern["min"];
-  // pattern["value"] = "iiii";
-  //
-  // gradient_data.push_back(pattern);
-
-} // constructor END
-
-nlohmann::json Gradient::get_fillA(std::string type) {
-
-  nlohmann::json data;
-
-  if (type == "image") {
-
-    /// 4: color / image only
-    data["label"]  = "colorA";
-    data["select"]  = "color";  // select, range, files, color, sine
-    data["min"] = 0;
-    data["max"] = 1;
-    data["default"] = data["min"];
-    data["a"] = data["default"];
-    data["b"] = data["default"];
-    data["c"] = data["default"];
-
-  } else {
-
-    /// 4: sine A / audio only
-    data["label"]  = "sineA";
-    data["select"]  = "sine";  // select, range, files, color, sine
-    data["min"] = 0;
-    data["max"] = 1;
-    data["default"] = data["min"];
-    data["a"] = data["default"];
-    data["b"] = 0.5;
-    data["c"] = 0.5;
-
-  }
-
-  return data;
 }
 
-nlohmann::json Gradient::get_fillB(std::string type) {
+double Gradient::frame_phase(std::size_t index) {
 
-  nlohmann::json data;
+  double phase = m_phase, multiplier;
 
-  if (type == "image") {
-
-    /// 4: color / image only
-    data["label"]  = "colorB";
-    data["select"]  = "color";  // select, range, files, color, sine
-    data["min"] = 0;
-    data["max"] = 1;
-    data["default"] = data["max"];
-    data["a"] = data["default"];
-    data["b"] = data["default"];
-    data["c"] = data["default"];
-
-  } else {
-
-    /// 4: sine A / audio only
-    data["label"]  = "sineB";
-    data["select"]  = "sine";  // select, range, files, color, sine
-    data["min"] = 0;
-    data["max"] = 1;
-    data["default"] = data["max"];
-    data["a"] = data["default"];
-    data["b"] = 0.5;
-    data["c"] = 0.5;
-
-  }
-
-  return data;
-}
-
-nlohmann::json Gradient::data(std::string type) {
-
-  return gradient_data;
-} // data() END
-
-nlohmann::json Gradient::data(nlohmann::json data, std::string type) {
-
-  std::string old_type = get_type(data);
-
-  gradient_data = set_data(data, type);
-
-  if (type != old_type) {
-    gradient_data.push_back(get_fillA(type));
-    gradient_data.push_back(get_fillB(type));
-  } else {
-    gradient_data.push_back(data[4]);
-    gradient_data.push_back(data[5]);
-  }
-  gradient_data.push_back(data[6]);
-  gradient_data.push_back(data[7]);
-  gradient_data.push_back(data[8]);
-
-  return gradient_data;
-} // data(data) END
-
-void Gradient::process(std::vector<cv::Mat>& images) {
-
-  blendchar blend;
-  double opacity;
-  std::vector<unsigned char> rgbA, rgbB;
-
-  blend   = eval::get_blend(gradient_data, "blend");
-  opacity = eval::data_float(gradient_data, "opacity");
-  rgbA    = eval::data_rgb(gradient_data, "colorA");
-  rgbB    = eval::data_rgb(gradient_data, "colorB");
-
-  double value, pm;
-  unsigned int width, height;
-  uchar r, g, b;
-
-  double frequency, phase, tilt;
-
-  frequency = eval::data_float(gradient_data, "frequency");
-  phase = eval::data_float(gradient_data, "phase");
-  tilt = eval::data_float(gradient_data, "tilt");
-
-  tilt = circle(0, 1, tilt);
-
-    width = static_cast<unsigned int>(images[0].cols);
-    height = static_cast<unsigned int>(images[0].rows);
-
-    unsigned int c;
-    uchar* ptr;
-
-    for (unsigned int i = 0; i < images.size(); i++) {
-
-      for (unsigned int j = 0; j < i; j++) {
-        if(tilt <= 0.25) {
-            pm = 1 - tilt * 4;
-        } else if (tilt <= 0.5) {
-            pm = (tilt - 0.25) * (-4);
-        } else if (tilt <= 0.75) {
-            pm = 1 - (tilt - 0.5) * 4;
-        } else {
-            pm = (tilt - 0.75) * (-4);
-        }
-
-      }
-
-      phase += frequency * pm;
-
-      for (unsigned int y = 0; y < height; y++) {
-
-        ptr = images[i].ptr<uchar>(y);
-        for (unsigned int x = 0; x < width; x++) {
-          c = x * 3;
-
-          value = point_gradient(y, x, width, height, frequency, phase, tilt);
-          r = projectChar(rgbA[0], rgbB[0], value);
-          g = projectChar(rgbA[1], rgbB[1], value);
-          b = projectChar(rgbA[2], rgbB[2], value);
-
-          ptr[c + 2] = blend(ptr[c + 2], r, opacity);
-          ptr[c + 1] = blend(ptr[c + 1], g, opacity);
-          ptr[c] = blend(ptr[c], b, opacity);
-        }
-      }
+  for (std::size_t i = 0; i < index; i++) {
+    if(m_tilt <= 0.25) {
+      multiplier = 1 - m_tilt * 4;
+    } else if (m_tilt <= 0.5) {
+      multiplier = (m_tilt - 0.25) * (-4);
+    } else if (m_tilt <= 0.75) {
+      multiplier = 1 - (m_tilt - 0.5) * 4;
+    } else {
+      multiplier = (m_tilt - 0.75) * (-4);
     }
-} // process(images, audio) END
-
-void Gradient::process(stk::StkFrames& audio) {
-
-  blendfloat blend;
-  double opacity, frequency, phase, tilt, value, pm;
-  std::size_t frames, channels;
-  stk::StkFrames signalA, signalB;
-  stk::StkFloat tick;
-
-  blend    = eval::get_blendf(gradient_data, "blend");
-  opacity  = eval::data_float(gradient_data, "opacity");
-  frames   = audio.frames();
-  channels = audio.channels();
-  signalA  = eval::data_signal(gradient_data, "sineA", frames);
-  signalB  = eval::data_signal(gradient_data, "sineB", frames);
-
-  frequency = eval::data_float(gradient_data, "frequency");
-  phase     = eval::data_float(gradient_data, "phase");
-  tilt      = eval::data_float(gradient_data, "tilt");
-
-  tilt = circle(0, 1, tilt);
-
-  stk::StkFrames framesL(frames, 1), framesR(frames, 1);
-  framesL.setChannel(0, audio, 0);
-  framesR.setChannel(0, audio, 1);
-
-  if(tilt <= 0.25) {
-    pm = 1 - tilt * 4;
-  } else if (tilt <= 0.5) {
-    pm = (tilt - 0.25) * (-4);
-  } else if (tilt <= 0.75) {
-    pm = 1 - (tilt - 0.5) * 4;
-  } else {
-    pm = (tilt - 0.75) * (-4);
+    phase += m_frequency * multiplier;
   }
-  phase += frequency * pm;
 
-  for (std::size_t y = 0; y < frames; y++) {
-    for (std::size_t x = 0; x < channels; x++) {
+  return phase;
+}
 
-      value = point_gradient(y, x, channels, frames, frequency, phase, tilt);
+double Gradient::discrete(std::size_t& y, std::size_t& x, double& frequency, double& phase, double& tilt) {
 
-      tick = project(signalA[y], signalB[y], value);
+  static double prev_shape;
 
-      if (x == 0)
-        framesL[y] = blend(framesL[y], tick, opacity);
-      else
-        framesR[y] = blend(framesR[y], tick, opacity);
+  double f, p, t, w, h, rp, ra, ya, xa, ry, yv, xv, degrees, sinus;
+
+  f = frequency * 360;
+  p = phase * 360;
+  t = 1 - tilt;
+
+  w = static_cast<double>(m_width - 1);
+  h = static_cast<double>(m_height - 1);
+
+  if(t <= 0.25) {
+    ya = 1 - t * 4;
+    xa = t * 4;
+    rp = 0;
+  } else if (t <= 0.5) {
+    ra = t - 0.25;
+    ya = ra * 4;
+    xa = 1 - ra * 4;
+    rp = 0;
+  } else if (t <= 0.75) {
+    ra = t - 0.5;
+    ya = 1 - ra * 4;
+    xa = ra * 4;
+    rp = 180;
+  } else {
+    ra = t - 0.75;
+    ya = ra * 4;
+    xa = 1 - ra * 4;
+    rp = 180;
+  }
+
+  if(t <= 0.25) {
+    ry = y;          // √
+  } else if (t <= 0.5) {
+    ry = h - y;
+  } else if (t <= 0.75) {
+    ry = y;
+  } else {
+    ry = h - y;
+  }
+
+  yv = (ry / h * ya);
+  xv = (x / w * xa);
+
+  // pattern here
+  // to part of the function
+
+  degrees = ((xv + yv) * f) + p + rp;
+
+  sinus = sin(math::radian(degrees));
+
+  if (m_shape == "square") {
+    if (sinus >= 0)
+      sinus = 1;
+    else
+      sinus = -1;
+  }
+
+  if (m_shape == "triangle")
+    sinus = acos(sinus) / M_PI_2 - 1;
+
+  if (m_shape == "saw") {
+
+    double sin_a, sin_b;
+
+    sinus = acos(sinus) / M_PI_2 - 1;
+
+    if(sinus <= prev_shape) {
+      sin_a = sinus / 2 - 0.5;
+      sin_b = sinus * (-1) / 2 + 0.5;
+    } else {
+      sin_a = sinus * (-1) / 2 + 0.5;
+      sin_b = sinus / 2 - 0.5;
+    }
+
+    if (m_tilt == 0 && x == m_width - 1) {
+      prev_shape = sinus;
+      sinus = sin_a;
+    } else if (m_tilt == 1 && x == m_width - 1) {
+      prev_shape = sinus;
+      sinus = sin_a;
+    } else if (m_tilt == 0.5 && x == m_width - 1) {
+      prev_shape = sinus;
+      sinus = sin_b;
+    } else if (m_tilt > 0 && m_tilt < 0.5) {
+      prev_shape = sinus;
+      sinus = sin_b;
+    } else if (m_tilt > 0.5 && m_tilt < 1) {
+      prev_shape = sinus;
+      sinus = sin_a;
+    } else {
+      sinus = sin_a;
+    }
+
+  }
+
+  return math::normalize(-1, 1, sinus);
+}
+
+nlohmann::json Gradient::init() {
+
+  return m_data;
+}
+
+nlohmann::json Gradient::update(nlohmann::json data) {
+
+  m_shape     = data::get_str(data, "shape");
+  m_frequency = data::get_float(data, "frequency");
+  m_amplitude = data::get_float(data, "amplitude");
+  m_phase     = data::get_float(data, "phase");
+
+  double tilt = data::get_float(data, "tilt");
+  m_tilt      = math::circle(0, 1, tilt);
+  m_filter    = data::get_str(data, "filter");
+
+  m_data = data;
+
+  return m_data;
+}
+
+cv::Mat Gradient::frame(cv::Mat& mask, std::size_t index) {
+
+  m_width = mask.cols;
+  m_height = mask.rows;
+
+  double frequency, amplitude, phase, tilt;
+
+  frequency = pow(m_frequency, m_frq_gamma);
+  frequency = math::project(m_freq_min, m_freq_max, frequency);
+
+  amplitude = m_amplitude;
+  phase     = frame_phase(index);
+  tilt      = m_tilt;
+
+  std::cout << "frequency: " << frequency << '\n';
+  double* ptr;
+
+  for (std::size_t y = 0; y < m_height; y++) {
+
+    ptr = mask.ptr<double>(y);
+    for (std::size_t x = 0; x < m_width; x++) {
+
+      if (frequency == 0) {
+        ptr[x] = 1 * amplitude;
+      } else {
+        ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
+      }
 
     }
   }
 
-  audio.setChannel(0, framesL, 0);
-  audio.setChannel(1, framesR, 0);
+  return mask;
+}
 
-} // process(audio, images) END
+void Gradient::process(cv::Mat& mask, std::size_t index) {
+
+  m_width = mask.cols;
+  m_height = mask.rows;
+
+  unsigned char filter_select = 0;
+
+  if (m_filter == "frequency") filter_select = 1;
+  if (m_filter == "amplitude") filter_select = 2;
+  if (m_filter == "phase") filter_select = 3;
+  if (m_filter == "tilt") filter_select = 4;
+
+  double frequency, amplitude, phase, tilt;
+
+  frequency = pow(m_frequency, m_frq_gamma);
+  frequency = math::project(m_freq_min, m_freq_max, frequency);
+
+  amplitude = m_amplitude;
+  phase     = frame_phase(index);
+  tilt      = m_tilt;
+
+  double* ptr;
+
+  for (std::size_t y = 0; y < m_height; y++) {
+
+    ptr = mask.ptr<double>(y);
+    for (std::size_t x = 0; x < m_width; x++) {
+
+      if (filter_select == 1) frequency = math::project(m_freq_min, m_freq_max, ptr[x]);
+      if (filter_select == 2) amplitude = ptr[x];
+      if (filter_select == 3) phase     = math::project(-1, 1, ptr[x]);
+      if (filter_select == 4) tilt      = ptr[x];
+
+      if (frequency == 0) {
+        ptr[x] = 1 * amplitude;
+      } else {
+        ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
+      }
+
+    }
+  }
+
+}

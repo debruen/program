@@ -7,12 +7,14 @@ Output::Output() {
   m_data = m_base->data();
 }
 
-nlohmann::json Output::data() {
+nlohmann::json Output::init() {
 
   return m_data;
 }
 
-nlohmann::json Output::data(nlohmann::json data) {
+nlohmann::json Output::update(nlohmann::json data, std::string type) {
+
+  m_type = type;
 
   /// clear transform class if value is changed
   if(data[0]["value"] != m_data[0]["value"]) {
@@ -35,12 +37,10 @@ nlohmann::json Output::data(nlohmann::json data) {
 
 void Output::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
-  m_base->process(images, audio);
-
-}
-
-void Output::process(stk::StkFrames& audio, std::vector<cv::Mat>& images) {
-
-  m_base->process(audio, images);
+  if (m_type == "audio") {
+    m_base->process(audio, images);
+  } else {
+    m_base->process(images, audio);
+  }
 
 }

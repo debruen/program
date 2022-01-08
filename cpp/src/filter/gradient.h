@@ -2,29 +2,39 @@
 #ifndef gradient_h
 #define gradient_h
 
-#include "filter.h"
+#include "mask.h"
 
-class Gradient : public Filter {
+class Gradient : public Mask{
 
   private:
 
-    nlohmann::json gradient_data;
+    nlohmann::json m_data;
 
-    nlohmann::json get_fillA(std::string type);
+    const double m_freq_min{0}, m_freq_max{1000}, m_frq_gamma{6};
 
-    nlohmann::json get_fillB(std::string type);
+    std::string m_shape{"sine"}, m_filter{"none"};
+
+    double m_frequency{0}, m_amplitude{1}, m_phase{0}, m_tilt{0};
+
+    std::size_t m_width{0}, m_height{0};
+
+    // std::vector<bool> m_pattern;
+    // std::vector<std::size_t> m_counter;
+
+    double frame_phase(std::size_t index);
+
+    double discrete(std::size_t& y, std::size_t& x, double& frequency, double& phase, double& tilt);
 
   public:
-    Gradient(std::string type);
+    Gradient();
 
-    virtual nlohmann::json data(std::string type);
+    virtual nlohmann::json init();
 
-    virtual nlohmann::json data(nlohmann::json data, std::string type);
+    virtual nlohmann::json update(nlohmann::json data);
 
-    virtual void process(std::vector<cv::Mat>& images);
+    virtual cv::Mat frame(cv::Mat& mask, std::size_t index);
 
-    virtual void process(stk::StkFrames& audio);
-
+    virtual void process(cv::Mat& mask, std::size_t index);
 };
 
 #endif // gradient_h END

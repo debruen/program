@@ -7,59 +7,29 @@ Hsl::Hsl() {
   hsl_data = get_data();
 
   // 1
-  nlohmann::json narrowing;
-  narrowing["label"]   = "narrowing";
-  narrowing["select"]  = "range";  // select, range, files
-  narrowing["type"]    = "float";
-  narrowing["min"]     = 0.0;
-  narrowing["max"]     = 1.0;
-  narrowing["default"] = narrowing["min"];
-  narrowing["value"]   = narrowing["default"];
 
+  nlohmann::json narrowing = data::data_float("narrowing", 0, 1, 0);
   hsl_data.push_back(narrowing);
 
   // 2
-  nlohmann::json keys;
-  keys["label"]   = "keys";
-  keys["select"]  = "select";  // select, range, files
-  keys["options"] = {97, 88};
-  keys["default"] = keys["options"][0];
-  keys["value"]   = keys["default"];
+  std::vector<std::string> keys_options {"97", "88"};
+  nlohmann::json keys = data::data_string("keys", true, keys_options, keys_options[0]);
 
   hsl_data.push_back(keys);
 
+  std::vector<std::string> channel_options {"H", "s", "l"};
   /// 3:
-  nlohmann::json a;
-  a["label"]   = "a";
-  a["select"]  = "select";  // select, range, files
-  a["options"] = {"H", "s", "l"};
-  a["default"] = a["options"][0];
-  a["value"]   = a["default"];
 
+  nlohmann::json a = data::data_string("a", true, channel_options, channel_options[0]);
   hsl_data.push_back(a);
 
   /// 4:
-  nlohmann::json b;
-  b["label"]   = "b";
-  b["select"]  = "select";  // select, range, files
-  b["options"] = {"H", "s", "l"};
-  b["default"] = b["options"][1];
-  b["value"]   = b["default"];
-
+  nlohmann::json b = data::data_string("b", true, channel_options, channel_options[1]);
   hsl_data.push_back(b);
 
   /// 5:
-  nlohmann::json c;
-  c["label"]   = "c";
-  c["select"]  = "select";  // select, range, files
-  c["options"] = {"H", "s", "l"};
-  c["default"] = c["options"][2];
-  c["value"]   = c["default"];
-
+  nlohmann::json c = data::data_string("c", true, channel_options, channel_options[2]);
   hsl_data.push_back(c);
-
-  nlohmann::json size = get_size();
-  hsl_data.push_back(size);
 
   nlohmann::json save = get_save();
   hsl_data.push_back(save);
@@ -137,7 +107,7 @@ nlohmann::json Hsl::data() {
 nlohmann::json Hsl::data(nlohmann::json data) {
 
   /// set output type value
-  set_value(eval::data_str(data, "type"));
+  set_value(data::get_string(data, "type"));
 
   /// set hsl data
   hsl_data = data;
@@ -149,9 +119,9 @@ void Hsl::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
   std::string chan_a, chan_b, chan_c;
 
-  chan_a = eval::data_str(hsl_data, "a");
-  chan_b = eval::data_str(hsl_data, "b");
-  chan_c = eval::data_str(hsl_data, "c");
+  chan_a = data::get_string(hsl_data, "a");
+  chan_b = data::get_string(hsl_data, "b");
+  chan_c = data::get_string(hsl_data, "c");
 
   uchar ca, cb, cc;
   if(chan_a == "H") ca = 0;

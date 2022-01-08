@@ -4,13 +4,8 @@
 Out::Out() {
 
   /// 0: output type selection
-  nlohmann::json type;
-  type["label"]   = "type";
-  type["select"]  = "select";  // select, range, files
-  type["options"] = {"hsl", "rgb"};
-  type["default"] = type["options"][0];
-  type["value"]   = type["default"];
-
+  std::vector<std::string> type_options {"hsl", "rgb"};
+  nlohmann::json type = data::data_string("type", true, type_options, type_options[0]);
   out_data.push_back(type);
 
 }
@@ -20,24 +15,9 @@ nlohmann::json Out::get_data() {
   return out_data;
 }
 
-nlohmann::json Out::get_size() {
-
-  nlohmann::json size;
-  size["label"]   = "size";
-  size["select"]  = "select";  // select, range, files
-  size["options"] = {"A6", "A5", "A4", "A3", "A2"};
-  size["default"] = size["options"][2];
-  size["value"]   = size["default"];
-
-  return size;
-}
-
 nlohmann::json Out::get_save() {
 
-  nlohmann::json save;
-  save["label"]   = "save";
-  save["select"]  = "button";  // select, range, files, button
-  save["value"]   = false;
+  nlohmann::json save = data::data_button("save", true, false);
 
   return save;
 }

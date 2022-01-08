@@ -1,10 +1,10 @@
 
-#ifndef output_h
-#define output_h
+#ifndef filter_h
+#define filter_h
 
-#include "out/hsl.h"
+#include "filter/layer.h"
 
-class Output {
+class Filter {
 
   private:
 
@@ -12,10 +12,10 @@ class Output {
 
     nlohmann::json m_data;
 
-    Out* m_base;
+    std::vector< Layer* > m_layer;
 
   public:
-    Output();
+    Filter();
 
     nlohmann::json init();
 
@@ -25,4 +25,4 @@ class Output {
 
 };
 
-#endif /* output_h */
+#endif /* filter_h */

@@ -14,7 +14,7 @@
 
 #include "fftw3.h"
 
-#include "../functions.h"
+#include "../data.h"
 
 class Out {
 
@@ -27,7 +27,6 @@ class Out {
     Out();
 
     nlohmann::json get_data();
-    nlohmann::json get_size();
     nlohmann::json get_save();
 
     void set_value(std::string data);
