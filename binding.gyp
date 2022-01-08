@@ -6,8 +6,10 @@
         'conditions': [
             ['OS=="mac"', {
                 'xcode_settings': {
+                    '-std': 'c++11',
+                    '-stdlib': 'libc++',
                     'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'MACOSX_DEPLOYMENT_TARGET': '10.13',
+                    'MACOSX_DEPLOYMENT_TARGET': '12.1'
                 }
             }]
         ],
@@ -28,21 +30,16 @@
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
-            "/usr/",
-            "/usr/local/lib",
-            "/usr/local/include",
-            "/usr/local/include/opencv4",
-            "/usr/X11R6/include",
-            "/usr/X11R6/lib",
-            "/usr/local/opt/stk/lib"
+            "/usr/include/lib",
+            "/opt/homebrew/lib",
+            "/opt/homebrew/include",
+            "/opt/homebrew/include/opencv4"
         ],
         'libraries': [
-            '-I/usr/X11R6/include',
-            '-L/usr/X11R6/lib',
+            '-L/opt/homebrew/lib',
             '-lopencv_core',
             '-lopencv_imgproc',
             '-lopencv_highgui',
-            '-lX11',
             '-lpng',
             '-ltiff',
             '-ljpeg',

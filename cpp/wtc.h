@@ -16,7 +16,7 @@
 #define cimg_use_png
 #define cimg_use_tiff
 
-#include "CImg.h"
+// #include "CImg.h"
 
 #include "stk/SineWave.h"
 
@@ -51,7 +51,7 @@ namespace wtc {
         unsigned char projectChar(unsigned char min, unsigned char max, double v);
 
         // 2d to normalized by min max
-        void normalizeLayer(int layer, cimg_library::CImg<unsigned char>& image);
+        // void normalizeLayer(int layer, cimg_library::CImg<unsigned char>& image);
 
         std::vector< std::vector<double> > normalize2dInt(std::vector< std::vector<unsigned int> >& v);
     }

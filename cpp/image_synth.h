@@ -43,6 +43,7 @@ private:
   void fill(cv::Mat& image);
   void noise(cv::Mat& image);
   void walker(cv::Mat& image);
+
   void gradient(cv::Mat& image, int page = 0);
   void rectangle(cv::Mat& image, int page = 0);
 

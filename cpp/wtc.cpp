@@ -63,21 +63,21 @@ namespace wtc {
         unsigned char projectChar(unsigned char min, unsigned char max, double v) { // from normalized to range
             return round((v * (static_cast<double>(max) - static_cast<double>(min))) + static_cast<double>(min));
         }
-        void normalizeLayer(int layer, cimg_library::CImg<unsigned char>& image) {
-            std::vector<unsigned int> check, range;
-            for (unsigned int y = 0; y < static_cast<unsigned int>(image.height()); ++y) {
-                for (unsigned int x = 0; x < static_cast<unsigned int>(image.width()); ++x) {
-                    check.push_back(image(x,y,0,layer));
-                }
-            }
-            range = v1d::minMaxInt(check);
-
-            for (unsigned int y = 0; y < static_cast<unsigned int>(image.height()); ++y) {
-                for (unsigned int x = 0; x < static_cast<unsigned int>(image.width()); ++x) {
-                    image(x,y,0,layer) = round(normalizeInt(range[0], range[1], image(x,y,0,layer)) * 255);
-                }
-            }
-        }
+        // void normalizeLayer(int layer, cimg_library::CImg<unsigned char>& image) {
+        //     std::vector<unsigned int> check, range;
+        //     for (unsigned int y = 0; y < static_cast<unsigned int>(image.height()); ++y) {
+        //         for (unsigned int x = 0; x < static_cast<unsigned int>(image.width()); ++x) {
+        //             check.push_back(image(x,y,0,layer));
+        //         }
+        //     }
+        //     range = v1d::minMaxInt(check);
+        //
+        //     for (unsigned int y = 0; y < static_cast<unsigned int>(image.height()); ++y) {
+        //         for (unsigned int x = 0; x < static_cast<unsigned int>(image.width()); ++x) {
+        //             image(x,y,0,layer) = round(normalizeInt(range[0], range[1], image(x,y,0,layer)) * 255);
+        //         }
+        //     }
+        // }
 
         std::vector< std::vector<double> > normalize2dInt(std::vector< std::vector<unsigned int> >& v) {
             std::vector<unsigned int> check, range;
@@ -806,103 +806,103 @@ namespace wtc {
 
     namespace color { // ----------------------------------------------------------- color ----
 
-        std::vector<double> LabRange() { // get Lab min, max
+        // std::vector<double> LabRange() { // get Lab min, max
+        //
+        //     cimg_library::CImg<unsigned char> RGB(1,1,1,3);
+        //     cimg_library::CImg<double> Lab(1,1,1,3);
+        //
+        //     double minL = 0;
+        //     double mina = 0;
+        //     double minb = 0;
+        //     double maxL = 0;
+        //     double maxa = 0;
+        //     double maxb = 0;
+        //
+        //     for(int R = 0; R < 256; ++R) {
+        //         for(int G = 0; G < 256; ++G) {
+        //             for(int B = 0; B < 256; ++B) {
+        //                 RGB(0,0,0,0) = R;
+        //                 RGB(0,0,0,1) = G;
+        //                 RGB(0,0,0,2) = B;
+        //
+        //                 Lab = RGB.get_RGBtoLab();
+        //
+        //                 double L = Lab(0,0,0,0);
+        //                 double a = Lab(0,0,0,1);
+        //                 double b = Lab(0,0,0,2);
+        //
+        //                 if(L < minL) minL = L;
+        //                 if(L > maxL) maxL = L;
+        //
+        //                 if(a < mina) mina = a;
+        //                 if(a > maxa) maxa = a;
+        //
+        //                 if(b < minb) minb = b;
+        //                 if(b > maxb) maxb = b;
+        //             }
+        //         }
+        //     }
+        //
+        //     std::vector<double> range;
+        //
+        //     range.push_back(minL);
+        //     range.push_back(maxL);
+        //     range.push_back(mina);
+        //     range.push_back(maxa);
+        //     range.push_back(minb);
+        //     range.push_back(maxb);
+        //
+        //     return range;
+        // }
 
-            cimg_library::CImg<unsigned char> RGB(1,1,1,3);
-            cimg_library::CImg<double> Lab(1,1,1,3);
-
-            double minL = 0;
-            double mina = 0;
-            double minb = 0;
-            double maxL = 0;
-            double maxa = 0;
-            double maxb = 0;
-
-            for(int R = 0; R < 256; ++R) {
-                for(int G = 0; G < 256; ++G) {
-                    for(int B = 0; B < 256; ++B) {
-                        RGB(0,0,0,0) = R;
-                        RGB(0,0,0,1) = G;
-                        RGB(0,0,0,2) = B;
-
-                        Lab = RGB.get_RGBtoLab();
-
-                        double L = Lab(0,0,0,0);
-                        double a = Lab(0,0,0,1);
-                        double b = Lab(0,0,0,2);
-
-                        if(L < minL) minL = L;
-                        if(L > maxL) maxL = L;
-
-                        if(a < mina) mina = a;
-                        if(a > maxa) maxa = a;
-
-                        if(b < minb) minb = b;
-                        if(b > maxb) maxb = b;
-                    }
-                }
-            }
-
-            std::vector<double> range;
-
-            range.push_back(minL);
-            range.push_back(maxL);
-            range.push_back(mina);
-            range.push_back(maxa);
-            range.push_back(minb);
-            range.push_back(maxb);
-
-            return range;
-        }
-
-        std::vector<double> HslRange() { // get Lab min, max
-
-            cimg_library::CImg<unsigned char> RGB(1,1,1,3);
-            cimg_library::CImg<double> Lab(1,1,1,3);
-
-            double minH = 0;
-            double mins = 0;
-            double minl = 0;
-            double maxH = 0;
-            double maxs = 0;
-            double maxl = 0;
-
-            for(int R = 0; R < 256; ++R) {
-                for(int G = 0; G < 256; ++G) {
-                    for(int B = 0; B < 256; ++B) {
-                        RGB(0,0,0,0) = R;
-                        RGB(0,0,0,1) = G;
-                        RGB(0,0,0,2) = B;
-
-                        Lab = RGB.get_RGBtoHSL();
-
-                        double L = Lab(0,0,0,0);
-                        double a = Lab(0,0,0,1);
-                        double b = Lab(0,0,0,2);
-
-                        if(L < minH) minH = L;
-                        if(L > maxH) maxH = L;
-
-                        if(a < mins) mins = a;
-                        if(a > maxs) maxs = a;
-
-                        if(b < minl) minl = b;
-                        if(b > maxl) maxl = b;
-                    }
-                }
-            }
-
-            std::vector<double> range;
-
-            range.push_back(minH);
-            range.push_back(maxH);
-            range.push_back(mins);
-            range.push_back(maxs);
-            range.push_back(minl);
-            range.push_back(maxl);
-
-            return range;
-        }
+        // std::vector<double> HslRange() { // get Lab min, max
+        //
+        //     cimg_library::CImg<unsigned char> RGB(1,1,1,3);
+        //     cimg_library::CImg<double> Lab(1,1,1,3);
+        //
+        //     double minH = 0;
+        //     double mins = 0;
+        //     double minl = 0;
+        //     double maxH = 0;
+        //     double maxs = 0;
+        //     double maxl = 0;
+        //
+        //     for(int R = 0; R < 256; ++R) {
+        //         for(int G = 0; G < 256; ++G) {
+        //             for(int B = 0; B < 256; ++B) {
+        //                 RGB(0,0,0,0) = R;
+        //                 RGB(0,0,0,1) = G;
+        //                 RGB(0,0,0,2) = B;
+        //
+        //                 Lab = RGB.get_RGBtoHSL();
+        //
+        //                 double L = Lab(0,0,0,0);
+        //                 double a = Lab(0,0,0,1);
+        //                 double b = Lab(0,0,0,2);
+        //
+        //                 if(L < minH) minH = L;
+        //                 if(L > maxH) maxH = L;
+        //
+        //                 if(a < mins) mins = a;
+        //                 if(a > maxs) maxs = a;
+        //
+        //                 if(b < minl) minl = b;
+        //                 if(b > maxl) maxl = b;
+        //             }
+        //         }
+        //     }
+        //
+        //     std::vector<double> range;
+        //
+        //     range.push_back(minH);
+        //     range.push_back(maxH);
+        //     range.push_back(mins);
+        //     range.push_back(maxs);
+        //     range.push_back(minl);
+        //     range.push_back(maxl);
+        //
+        //     return range;
+        // }
 
         std::vector<double> rgbToHsl(unsigned char& R, unsigned char& G, unsigned char& B) { // R, G, B = 0 - 255 | H, s, l = 0.0 - 1.0
 
@@ -988,7 +988,7 @@ namespace wtc {
 
             std::vector<unsigned char> rgb{R, G, B};
             return rgb;
-        }
+        } // hslToRgb END
     } // --------------------------------------------------------------------------- color ---- end
 
 }
