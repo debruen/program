@@ -9,7 +9,7 @@
                     '-std': 'c++11',
                     '-stdlib': 'libc++',
                     'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'MACOSX_DEPLOYMENT_TARGET': '11.4'
+                    'MACOSX_DEPLOYMENT_TARGET': '12.1'
                 }
             }]
         ],

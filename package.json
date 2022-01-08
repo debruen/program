@@ -1,6 +1,6 @@
 {
   "name": "program",
-  "version": "0.0.0",
+  "version": "0.0",
   "description": "",
   "main": "index.js",
   "gypfile": true,
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/whyturbocharge/program.git"
+    "url": "git+https://github.com/debruen/program.git"
   },
   "author": "Florian de Brün",
   "license": "",
   "bugs": {
-    "url": "https://github.com/whyturbocharge/program/issues"
+    "url": "https://github.com/debruen/program/issues"
   },
-  "homepage": "https://github.com/whyturbocharge/program#readme",
+  "homepage": "https://github.com/debruen/program#readme",
   "devDependencies": {
     "node-gyp": "^8.1.0"
   },
