@@ -3,9 +3,9 @@
 
 Program::Program() {
 
-  m_data["settings"]  = m_settings.init();
-  m_data["filter"] = m_filter.init();
-  m_data["output"] = m_output.init();
+  m_data["settings"] = m_settings.init();
+  m_data["filter"]   = m_filter.init();
+  m_data["output"]   = m_output.init();
 
 }
 
@@ -17,15 +17,14 @@ nlohmann::json Program::update(nlohmann::json data) {
 
   std::string type = data::get_string(data["settings"], "type");
 
-  m_data["settings"]  = m_settings.update(data["settings"]);
-  m_data["filter"] = m_filter.update(data["filter"], type);
-  m_data["output"] = m_output.update(data["output"], type);
+  m_data["settings"] = m_settings.update(data["settings"]);
+  m_data["filter"]   = m_filter.update(data["filter"], type);
+  m_data["output"]   = m_output.update(data["output"], type);
 
   return m_data;
 } // data()
 
 nlohmann::json Program::get() {
-
   return m_data;
 } // get()
 

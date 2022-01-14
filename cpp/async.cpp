@@ -43,9 +43,6 @@ void AsyncUpdate::OnOK() {
 AsyncPreview::AsyncPreview(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right)
   : AsyncWorker(callback), program(program), p_images(images), p_left(left), p_right(right) {
 
-// AsyncPreview::AsyncPreview(Napi::Function& callback, Program& program, uchar* images, float* left, float* right)
-//   : AsyncWorker(callback), program(program), p_images(images), p_left(left), p_right(right) {
-
   nlohmann::json data = program.get();
 
   m_width  = data::get_width(data["settings"], "preview");
@@ -72,10 +69,6 @@ void AsyncPreview::Execute() {
 
 void AsyncPreview::OnOK() {
 
-  // for (unsigned int i = 0; i < m_frames; i++) {
-  //   cv::cvtColor(m_images[i], m_images[i], cv::COLOR_BGR2BGRA);
-  // }
-
   // writing result to image_buffer
   unsigned int p, c, z;
   uchar* ptr;
@@ -93,7 +86,7 @@ void AsyncPreview::OnOK() {
         p_images[z]   = ptr[c+2]; // red
         p_images[z+1] = ptr[c+1]; // green
         p_images[z+2] = ptr[c];   // blue
-        p_images[z+3] = 255; // alpha
+        p_images[z+3] = 255;      // alpha channel
 
       }
     }
