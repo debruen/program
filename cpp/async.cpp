@@ -22,6 +22,27 @@ void AsyncInit::OnOK() {
 
 // ----- AsyncInit END!
 
+// ----- AsyncWork
+
+AsyncWork::AsyncWork(Napi::Function& callback, Program& program)
+  : AsyncWorker(callback), program(program) {
+
+};
+
+void AsyncWork::Execute() {
+
+  m_msg = program.work();
+};
+
+void AsyncWork::OnOK() {
+
+  std::string msg = m_msg;
+
+  Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
+};
+
+// ----- AsyncInit END!
+
 
 // AsyncUpdate
 

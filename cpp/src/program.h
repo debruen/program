@@ -21,6 +21,8 @@ class Program {
   public:
     Program();
 
+    std::string work();
+
     nlohmann::json init();
 
     nlohmann::json update(nlohmann::json data);

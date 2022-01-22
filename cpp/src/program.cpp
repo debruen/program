@@ -9,6 +9,12 @@ Program::Program() {
 
 }
 
+std::string Program::work() {
+
+  std::string msg = "work done!";
+  return msg;
+}
+
 nlohmann::json Program::init() {
   return m_data;
 } // data()

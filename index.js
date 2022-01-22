@@ -1,5 +1,5 @@
 
-const {program_init, program_update, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_init, program_work, program_update, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
@@ -19,6 +19,17 @@ class Program{
     })
 
   } // init
+
+  work() {
+
+    return new Promise((resolve) => {
+      program_work((err, result) => {
+
+        resolve(result)
+      })
+    })
+
+  } // work
 
   update(data) {
 

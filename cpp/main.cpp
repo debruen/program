@@ -23,6 +23,23 @@ Napi::Value program_init(const Napi::CallbackInfo& info) {
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
+Napi::Value program_work(const Napi::CallbackInfo& info) {
+
+  // Parameter info[]
+  Napi::Function callback = info[0].As<Napi::Function>();
+
+  // init new AsyncWork
+  AsyncWork* work = new AsyncWork(callback, program);
+
+  // Start AsyncWorker
+  work->Queue();
+
+  // return
+  std::string msg = "program started";
+
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
 // async data
 Napi::Value program_update(const Napi::CallbackInfo& info) {
 
