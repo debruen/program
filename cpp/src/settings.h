@@ -15,9 +15,9 @@ class Settings {
 
     nlohmann::json m_data = nlohmann::json::array();
 
-    std::string home();
+    void update_data(nlohmann::json& data);
 
-    void flip(cv::Mat& image, bool back = false);
+    void flip_image(cv::Mat& image, bool back = false);
 
     bool fileExists(const std::string& file);
     std::string getFreeFile(std::string& filename, std::string& path, std::string type);
@@ -29,6 +29,7 @@ class Settings {
 
   public:
     Settings();
+    Settings(nlohmann::json data);
 
     nlohmann::json init();
 

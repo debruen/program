@@ -1,7 +1,8 @@
 
 #include "async.h"
 
-// AsyncInit
+// ----- AsyncInit
+
 AsyncInit::AsyncInit(Napi::Function& callback, Program& program)
   : AsyncWorker(callback), program(program) {
 
@@ -18,6 +19,9 @@ void AsyncInit::OnOK() {
 
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
+
+// ----- AsyncInit END!
+
 
 // AsyncUpdate
 

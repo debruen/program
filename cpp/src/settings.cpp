@@ -35,7 +35,7 @@ Settings::Settings() {
   m_data.push_back(data::data_size("output"));
 
   // 9: path
-  std::string save_path = home();
+  std::string save_path = getenv("HOME");
   save_path = save_path + "/Desktop/output/";
   m_data.push_back(data::data_path("path", save_path));
 
@@ -43,14 +43,25 @@ Settings::Settings() {
   std::string file_name = "output_";
   m_data.push_back(data::data_path("file name", file_name));
 
-} // constructor END
+  update_data(m_data);
 
-std::string Settings::home() {
+} // constructor() END!
 
-    return getenv("HOME");
-}
+Settings::Settings(nlohmann::json data) : m_data(data) {
 
-void Settings::flip(cv::Mat& image, bool back) {
+  update_data(m_data);
+
+} // constructor(data) END!
+
+void Settings::update_data(nlohmann::json& data) {
+
+  std::string area = data::get_string(data, "area");
+  double ratio = data::get_float(data, "ratio");
+  data::compute_size(data, "output", area, ratio);
+
+} // update_data(&data) END!
+
+void Settings::flip_image(cv::Mat& image, bool back) {
 
   std::string direction = data::get_string(m_data, "direction");
   std::string stereo = data::get_string(m_data, "stereo");
@@ -97,24 +108,18 @@ void Settings::flip(cv::Mat& image, bool back) {
     }
   }
 
-} // flip END
+} // flip_image(&image, back = false) END!
 
 nlohmann::json Settings::init() {
 
-  std::string area = data::get_string(m_data, "area");
-  double ratio = data::get_float(m_data, "ratio");
-  data::compute_size(m_data, "output", area, ratio);
-
   return m_data;
-} // data() END
+} // init() END
 
 nlohmann::json Settings::update(nlohmann::json data) {
 
   m_data = data;
 
-  std::string area = data::get_string(m_data, "area");
-  double ratio = data::get_float(m_data, "ratio");
-  data::compute_size(m_data, "output", area, ratio);
+  update_data(m_data);
 
   return m_data;
 } // update(data) END
@@ -129,12 +134,11 @@ void Settings::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
   frames = data::get_int(m_data, "frames");
 
   // init images
-  // loop over frames
   for (std::size_t i = 0; i < frames; i++) {
 
     images[i] = 0;
 
-    flip(images[i]);
+    flip_image(images[i]);
   } // loop over frames end
 
   stk::StkFrames empL(audio_frames, 1), empR(audio_frames, 1);
@@ -163,7 +167,7 @@ void Settings::file(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
     cv::Mat img = cv::Mat(size, CV_8UC3);
     img = 0;
-    flip(img);
+    flip_image(img);
 
     images.push_back(img);
 
@@ -176,7 +180,7 @@ void Settings::file(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 void Settings::flip_back(std::vector<cv::Mat>& images) {
 
   for (std::size_t i = 0; i < images.size(); i++) {
-    flip(images[i], true);
+    flip_image(images[i], true);
   } // loop over frames end
 
 } // flip_back()
