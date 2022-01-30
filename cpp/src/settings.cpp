@@ -128,7 +128,7 @@ nlohmann::json Settings::update(nlohmann::json data) {
   return m_data;
 } // update(data) END
 
-cv::Mat Settings::image_frame(std::size_t frame) {
+cv::Mat Settings::image_frame(std::size_t frame_index) {
 
   std::size_t width, height;
 
@@ -137,15 +137,15 @@ cv::Mat Settings::image_frame(std::size_t frame) {
 
   cv::Size size(width, height);
 
-  cv::Mat image = cv::Mat(size, CV_8UC3);
-  image = 0;
+  cv::Mat frame = cv::Mat(size, CV_8UC3);
+  frame = 0;
 
-  flip_image(image);
+  flip_image(frame);
 
-  return image;
+  return frame;
 }
 
-cv::Mat Settings::audio_frame(std::size_t frame) {
+cv::Mat Settings::audio_frame(std::size_t frame_index) {
 
   std::size_t width, height;
 
@@ -154,10 +154,10 @@ cv::Mat Settings::audio_frame(std::size_t frame) {
 
   cv::Size size(width, height);
 
-  cv::Mat audio = cv::Mat(size, CV_64FC1);
-  audio = 0;
+  cv::Mat frame = cv::Mat(size, CV_64FC1);
+  frame = 0;
 
-  return audio;
+  return frame;
 }
 
 

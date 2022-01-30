@@ -9,12 +9,14 @@ Program::Program() {
 
 }
 
-frame Program::create_frame(nlohmann::json data, std::size_t f) {
+frame Program::create_frame(std::size_t frame_index) {
 
-  cv::Mat image;
-  stk::StkFrames audio;
+  cv::Mat image = m_settings.image_frame(frame_index);
+  cv::Mat audio = m_settings.audio_frame(frame_index);
 
-  frame frame = {.frame = f, .image = image, .audio = audio};
+
+
+  frame frame = {.frame = frame_index, .image = image, .audio = audio};
 
   // settings
   // filter

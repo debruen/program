@@ -11,7 +11,7 @@
 typedef struct {
   std::size_t frame;
   cv::Mat image;
-  stk::StkFrames audio;
+  cv::Mat audio;
 } frame;
 
 class Program {
@@ -29,7 +29,7 @@ class Program {
 
     std::vector<frame> m_frames;
 
-    frame create_frame(nlohmann::json data, std::size_t f);
+    frame create_frame(std::size_t frame_index);
 
     frame get_frame(std::size_t f);
 

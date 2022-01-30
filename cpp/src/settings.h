@@ -35,9 +35,9 @@ class Settings {
 
     nlohmann::json update(nlohmann::json data);
 
-    cv::Mat image_frame(std::size_t frame);
+    cv::Mat image_frame(std::size_t frame_index);
 
-    cv::Mat audio_frame(std::size_t frame);
+    cv::Mat audio_frame(std::size_t frame_index);
 
 
 
