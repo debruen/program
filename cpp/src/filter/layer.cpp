@@ -7,7 +7,7 @@ Layer::Layer() {
 
   m_blend = new Blend();
   m_film = new Film();
-  m_data.push_back(m_film->init());
+  m_data.push_back(m_film->data());
   m_data.push_back(m_blend->init());
 
 }
@@ -32,23 +32,16 @@ nlohmann::json Layer::update(nlohmann::json data, std::string type) {
   return m_data;
 }
 
-void Layer::frame(cv::Mat& image, std::size_t frame) {
+void Layer::image_frame(cv::Mat& image, std::size_t frame_index) {
 
-  std::size_t width, height;
-
-  width  = image.cols;
-  height = image.rows;
-
-  cv::Mat film = m_film->frame(frame, width, height);
+  cv::Mat film = m_film->image_frame(image, frame_index);
 
   // m_blend->process(image, film);
 }
 
-void Layer::frame(stk::StkFrames& audio, std::size_t frame) {
+void Layer::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
-  std::size_t length = audio.frames();
-
-  stk::StkFrames film = m_film->frame(length);
+  cv::Mat film = m_film->audio_frame(audio, frame_index);
 
   // m_blend->process(audio, film);
 }

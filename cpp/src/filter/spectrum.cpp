@@ -196,7 +196,7 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   return m_data;
 }
 
-cv::Mat Spectrum::image_frame(cv::Mat image, std::size_t frame) {
+cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index) {
 
   cv::Size size(image.cols, image.rows);
 
@@ -215,7 +215,7 @@ cv::Mat Spectrum::image_frame(cv::Mat image, std::size_t frame) {
   return film;
 }
 
-cv::Mat Spectrum::audio_frame(cv::Mat audio, std::size_t frame) {
+cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
   m_width = audio.cols;
   m_height = audio.rows;
@@ -229,8 +229,11 @@ cv::Mat Spectrum::audio_frame(cv::Mat audio, std::size_t frame) {
   frequency = pow(m_frequency, m_frq_gamma);
   frequency = math::project(m_audio_min, m_audio_max, frequency);
 
+  frequency = frequency * m_height / 44100.0;
+  // ?? adjust frequency to audio here !!
+
   amplitude = m_amplitude;
-  phase     = frame_phase(frame);
+  phase     = frame_phase(frame_index);
   tilt      = m_tilt;
 
   std::cout << "frequency: " << frequency << '\n';
@@ -242,7 +245,7 @@ cv::Mat Spectrum::audio_frame(cv::Mat audio, std::size_t frame) {
     for (std::size_t x = 0; x < m_width; x++) {
 
       if (frequency == 0) {
-        ptr[x] = 1 * amplitude;
+        ptr[x] = 0 * amplitude;
       } else {
         ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
       }

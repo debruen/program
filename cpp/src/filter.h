@@ -17,9 +17,15 @@ class Filter {
   public:
     Filter();
 
-    nlohmann::json init();
+    nlohmann::json data();
 
     nlohmann::json update(nlohmann::json data, std::string type);
+
+    void image_frame(cv::Mat& image, std::size_t frame_index);
+
+    void audio_frame(cv::Mat& audio, std::size_t frame_index);
+
+
 
     void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 

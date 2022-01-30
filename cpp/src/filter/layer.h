@@ -25,9 +25,9 @@ class Layer {
     nlohmann::json update(nlohmann::json data, std::string type);
 
 
-    void frame(cv::Mat& image, std::size_t frame);
+    void image_frame(cv::Mat& image, std::size_t frame_index);
 
-    void frame(stk::StkFrames& audio, std::size_t frame);
+    void audio_frame(cv::Mat& audio, std::size_t frame_index);
 
 
 

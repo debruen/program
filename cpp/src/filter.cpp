@@ -5,7 +5,7 @@ Filter::Filter() {
   m_data = nlohmann::json::array();
 }
 
-nlohmann::json Filter::init() {
+nlohmann::json Filter::data() {
 
   return m_data;
 }
@@ -37,6 +37,23 @@ nlohmann::json Filter::update(nlohmann::json data, std::string type) {
 
   return m_data;
 }
+
+void Filter::image_frame(cv::Mat& image, std::size_t frame_index) {
+
+  // for (std::size_t i = 0; i < m_layer.size(); i++) {
+  //   m_layer[i]->process(images, audio);
+  // }
+
+}
+
+void Filter::audio_frame(cv::Mat& audio, std::size_t frame_index) {
+
+  // for (std::size_t i = 0; i < m_layer.size(); i++) {
+  //   m_layer[i]->process(images, audio);
+  // }
+
+}
+
 
 void Filter::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

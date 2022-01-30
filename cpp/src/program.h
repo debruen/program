@@ -25,7 +25,7 @@ class Program {
     Filter m_filter;
     Output m_output;
 
-    std::size_t m_active_frame{0};
+    // std::size_t m_active_frame{0};
 
     std::vector<frame> m_frames;
 

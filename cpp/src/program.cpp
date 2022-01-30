@@ -4,22 +4,31 @@
 Program::Program() {
 
   m_data["settings"] = m_settings.data();
-  m_data["filter"]   = m_filter.init();
+  m_data["filter"]   = m_filter.data();
   m_data["output"]   = m_output.init();
 
 }
 
 frame Program::create_frame(std::size_t frame_index) {
 
+  // settings
+  std::string type = data::get_string(m_data["settings"], "type");
+
   cv::Mat image = m_settings.image_frame(frame_index);
   cv::Mat audio = m_settings.audio_frame(frame_index);
 
+  // filter
+  if(type == "audio") {
+    m_filter.audio_frame(audio, frame_index);
+  } else {
+    m_filter.image_frame(image, frame_index);
+  }
+
+  // output
 
 
   frame frame = {.frame = frame_index, .image = image, .audio = audio};
 
-  // settings
-  // filter
   // output
 
   return frame;

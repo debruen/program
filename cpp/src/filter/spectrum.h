@@ -33,9 +33,10 @@ class Spectrum : public Coat {
 
     virtual nlohmann::json update(nlohmann::json data);
 
-    virtual cv::Mat image_frame(cv::Mat image, std::size_t frame);
+    virtual cv::Mat image_frame(cv::Mat& image, std::size_t frame_index);
 
-    virtual cv::Mat audio_frame(cv::Mat audio, std::size_t frame);
+    virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index);
+
 
 
     virtual cv::Mat frame(std::size_t width, std::size_t height);
