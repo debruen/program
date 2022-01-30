@@ -29,11 +29,17 @@ class Settings {
 
   public:
     Settings();
-    Settings(nlohmann::json data);
+    // Settings(nlohmann::json data);
 
-    nlohmann::json init();
+    nlohmann::json data();
 
     nlohmann::json update(nlohmann::json data);
+
+    cv::Mat image_frame(std::size_t frame);
+
+    cv::Mat audio_frame(std::size_t frame);
+
+
 
     cv::Mat image();
 

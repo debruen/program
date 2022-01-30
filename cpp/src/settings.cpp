@@ -51,11 +51,11 @@ Settings::Settings() {
 
 } // constructor() END!
 
-Settings::Settings(nlohmann::json data) : m_data(data) {
-
-  update_data(m_data);
-
-} // constructor(data) END!
+// Settings::Settings(nlohmann::json data) : m_data(data) {
+//
+//   update_data(m_data);
+//
+// } // constructor(data) END!
 
 void Settings::update_data(nlohmann::json& data) {
 
@@ -114,10 +114,10 @@ void Settings::flip_image(cv::Mat& image, bool back) {
 
 } // flip_image(&image, back = false) END!
 
-nlohmann::json Settings::init() {
+nlohmann::json Settings::data() {
 
   return m_data;
-} // init() END
+} // data() END
 
 nlohmann::json Settings::update(nlohmann::json data) {
 
@@ -127,6 +127,39 @@ nlohmann::json Settings::update(nlohmann::json data) {
 
   return m_data;
 } // update(data) END
+
+cv::Mat Settings::image_frame(std::size_t frame) {
+
+  std::size_t width, height;
+
+  width = data::get_width(m_data, "output");
+  height = data::get_height(m_data, "output");
+
+  cv::Size size(width, height);
+
+  cv::Mat image = cv::Mat(size, CV_8UC3);
+  image = 0;
+
+  flip_image(image);
+
+  return image;
+}
+
+cv::Mat Settings::audio_frame(std::size_t frame) {
+
+  std::size_t width, height;
+
+  width = 2;
+  height = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
+
+  cv::Size size(width, height);
+
+  cv::Mat audio = cv::Mat(size, CV_64FC1);
+  audio = 0;
+
+  return audio;
+}
+
 
 void Settings::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

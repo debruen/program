@@ -3,7 +3,7 @@
 
 Program::Program() {
 
-  m_data["settings"] = m_settings.init();
+  m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.init();
   m_data["output"]   = m_output.init();
 

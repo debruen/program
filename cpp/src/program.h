@@ -36,6 +36,14 @@ class Program {
   public:
     Program();
 
+    // •   work()
+
+    // <-  data()
+    // <-> update(data) / including play ???
+
+    // <-  read(frame)  / returns image and audio data
+
+
     std::string work();
 
     frame read(std::size_t f);
