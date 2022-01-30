@@ -89,12 +89,19 @@ class Blend {
     static double exclusion(double& a, double& b, double& o);
     static unsigned char exclusion(unsigned char& aChar, unsigned char& bChar, double& o);
 
+    void frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index);
+
   public:
     Blend();
 
-    nlohmann::json init();
+    nlohmann::json data();
 
     nlohmann::json update(nlohmann::json data);
+
+    void image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index);
+
+    void audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index);
+
 
     void process(std::vector<cv::Mat>& images, std::vector<cv::Mat>& fillings);
 

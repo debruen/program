@@ -403,7 +403,45 @@ unsigned char Blend::exclusion(unsigned char& aChar, unsigned char& bChar, doubl
     return round(c * 255);
 }
 
-nlohmann::json Blend::init() {
+void Blend::frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) {
+  std::size_t width = image.cols, height = image.rows;
+  cv::Size size(width, height);
+
+  cv::Mat mask = cv::Mat(size, CV_64FC1);
+
+  std::size_t c;
+  uchar* image_ptr, * film_ptr;
+  double* mask_ptr;
+
+
+  for (std::size_t i = m_masks.size(); i --> 0; ) {
+    if (i == m_masks.size()) {
+      mask = m_masks[i]->frame(mask, frame_index);
+    } else {
+      m_masks[i]->process(mask, frame_index);
+    }
+  }
+
+  for (std::size_t  y = 0; y < height; y++) {
+
+    image_ptr = image.ptr<uchar>(y);
+    film_ptr = film.ptr<uchar>(y);
+    mask_ptr = mask.ptr<double>(y);
+
+    for (std::size_t  x = 0; x < width; x++) {
+      c = x * 3;
+
+      image_ptr[c + 2] = m_blendc(image_ptr[c + 2], film_ptr[c + 2], mask_ptr[x]);
+      image_ptr[c + 1] = m_blendc(image_ptr[c + 1], film_ptr[c + 1], mask_ptr[x]);
+      image_ptr[c]     = m_blendc(image_ptr[c],     film_ptr[c],     mask_ptr[x]);
+    }
+  }
+
+}
+
+// --- --- --- --- --- --- --- --- Public --- --- ---
+
+nlohmann::json Blend::data() {
 
   return m_data;
 }
@@ -455,6 +493,20 @@ nlohmann::json Blend::update(nlohmann::json data) {
 
   return m_data;
 }
+
+void Blend::image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) {
+
+  frame(image, film, frame_index);
+
+}
+
+void Blend::audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index) {
+
+  frame(audio, film, frame_index);
+
+}
+
+
 
 void Blend::process(std::vector<cv::Mat>& images, std::vector<cv::Mat>& fillings) {
 

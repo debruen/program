@@ -8,7 +8,7 @@ Layer::Layer() {
   m_blend = new Blend();
   m_film = new Film();
   m_data.push_back(m_film->data());
-  m_data.push_back(m_blend->init());
+  m_data.push_back(m_blend->data());
 
 }
 
@@ -35,6 +35,7 @@ nlohmann::json Layer::update(nlohmann::json data, std::string type) {
 void Layer::image_frame(cv::Mat& image, std::size_t frame_index) {
 
   cv::Mat film = m_film->image_frame(image, frame_index);
+  m_blend->image_frame(image, film, frame_index);
 
   // m_blend->process(image, film);
 }
