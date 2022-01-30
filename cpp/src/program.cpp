@@ -9,11 +9,76 @@ Program::Program() {
 
 }
 
+frame Program::create_frame(nlohmann::json data, std::size_t f) {
+
+  cv::Mat image;
+  stk::StkFrames audio;
+
+  frame frame = {.frame = f, .image = image, .audio = audio};
+
+  // settings
+  // filter
+  // output
+
+  return frame;
+}
+
+frame Program::get_frame(std::size_t f) {
+
+  frame frame;
+  bool check = false;
+
+  for (std::size_t i = 0; i < m_frames.size(); i++) {
+    if (m_frames[i].frame == f) {
+      frame = m_frames[i];
+      check = true;
+      break;
+    }
+  }
+
+  if(!check) throw std::invalid_argument("no matching frame");
+
+  return frame;
+}
+
 std::string Program::work() {
+
+  bool run = true;
+
+  nlohmann::json data;
+
+  while(run) {
+    data = get();
+
+  }
+  // loop
+  // read data
+  // work on buffer
 
   std::string msg = "work done!";
   return msg;
+} // work()
+
+
+
+frame Program::read(std::size_t f) {
+
+  frame frame;
+
+  try {
+
+    frame = get_frame(f);
+
+  } catch (const std::invalid_argument& e) {
+
+  }
+
+  return frame;
 }
+
+nlohmann::json Program::get() {
+  return m_data;
+} // get()
 
 nlohmann::json Program::init() {
   return m_data;
@@ -29,10 +94,6 @@ nlohmann::json Program::update(nlohmann::json data) {
 
   return m_data;
 } // data()
-
-nlohmann::json Program::get() {
-  return m_data;
-} // get()
 
 void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

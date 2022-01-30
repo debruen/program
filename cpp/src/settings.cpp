@@ -3,15 +3,19 @@
 
 Settings::Settings() {
 
-  /// 0: type (settings type: image or audio)
+  /// type (image or audio)
   std::vector<std::string> type_options{"image", "audio"};
-  m_data.push_back(data::data_string("type", true, type_options, type_options[0]));
+  m_data.push_back(data::init_str("type", type_options, type_options[0]));
 
-  /// 1: frames (image frames)
-  m_data.push_back(data::data_int("frames", 1, 60, 1));
+  /// time per frame (audio length in milliseconds)
+  m_data.push_back(data::init_time("frame time", 1000, 60000, 3000));
 
-  /// 2: time (audio length in milliseconds)
-  m_data.push_back(data::data_time("time", 1000, 60000, 3000));
+
+  /// frames (image frames)
+  m_data.push_back(data::init_int("frames", 1, 60, 1));
+
+  /// time (audio length in milliseconds)
+  m_data.push_back(data::init_time("time", 1000, 60000, 3000));
 
   /// 3: ratio (2:1 - 1:2)
   m_data.push_back(data::data_float("ratio", 0.5, 2, 1.0/M_SQRT2));
@@ -150,6 +154,32 @@ void Settings::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
   audio.setChannel(1, empR, 0);
 
 } // process()
+
+cv::Mat Settings::image() {
+
+  std::size_t width, height;
+
+  width = data::get_width(m_data, "output");
+  height = data::get_height(m_data, "output");
+
+  cv::Size size(width, height);
+
+  cv::Mat image = cv::Mat(size, CV_8UC3);
+  image = 0;
+
+  flip_image(image);
+
+  return image;
+}
+
+stk::StkFrames Settings::audio() {
+
+  std::size_t frame_time = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
+
+  stk::StkFrames audio(frame_time, 2);
+
+  return audio;
+}
 
 void Settings::file(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

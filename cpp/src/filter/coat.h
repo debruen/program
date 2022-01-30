@@ -16,17 +16,17 @@ protected:
 
   Coat();
 
-  nlohmann::json get_data();
+  nlohmann::json coat_data();
 
 public:
 
-  virtual nlohmann::json init() = 0;
+  virtual nlohmann::json data() = 0;
 
   virtual nlohmann::json update(nlohmann::json data) = 0;
 
-  virtual cv::Mat image(std::size_t width, std::size_t height) = 0;
+  virtual cv::Mat frame(std::size_t width, std::size_t height) = 0;
 
-  virtual stk::StkFrames audio(std::size_t length) = 0;
+  virtual stk::StkFrames frame(std::size_t length) = 0;
 
 };
 

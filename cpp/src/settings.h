@@ -35,6 +35,10 @@ class Settings {
 
     nlohmann::json update(nlohmann::json data);
 
+    cv::Mat image();
+
+    stk::StkFrames audio();
+
     void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 
     void file(std::vector<cv::Mat>& images, stk::StkFrames& audio);

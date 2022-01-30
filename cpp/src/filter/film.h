@@ -23,9 +23,12 @@ class Film {
 
     nlohmann::json update(nlohmann::json data);
 
-    std::vector<cv::Mat> images(std::size_t frames, std::size_t width, std::size_t height);
+    // width, height and length should go to m_data
+    cv::Mat frame(std::size_t frame, std::size_t width, std::size_t height);
 
-    stk::StkFrames audio(std::size_t length);
+    stk::StkFrames frame(std::size_t length);
+
+    std::vector<cv::Mat> images(std::size_t frames, std::size_t width, std::size_t height);
 
 };
 

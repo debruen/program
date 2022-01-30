@@ -3,7 +3,7 @@
 
 Spectrum::Spectrum() {
 
-  m_data = get_data();
+  m_data = coat_data();
 
   m_data.push_back(data::data_data("color range", m_color_min, m_color_max));
 
@@ -55,7 +55,7 @@ std::vector< std::vector<unsigned char> > Spectrum::rgb_spectrum() {
   return rgb;
 }
 
-nlohmann::json Spectrum::init() {
+nlohmann::json Spectrum::data() {
 
   return m_data;
 }
@@ -72,7 +72,7 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   return m_data;
 }
 
-cv::Mat Spectrum::image(std::size_t width, std::size_t height) {
+cv::Mat Spectrum::frame(std::size_t width, std::size_t height) {
 
   cv::Size size(width, height);
   cv::Mat image = cv::Mat(size, CV_8UC3);
@@ -90,7 +90,7 @@ cv::Mat Spectrum::image(std::size_t width, std::size_t height) {
   return image;
 }
 
-stk::StkFrames Spectrum::audio(std::size_t length) {
+stk::StkFrames Spectrum::frame(std::size_t length) {
 
   stk::StkFrames signal(length, 1);
   double frequency, amplitude, phase, phase_min, phase_max, tick;

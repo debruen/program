@@ -8,6 +8,6 @@ Coat::Coat() {
 
 } // constructor END
 
-nlohmann::json Coat::get_data() {
+nlohmann::json Coat::coat_data() {
   return m_coat;
 }

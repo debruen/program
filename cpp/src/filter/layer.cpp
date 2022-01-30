@@ -32,6 +32,27 @@ nlohmann::json Layer::update(nlohmann::json data, std::string type) {
   return m_data;
 }
 
+void Layer::frame(cv::Mat& image, std::size_t frame) {
+
+  std::size_t width, height;
+
+  width  = image.cols;
+  height = image.rows;
+
+  cv::Mat film = m_film->frame(frame, width, height);
+
+  // m_blend->process(image, film);
+}
+
+void Layer::frame(stk::StkFrames& audio, std::size_t frame) {
+
+  std::size_t length = audio.frames();
+
+  stk::StkFrames film = m_film->frame(length);
+
+  // m_blend->process(audio, film);
+}
+
 void Layer::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
   if (m_type == "audio") {
@@ -39,7 +60,7 @@ void Layer::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
     std::size_t length = audio.frames();
     stk::StkFrames audio_film;
 
-    audio_film = m_film->audio(length);
+    audio_film = m_film->frame(length);
     m_blend->process(audio, audio_film);
 
   } else {

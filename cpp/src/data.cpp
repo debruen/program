@@ -10,7 +10,7 @@ std::size_t data::array_size(nlohmann::json& data) {
   return size;
 }
 
-// json string functions
+// data string functions
 
 nlohmann::json data::init_str(std::string name, std::vector<std::string> options, std::string value) {
 
@@ -43,6 +43,59 @@ std::string data::get_str(nlohmann::json& data, std::string name) {
 
   return value;
 }
+
+// data int functions
+
+nlohmann::json data::init_int(std::string name, std::size_t min, std::size_t max, std::size_t value) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "range";
+  data["type"] = "int";
+  data["min"] = min;
+  data["max"] = max;
+  data["value"] = value;
+
+  return data;
+}
+
+std::size_t data::get_int(nlohmann::json& data, std::string name) {
+
+  nlohmann::json select;
+
+  std::size_t size = array_size(data);
+
+  for (std::size_t i = 0; i < size; i++) {
+    if (data[i]["name"] == name) {
+      select = data[i];
+      break;
+    }
+  }
+
+  std::size_t value{0};
+
+  if(select["type"] == "int" || select["type"] == "time") value = select["value"];
+
+  return value;
+}
+// data time functions
+
+nlohmann::json data::init_time(std::string name, std::size_t min, std::size_t max, std::size_t value) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "range";
+  data["type"] = "time";
+  data["min"] = min;
+  data["max"] = max;
+  data["value"] = value;
+
+  return data;
+}
+
+
 
 // json data functions
 
@@ -144,26 +197,6 @@ nlohmann::json data::data_path(std::string name, std::string value) {
   data["value"] = value;
 
   return data;
-}
-
-int data::get_int(nlohmann::json& data, std::string name) {
-
-  nlohmann::json select;
-
-  std::size_t size = array_size(data);
-
-  for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
-      select = data[i];
-      break;
-    }
-  }
-
-  int value = 0;
-
-  if(select["type"] == "int" || select["type"] == "time") value = select["value"];
-
-  return value;
 }
 
 double data::get_float(nlohmann::json& data, std::string name) {
