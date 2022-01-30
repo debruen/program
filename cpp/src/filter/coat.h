@@ -3,6 +3,7 @@
 #define coat_h
 
 #include "../data.h"
+#include "../math.h"
 
 class Coat {
 
