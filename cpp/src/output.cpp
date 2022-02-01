@@ -26,7 +26,7 @@ nlohmann::json Output::update(nlohmann::json data, std::string type) {
 
     data = m_base->data();
   } else {
-    data = m_base->data(data);
+    data = m_base->update(data);
 
   }
 
@@ -34,6 +34,16 @@ nlohmann::json Output::update(nlohmann::json data, std::string type) {
 
   return m_data;
 }
+
+void Output::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+  m_base->image_frame(image, audio, frame_index);
+}
+
+void Output::audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+  m_base->audio_frame(image, audio, frame_index);
+}
+
+
 
 void Output::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

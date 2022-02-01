@@ -20,12 +20,13 @@ frame Program::create_frame(std::size_t frame_index) {
   // filter
   if(type == "audio") {
     m_filter.audio_frame(audio, frame_index);
+    m_output.audio_frame(image, audio, frame_index);
+
   } else {
     m_filter.image_frame(image, frame_index);
+    m_output.image_frame(image, audio, frame_index);
+
   }
-
-  // output
-
 
   frame frame = {.frame = frame_index, .image = image, .audio = audio};
 
@@ -56,10 +57,7 @@ std::string Program::work() {
 
   bool run = true;
 
-  nlohmann::json data;
-
   while(run) {
-    data = get();
 
   }
   // loop
@@ -68,9 +66,21 @@ std::string Program::work() {
 
   std::string msg = "work done!";
   return msg;
-} // work()
+}
 
+nlohmann::json Program::data() {
+  return m_data;
+}
+nlohmann::json Program::update(nlohmann::json data) {
 
+  std::string type = data::get_string(data["settings"], "type");
+
+  m_data["settings"] = m_settings.update(data["settings"]);
+  m_data["filter"]   = m_filter.update(data["filter"], type);
+  m_data["output"]   = m_output.update(data["output"], type);
+
+  return m_data;
+}
 
 frame Program::read(std::size_t f) {
 
@@ -87,22 +97,8 @@ frame Program::read(std::size_t f) {
   return frame;
 }
 
-nlohmann::json Program::get() {
-  return m_data;
-} // get()
 
 nlohmann::json Program::init() {
-  return m_data;
-} // data()
-
-nlohmann::json Program::update(nlohmann::json data) {
-
-  std::string type = data::get_string(data["settings"], "type");
-
-  m_data["settings"] = m_settings.update(data["settings"]);
-  m_data["filter"]   = m_filter.update(data["filter"], type);
-  m_data["output"]   = m_output.update(data["output"], type);
-
   return m_data;
 } // data()
 

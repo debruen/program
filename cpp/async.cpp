@@ -68,7 +68,7 @@ void AsyncUpdate::OnOK() {
 AsyncPreview::AsyncPreview(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right)
   : AsyncWorker(callback), program(program), p_images(images), p_left(left), p_right(right) {
 
-  nlohmann::json data = program.get();
+  nlohmann::json data = program.data();
 
   m_width  = data::get_width(data["settings"], "preview");
   m_height = data::get_height(data["settings"], "preview");

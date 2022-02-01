@@ -23,7 +23,12 @@ class Hsl : public Out {
 
     virtual nlohmann::json data();
 
-    virtual nlohmann::json data(nlohmann::json data);
+    virtual nlohmann::json update(nlohmann::json data);
+
+    virtual void image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
+
+    virtual void audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
+
 
     virtual void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 

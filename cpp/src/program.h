@@ -25,8 +25,6 @@ class Program {
     Filter m_filter;
     Output m_output;
 
-    // std::size_t m_active_frame{0};
-
     std::vector<frame> m_frames;
 
     frame create_frame(std::size_t frame_index);
@@ -43,16 +41,16 @@ class Program {
 
     // <-  read(frame)  / returns image and audio data
 
-
     std::string work();
+
+    nlohmann::json data();
+    nlohmann::json update(nlohmann::json data);
 
     frame read(std::size_t f);
 
-    nlohmann::json get();
+
 
     nlohmann::json init();
-
-    nlohmann::json update(nlohmann::json data);
 
     void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 
