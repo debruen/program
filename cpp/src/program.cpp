@@ -7,9 +7,13 @@ Program::Program() {
   m_data["filter"]   = m_filter.data();
   m_data["output"]   = m_output.init();
 
+  m_frame_time = data::get_int(m_data["settings"], "frame time");
+
 }
 
-frame Program::create_frame(std::size_t frame_index) {
+void Program::create_frame(std::size_t frame_index) {
+
+  auto start = std::chrono::system_clock::now();
 
   // settings
   std::string type = data::get_string(m_data["settings"], "type");
@@ -28,21 +32,71 @@ frame Program::create_frame(std::size_t frame_index) {
 
   }
 
-  frame frame = {.frame = frame_index, .image = image, .audio = audio};
+  frame frame = {.index = frame_index, .image = image, .audio = audio};
 
-  // output
+  auto end = std::chrono::system_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  return frame;
+  std::size_t relation = m_frame_time / elapsed.count() + 1;
+
+  std::cout << elapsed.count() << '\n';
+
+  if(relation < 2) relation = 2;
+
+  m_buffer_size = relation * 2;
+
+  m_buffer.push_back(new_frame);
 }
+
+void Program::update_buffer() {
+
+  if(m_buffer.size() < m_buffer_size) {
+    std::size_t new_frame_index = last_buffer_index();
+    new_frame_index = new_frame_index + 1;
+
+    create_frame(new_frame_index);
+  }
+
+}
+
+void Program::clean_buffer() {
+
+  std::vector<frame> temp_buffer;
+
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+
+    if (m_buffer[i].index >= m_current_frame) {
+      temp_buffer.push_back(m_buffer[i]);
+    }
+
+  }
+
+  m_buffer = temp_buffer;
+
+}
+
+std::size_t Program::last_buffer_index() {
+
+  std::size_t frame_index{0};
+
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+
+    if (m_buffer[i].index > frame_index) frame_index = m_buffer[i].index;
+
+  }
+
+  return frame_index;
+}
+
 
 frame Program::get_frame(std::size_t f) {
 
   frame frame;
   bool check = false;
 
-  for (std::size_t i = 0; i < m_frames.size(); i++) {
-    if (m_frames[i].frame == f) {
-      frame = m_frames[i];
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == f) {
+      frame = m_buffer[i];
       check = true;
       break;
     }
@@ -59,7 +113,12 @@ std::string Program::work() {
 
   while(run) {
 
+    clean_buffer();
+
+    update_buffer();
+
   }
+
   // loop
   // read data
   // work on buffer
@@ -82,13 +141,13 @@ nlohmann::json Program::update(nlohmann::json data) {
   return m_data;
 }
 
-frame Program::read(std::size_t f) {
+frame Program::read(std::size_t frame_index) {
 
   frame frame;
 
   try {
 
-    frame = get_frame(f);
+    frame = get_frame(frame_index);
 
   } catch (const std::invalid_argument& e) {
 
