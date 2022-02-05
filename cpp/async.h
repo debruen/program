@@ -24,12 +24,25 @@ class AsyncInit : public Napi::AsyncWorker {
 
 };
 
+class AsyncQuit : public Napi::AsyncWorker {
+
+  private:
+
+    Program& program;
+
+  public:
+    AsyncQuit(Napi::Function& callback, Program& program);
+    virtual ~AsyncQuit() {};
+
+    void Execute();
+    void OnOK();
+};
+
 class AsyncWork : public Napi::AsyncWorker {
 
   private:
 
     Program& program;
-    std::string m_msg;
 
   public:
     AsyncWork(Napi::Function& callback, Program& program);

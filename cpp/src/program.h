@@ -19,6 +19,8 @@ class Program {
 
   private:
 
+    bool m_work = true;
+
     nlohmann::json m_data;
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
@@ -51,15 +53,16 @@ class Program {
 
     // <-  read(frame)  / returns image and audio data
 
-    std::string work();
+    void work();
+
 
     nlohmann::json data();
     nlohmann::json update(nlohmann::json data);
 
     // reference image and audio for pick up?
-
     frame read(std::size_t f);
 
+    void quit();
 
 
     nlohmann::json init();

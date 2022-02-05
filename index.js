@@ -1,52 +1,47 @@
 
-const {program_init, program_work, program_update, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_main, program_data, program_update, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
   constructor() {
   } // constructor
 
-  init() {
-
+  main() {
     return new Promise((resolve) => {
-      program_init((err, result) => {
-
-        // convert result to JSON
-        const json = JSON.parse(result)
-
-        resolve(json)
-      })
-    })
-
-  } // init
-
-  work() {
-
-    return new Promise((resolve) => {
-      program_work((err, result) => {
-
+      program_main((err, result) => {
         resolve(result)
       })
     })
+  } // main()
 
-  } // work
-
-  update(data) {
-
-    // convert data to string
-    const string = JSON.stringify(data)
-
+  data() {
     return new Promise((resolve) => {
-      program_update(string, (err, result) => {
-
-        // convert result to JSON
+      program_data((err, result) => {
         const json = JSON.parse(result)
-
         resolve(json)
       })
     })
+  } // data()
 
-  } // data
+  update(data) {
+    const string = JSON.stringify(data)
+    return new Promise((resolve) => {
+      program_update(string, (err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  } // update(data)
+
+  quit() {
+    return new Promise((resolve) => {
+      program_quit((err, result) => {
+        resolve(result)
+      })
+    })
+  } // quit
+
+
 
   preview(images, left, right) {
 

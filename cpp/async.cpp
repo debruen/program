@@ -9,35 +9,42 @@ AsyncInit::AsyncInit(Napi::Function& callback, Program& program)
 };
 
 void AsyncInit::Execute() {
-
   m_data = program.init();
 };
 
 void AsyncInit::OnOK() {
-
   std::string string = m_data.dump();
-
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
 
 // ----- AsyncInit END!
 
-// ----- AsyncWork
-
-AsyncWork::AsyncWork(Napi::Function& callback, Program& program)
+AsyncQuit::AsyncQuit(Napi::Function& callback, Program& program)
   : AsyncWorker(callback), program(program) {
 
 };
 
-void AsyncWork::Execute() {
+void AsyncQuit::Execute() {
+  program.quit();
+};
 
-  m_msg = program.work();
+void AsyncQuit::OnOK() {
+  std::string string = "program: quit done";
+  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+};
+
+// ----- AsyncWork
+
+AsyncWork::AsyncWork(Napi::Function& callback, Program& program)
+  : AsyncWorker(callback), program(program) {
+};
+
+void AsyncWork::Execute() {
+  program.work();
 };
 
 void AsyncWork::OnOK() {
-
-  std::string msg = m_msg;
-
+  std::string msg = "main";
   Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
 };
 

@@ -29,10 +29,9 @@ void Program::create_frame(std::size_t frame_index) {
   } else {
     m_filter.image_frame(image, frame_index);
     m_output.image_frame(image, audio, frame_index);
-
   }
 
-  frame frame = {.index = frame_index, .image = image, .audio = audio};
+  frame new_frame = {.index = frame_index, .image = image, .audio = audio};
 
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
@@ -43,7 +42,7 @@ void Program::create_frame(std::size_t frame_index) {
 
   if(relation < 2) relation = 2;
 
-  m_buffer_size = relation * 2;
+  m_buffer_size = relation;
 
   m_buffer.push_back(new_frame);
 }
@@ -107,11 +106,9 @@ frame Program::get_frame(std::size_t f) {
   return frame;
 }
 
-std::string Program::work() {
+void Program::work() {
 
-  bool run = true;
-
-  while(run) {
+  while(m_work) {
 
     clean_buffer();
 
@@ -123,8 +120,6 @@ std::string Program::work() {
   // read data
   // work on buffer
 
-  std::string msg = "work done!";
-  return msg;
 }
 
 nlohmann::json Program::data() {
@@ -154,6 +149,13 @@ frame Program::read(std::size_t frame_index) {
   }
 
   return frame;
+}
+
+void Program::quit() {
+
+  std::cout << "****** quit ******" << '\n';
+  m_work = false;
+
 }
 
 
