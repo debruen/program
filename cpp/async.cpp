@@ -1,6 +1,19 @@
 
 #include "async.h"
 
+AsyncMain::AsyncMain(Napi::Function& callback, Program& program)
+  : AsyncWorker(callback), program(program) {
+};
+
+void AsyncMain::Execute() {
+  program.work();
+};
+
+void AsyncMain::OnOK() {
+  std::string msg = "main";
+  Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
+};
+
 // ----- AsyncInit
 
 AsyncInit::AsyncInit(Napi::Function& callback, Program& program)
@@ -33,20 +46,6 @@ void AsyncQuit::OnOK() {
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
 
-// ----- AsyncWork
-
-AsyncWork::AsyncWork(Napi::Function& callback, Program& program)
-  : AsyncWorker(callback), program(program) {
-};
-
-void AsyncWork::Execute() {
-  program.work();
-};
-
-void AsyncWork::OnOK() {
-  std::string msg = "main";
-  Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
-};
 
 // ----- AsyncInit END!
 
@@ -148,7 +147,6 @@ AsyncSave::AsyncSave(Napi::Function& callback, Program& program)
 };
 
 void AsyncSave::Execute() {
-
   program.save();
 };
 

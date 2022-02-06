@@ -7,7 +7,7 @@ Program program;
 Napi::Value program_main(const Napi::CallbackInfo& info) {
   Napi::Function callback = info[0].As<Napi::Function>();
 
-  AsyncWork* main = new AsyncWork(callback, program);
+  AsyncMain* main = new AsyncMain(callback, program);
   main->Queue();
 
   std::string msg = "program: main process started";

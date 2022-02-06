@@ -8,6 +8,21 @@
 
 #include "src/program.h"
 
+class AsyncMain : public Napi::AsyncWorker {
+
+  private:
+
+    Program& program;
+
+  public:
+    AsyncMain(Napi::Function& callback, Program& program);
+    virtual ~AsyncMain() {};
+
+    void Execute();
+    void OnOK();
+
+};
+
 class AsyncInit : public Napi::AsyncWorker {
 
   private:
@@ -36,21 +51,6 @@ class AsyncQuit : public Napi::AsyncWorker {
 
     void Execute();
     void OnOK();
-};
-
-class AsyncWork : public Napi::AsyncWorker {
-
-  private:
-
-    Program& program;
-
-  public:
-    AsyncWork(Napi::Function& callback, Program& program);
-    virtual ~AsyncWork() {};
-
-    void Execute();
-    void OnOK();
-
 };
 
 class AsyncUpdate : public Napi::AsyncWorker {
