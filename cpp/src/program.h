@@ -21,6 +21,10 @@ class Program {
 
     bool m_work = true;
 
+    bool m_update = false;
+
+    bool m_running = true;
+
     nlohmann::json m_data;
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
@@ -53,7 +57,7 @@ class Program {
 
     // <-  read(frame)  / returns image and audio data
 
-    void work();
+    void main();
 
 
     nlohmann::json data();

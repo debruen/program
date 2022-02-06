@@ -17,7 +17,7 @@ class Output {
   public:
     Output();
 
-    nlohmann::json init();
+    nlohmann::json data();
 
     nlohmann::json update(nlohmann::json data, std::string type);
 

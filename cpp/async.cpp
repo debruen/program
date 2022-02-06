@@ -6,7 +6,7 @@ AsyncMain::AsyncMain(Napi::Function& callback, Program& program)
 };
 
 void AsyncMain::Execute() {
-  program.work();
+  program.main();
 };
 
 void AsyncMain::OnOK() {

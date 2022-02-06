@@ -5,7 +5,7 @@ Program::Program() {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
-  m_data["output"]   = m_output.init();
+  m_data["output"]   = m_output.data();
 
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
@@ -36,22 +36,31 @@ void Program::create_frame(std::size_t frame_index) {
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::size_t relation = m_frame_time / elapsed.count() + 1;
+  std::size_t relation =  elapsed.count() / m_frame_time + 1;
 
-  std::cout << elapsed.count() << '\n';
+  std::cout << "frame_index: " << frame_index << '\n';
+  std::cout << "m_buffer_size: " << m_buffer_size << '\n';
+  std::cout << "m_frame_time: " << m_frame_time << '\n';
+  std::cout << "elapsed: " << elapsed.count() << '\n';
+  std::cout << "relation: " << relation << '\n';
 
   if(relation < 2) relation = 2;
 
   m_buffer_size = relation;
 
   m_buffer.push_back(new_frame);
+
 }
 
 void Program::update_buffer() {
 
   if(m_buffer.size() < m_buffer_size) {
-    std::size_t new_frame_index = last_buffer_index();
-    new_frame_index = new_frame_index + 1;
+
+    std::size_t new_frame_index{m_current_frame};
+
+    if(m_buffer.size() != 0) {
+      new_frame_index = last_buffer_index() + 1;
+    }
 
     create_frame(new_frame_index);
   }
@@ -80,7 +89,11 @@ std::size_t Program::last_buffer_index() {
 
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
 
-    if (m_buffer[i].index > frame_index) frame_index = m_buffer[i].index;
+    if (m_buffer[i].index >= frame_index) {
+
+      frame_index = m_buffer[i].index;
+
+    }
 
   }
 
@@ -106,19 +119,28 @@ frame Program::get_frame(std::size_t f) {
   return frame;
 }
 
-void Program::work() {
+void Program::main() {
 
   while(m_work) {
 
+    // check data
+    // work on buffer
+
+    if (m_update) {
+      std::vector<frame> temp_buffer;
+      m_buffer = temp_buffer;
+
+      m_update = false;
+    }
+
     clean_buffer();
 
+    //
     update_buffer();
 
   }
 
-  // loop
-  // read data
-  // work on buffer
+  m_running = false;
 
 }
 
@@ -132,6 +154,8 @@ nlohmann::json Program::update(nlohmann::json data) {
   m_data["settings"] = m_settings.update(data["settings"]);
   m_data["filter"]   = m_filter.update(data["filter"], type);
   m_data["output"]   = m_output.update(data["output"], type);
+
+  m_update = true;
 
   return m_data;
 }
@@ -156,6 +180,11 @@ void Program::quit() {
   std::cout << "****** quit ******" << '\n';
   m_work = false;
 
+  std::size_t a{0};
+  while (m_running) {
+    std::cout << "a ## " << a << '\n';
+    a++;
+  }
 }
 
 

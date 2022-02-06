@@ -7,7 +7,7 @@ Output::Output() {
   m_data = m_base->data();
 }
 
-nlohmann::json Output::init() {
+nlohmann::json Output::data() {
 
   return m_data;
 }
