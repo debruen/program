@@ -7,7 +7,7 @@ Hsl::Hsl() {
   hsl_data = get_data();
 
   // 1
-  nlohmann::json narrowing = data::data_float("narrowing", 0, 1, 0);
+  nlohmann::json narrowing = data::init_float("narrowing", 0, 1, 0);
   hsl_data.push_back(narrowing);
 
   // 2
@@ -56,7 +56,7 @@ std::vector<double> Hsl::fft(std::vector<double> input) {
     fftout = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * input.size());
     fftplan = fftw_plan_dft_1d(input.size(), fftin, fftout, FFTW_FORWARD, FFTW_ESTIMATE); // Here we set which kind of transformation we want to perform
 
-    for (int i = 0; i < static_cast<int>(input.size()); ++i) {
+    for (std::size_t i = 0; i < input.size(); i++) {
         fftin[i][0] = input[i];
         fftin[i][1] = 0.0;
     }
@@ -65,7 +65,7 @@ std::vector<double> Hsl::fft(std::vector<double> input) {
 
     std::vector<double> band;
 
-    for (int i = 0; i < static_cast<int>(input.size()) / 2; ++i) {
+    for (std::size_t i = 0; i < input.size() / 2; i++) {
 
         band.push_back(sqrt(fftout[i][0] * fftout[i][0] + fftout[i][1] * fftout[i][1]));
     }
@@ -116,176 +116,192 @@ nlohmann::json Hsl::update(nlohmann::json data) {
 
 void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
-  std::string chan_a, chan_b, chan_c;
+  std::string chan_a, chan_b, chan_c, keyboard;
 
   chan_a = data::get_string(hsl_data, "a");
   chan_b = data::get_string(hsl_data, "b");
   chan_c = data::get_string(hsl_data, "c");
 
-  // uchar ca, cb, cc;
-  // if(chan_a == "H") ca = 0;
-  // if(chan_a == "s") ca = 1;
-  // if(chan_a == "l") ca = 2;
-  //
-  // if(chan_b == "H") cb = 0;
-  // if(chan_b == "s") cb = 1;
-  // if(chan_b == "l") cb = 2;
-  //
-  // if(chan_c == "H") cc = 0;
-  // if(chan_c == "s") cc = 1;
-  // if(chan_c == "l") cc = 2;
-  //
-  // std::size_t audio_frames, sine_bands, n_length, narrow;
-  //
-  // audio_frames = audio.rows;
-  //
-  // sine_bands = image.cols / 4;
-  //
+  uchar ca, cb, cc;
+  if(chan_a == "H") ca = 0;
+  if(chan_a == "s") ca = 1;
+  if(chan_a == "l") ca = 2;
+
+  if(chan_b == "H") cb = 0;
+  if(chan_b == "s") cb = 1;
+  if(chan_b == "l") cb = 2;
+
+  if(chan_c == "H") cc = 0;
+  if(chan_c == "s") cc = 1;
+  if(chan_c == "l") cc = 2;
+
+  std::size_t audio_frames, sine_bands, n_length, narrow;
+
+  audio_frames = audio.rows;
+
+  sine_bands = image.cols / 4;
+
   // set_sine(sine_bands);
-  //
-  // double freq, keys, base, narrowing, table_hsl[256], table_lr[sine_bands][2], x_correction;
-  //
-  // narrowing = hsl_data[1]["value"];
-  //
-  // if(hsl_data[2]["value"] == 88) {
-  //   freq = 27.5000;
-  //   keys = 76.0;
-  // } else {
-  //   freq = 16.3516;
-  //   keys = 85.0;
-  // }
-  // base = pow(2, 1/12.0);
-  //
-  // // creating normalised LUT for Hsl
-  // for (int i = 0; i < 256; ++i)
-  //   table_hsl[i] = static_cast<double>(i) / 255;
-  //
-  // n_length = round(narrowing * sine_bands / 2);
-  // x_correction = 8.0 / (static_cast<double>(sine_bands));
-  // for (std::size_t i = 0; i < sine_bands; ++i) {
-  //   if(n_length == 0) {
-  //     narrow = i;
-  //   } else if(i < n_length) {
-  //     narrow = 0;
-  //   } else if (i > sine_bands - n_length) {
-  //     narrow = sine_bands - 1;
-  //   } else {
-  //     narrow = (static_cast<double>(i) - n_length) / narrowing;
-  //   }
-  //
-  //   table_lr[i][0] = (1 - static_cast<double>(narrow) / (sine_bands - 1)) * x_correction;
-  //   table_lr[i][1] = static_cast<double>(narrow) / (sine_bands - 1) * x_correction;
-  //
-  // }
-  //
-  // double left, right, h, s, l, b_freq, vol, s_freq, basefreq, tonefreq, discrete_l, discrete_r;
-  // unsigned int index;
-  //
-  // cv::Mat audio_image;
-  //
-  // cv::cvtColor(image, audio_image, cv::COLOR_BGR2HLS_FULL);
-  // cv::flip(audio_image, audio_image, 0);
-  // cv::Size size(sine_bands, audio_frames);
-  // cv::resize(audio_image, audio_image, size, 0, 0, cv::INTER_CUBIC);
-  //
-  // uchar* ptr;
-  // double* dptr;
-  //
-  // for (std::size_t y = 0; y < audio_frames; y++) {
-  //
-  //   left = 0;
-  //   right = 0;
-  //
-  //   ptr = audio_image.ptr<uchar>(y);
-  //   for (std::size_t x = 0; x < sine_bands; x++) {
-  //     index = x + x + x;
-  //
-  //     h = table_hsl[ptr[index]];
-  //     s = table_hsl[ptr[index + 2]];
-  //     l = table_hsl[ptr[index + 1]];
-  //
-  //     if(ca == 0) b_freq = h;
-  //     if(ca == 1) b_freq = s;
-  //     if(ca == 2) b_freq = l;
-  //
-  //     if(cb == 0) vol = h;
-  //     if(cb == 1) vol = s;
-  //     if(cb == 2) vol = l;
-  //
-  //     if(cc == 0) s_freq = h;
-  //     if(cc == 1) s_freq = s;
-  //     if(cc == 2) s_freq = l;
-  //
-  //     basefreq = pow(base, b_freq * 12.0) * freq;
-  //     tonefreq = pow(base, s_freq * keys) * basefreq;
-  //
-  //     m_sine_l[x].setFrequency(tonefreq);
-  //     m_sine_r[x].setFrequency(tonefreq);
-  //
-  //     discrete_l = m_sine_l[x].tick() * vol;
-  //     discrete_r = m_sine_r[x].tick() * vol;
-  //
-  //     left = left + discrete_l * table_lr[x][0];
-  //     right = right + discrete_r * table_lr[x][1];
-  //   }
-  //
-  //   dptr = audio.ptr<double>(y);
-  //   dptr[0] = left;
-  //   dptr[1] = right;
-  //
-  // }
+
+  std::vector< std::vector<stk::SineWave> > sine = make_sine(sine_bands);
+
+  double freq, keys, base, narrowing, table_hsl[256], table_lr[sine_bands][2], x_correction;
+
+  narrowing = data::get_float(hsl_data, "narrowing");
+  keyboard = data::get_string(hsl_data, "keys");
+
+  if(keyboard == "88") {
+    freq = 27.5000;
+    keys = 76.0;
+  } else {
+    freq = 16.3516;
+    keys = 85.0;
+  }
+  base = pow(2, 1/12.0);
+
+  // creating normalised LUT for Hsl
+  for (int i = 0; i < 256; ++i)
+    table_hsl[i] = static_cast<double>(i) / 255;
+
+  n_length = round(narrowing * sine_bands / 2);
+  x_correction = 8.0 / (static_cast<double>(sine_bands));
+  for (std::size_t i = 0; i < sine_bands; ++i) {
+    if(n_length == 0) {
+      narrow = i;
+    } else if(i < n_length) {
+      narrow = 0;
+    } else if (i > sine_bands - n_length) {
+      narrow = sine_bands - 1;
+    } else {
+      narrow = (static_cast<double>(i) - n_length) / narrowing;
+    }
+
+    table_lr[i][0] = (1 - static_cast<double>(narrow) / (sine_bands - 1)) * x_correction;
+    table_lr[i][1] = static_cast<double>(narrow) / (sine_bands - 1) * x_correction;
+
+  }
+
+  double left, right, h, s, l, b_freq, vol, s_freq, basefreq, tonefreq, discrete_l, discrete_r;
+  unsigned int index{0};
+
+  cv::Mat audio_image;
+
+  cv::cvtColor(image, audio_image, cv::COLOR_BGR2HLS_FULL);
+  cv::flip(audio_image, audio_image, 0);
+  cv::Size size(sine_bands, audio_frames);
+  cv::resize(audio_image, audio_image, size, 0, 0, cv::INTER_CUBIC);
+
+  std::cout << "audio_image width: " << audio_image.cols << '\n';
+  std::cout << "audio_image height: " << audio_image.rows << '\n';
+
+  uchar* ptr;
+  double* dptr;
+
+  for (std::size_t y = 0; y < audio_frames; y++) {
+
+    left = 0;
+    right = 0;
+
+    ptr = audio_image.ptr<uchar>(y);
+    for (std::size_t x = 0; x < sine_bands; x++) {
+      index = x + x + x;
+
+      h = table_hsl[ptr[index]];
+      s = table_hsl[ptr[index + 2]];
+      l = table_hsl[ptr[index + 1]];
+
+      if(ca == 0) b_freq = h;
+      if(ca == 1) b_freq = s;
+      if(ca == 2) b_freq = l;
+
+      if(cb == 0) vol = h;
+      if(cb == 1) vol = s;
+      if(cb == 2) vol = l;
+
+      if(cc == 0) s_freq = h;
+      if(cc == 1) s_freq = s;
+      if(cc == 2) s_freq = l;
+
+      basefreq = pow(base, b_freq * 12.0) * freq;
+      tonefreq = pow(base, s_freq * keys) * basefreq;
+
+      sine[0][x].setFrequency(tonefreq);
+      sine[1][x].setFrequency(tonefreq);
+
+      discrete_l = sine[0][x].tick() * vol;
+      discrete_r = sine[1][x].tick() * vol;
+
+      left = left + discrete_l * table_lr[x][0];
+      right = right + discrete_r * table_lr[x][1];
+    }
+
+    dptr = audio.ptr<double>(y);
+    dptr[0] = left;
+    dptr[1] = right;
+
+  }
 
 }
 
 void Hsl::audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
+  std::cout << "audio width: " << audio.cols << '\n';
+  std::cout << "audio height: " << audio.rows << '\n';
+
   std::size_t audio_frames = audio.rows;
 
   stk::StkFrames framesL(audio_frames, 1), framesR(audio_frames, 1), audio_comp(audio_frames, 2);
-  //
-  // // settings
-  // const std::size_t max_bands{2048};
-  //
-  // std::size_t width, height, area, bands{0}, cut, steps, index{0};
-  //
-  // width  = image.cols;
-  // height = image.rows;
-  // area = width * height;
-  //
-  // if(audio_frames < max_bands) {
-  //   bands = audio_frames / 2;
-  // } else {
-  //   bands = max_bands;
-  // }
-  //
-  // cut = audio_frames - bands;
-  // steps = area / bands * 2;
-  //
-  // std::vector< std::vector<double> > fftL, fftR;
-  //
-  // std::vector< std::vector< std::vector<double> > > fftN;
-  //
-  // double* ptr;
-  // for(std::size_t i = 0; i < steps; i++) {
-  //
-  //   index = round(static_cast<double>(cut) / steps * i);
-  //
-  //   std::vector<double> bandInL, bandInR, bandOutL, bandOutR;
-  //
-  //   for (std::size_t f = 0; f < bands; f++) {
-  //     ptr = audio.ptr<double>(index + f);
-  //     bandInL.push_back(ptr[0]);
-  //     bandInR.push_back(ptr[1]);
-  //   }
-  //
-  //   bandOutL = fft(bandInL);
-  //   bandOutR = fft(bandInR);
-  //
-  //   fftL.push_back(bandOutL);
-  //   fftR.push_back(bandOutR);
-  //
-  // }
-  //
+
+  // settings
+  const std::size_t max_bands{2048};
+
+  std::size_t width, height, area, bands{0}, cut, steps, index{0};
+
+  width  = image.cols;
+  height = image.rows;
+  area = width * height;
+
+  if(audio_frames < max_bands) {
+    bands = audio_frames / 2;
+  } else {
+    bands = max_bands;
+  }
+
+  cut = audio_frames - bands;
+  steps = area / bands * 2;
+
+  std::vector< std::vector<double> > fftL, fftR;
+
+  std::vector< std::vector< std::vector<double> > > fftN;
+
+
+  for(std::size_t i = 0; i < steps; i++) {
+
+    index = round(static_cast<double>(cut) / steps * i);
+
+    std::vector<double> bandInL, bandInR, bandOutL, bandOutR;
+
+    double* dptr;
+    for (std::size_t f = 0; f < bands; f++) {
+      dptr = audio.ptr<double>(index + f);
+
+      // std::cout << "ptr0: " << dptr[0] << '\n';
+      // std::cout << "ptr1: " << dptr[1] << '\n';
+
+      bandInL.push_back(dptr[0]);
+      bandInR.push_back(dptr[1]);
+    }
+
+    // std::cout << "fft ready: ***" << bandInL.size() << '\n';
+    //
+    // bandOutL = fft(bandInL);
+    // bandOutR = fft(bandInR);
+    //
+    // fftL.push_back(bandOutL);
+    // fftR.push_back(bandOutR);
+
+  }
+
   // fftN.push_back(fftL);
   // fftN.push_back(fftR);
   //
@@ -303,7 +319,7 @@ void Hsl::audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
   //
   // std::mt19937 generator(8);
   // std::uniform_int_distribution<int> distribution(0, size_diff);
-  //
+
   // cv::Mat_<cv::Vec3b> _I = image;
   //
   // std::vector<double> hsl;

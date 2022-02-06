@@ -34,6 +34,8 @@ class Out {
     std::vector<stk::SineWave> m_sine_l, m_sine_r;
     void set_sine(unsigned int bands);
 
+    std::vector< std::vector<stk::SineWave> > make_sine(unsigned int bands);
+
   public:
 
     virtual nlohmann::json data() = 0;

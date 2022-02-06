@@ -4,6 +4,7 @@
 
 #include <string>
 #include <chrono>
+#include <thread>
 
 #include "settings.h"
 #include "filter.h"

@@ -44,7 +44,7 @@ void Program::create_frame(std::size_t frame_index) {
   std::cout << "elapsed: " << elapsed.count() << '\n';
   std::cout << "relation: " << relation << '\n';
 
-  if(relation < 2) relation = 2;
+  if(relation < 1) relation = 2;
 
   m_buffer_size = relation;
 
@@ -183,6 +183,9 @@ void Program::quit() {
   std::size_t a{0};
   while (m_running) {
     std::cout << "a ## " << a << '\n';
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     a++;
   }
 }

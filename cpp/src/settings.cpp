@@ -137,27 +137,33 @@ cv::Mat Settings::image_frame(std::size_t frame_index) {
 
   cv::Size size(width, height);
 
-  cv::Mat frame = cv::Mat(size, CV_8UC3);
-  frame = 0;
+  cv::Mat image = cv::Mat(size, CV_8UC3);
+  image = 0;
 
-  flip_image(frame);
+  flip_image(image);
 
-  return frame;
+  return image;
 }
 
 cv::Mat Settings::audio_frame(std::size_t frame_index) {
 
-  std::size_t width, height;
+  std::size_t height = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
 
-  width = 2;
-  height = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
+  cv::Mat audio = cv::Mat::zeros(cv::Size(2, height), CV_64FC1);
 
-  cv::Size size(width, height);
+  double* ptr;
 
-  cv::Mat frame = cv::Mat(size, CV_64FC1);
-  frame = 0;
+  for (std::size_t y = 0; y < height; y++) {
 
-  return frame;
+    ptr = audio.ptr<double>(y);
+    for (std::size_t x = 0; x < 2; x++) {
+
+        ptr[x] = 0.0;
+
+    }
+  }
+
+  return audio;
 }
 
 

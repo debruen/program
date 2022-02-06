@@ -95,7 +95,39 @@ nlohmann::json data::init_time(std::string name, std::size_t min, std::size_t ma
   return data;
 }
 
+nlohmann::json data::init_float(std::string name, double min, double max, double value) {
 
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "range";
+  data["type"] = "float";
+  data["min"] = min;
+  data["max"] = max;
+  data["value"] = value;
+
+  return data;
+}
+
+double data::get_float(nlohmann::json& data, std::string name) {
+
+  nlohmann::json select;
+
+  std::size_t size = array_size(data);
+
+  for (std::size_t i = 0; i < size; i++) {
+    if (data[i]["name"] == name) {
+      select = data[i];
+      break;
+    }
+  }
+
+  double value = 0.0;
+
+  if(select["type"] == "float") value = select["value"];
+
+  return value;
+}
 
 // json data functions
 
@@ -197,26 +229,6 @@ nlohmann::json data::data_path(std::string name, std::string value) {
   data["value"] = value;
 
   return data;
-}
-
-double data::get_float(nlohmann::json& data, std::string name) {
-
-  nlohmann::json select;
-
-  std::size_t size = array_size(data);
-
-  for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
-      select = data[i];
-      break;
-    }
-  }
-
-  double value = 0.0;
-
-  if(select["type"] == "float") value = select["value"];
-
-  return value;
 }
 
 double data::get_value(nlohmann::json& data, std::string name) {
