@@ -24,8 +24,6 @@ class Program {
 
     bool m_update = false;
 
-    bool m_running = true;
-
     nlohmann::json m_data;
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
@@ -39,7 +37,7 @@ class Program {
 
     void create_frame(std::size_t frame_index);
 
-    void clean_buffer();
+    void clear_buffer();
 
     void update_buffer();
 
@@ -48,29 +46,29 @@ class Program {
 
     frame get_frame(std::size_t f);
 
+    std::thread m_main;
+    void main();
+
   public:
     Program();
 
-    // •   work()
+    // •   main()
 
     // <-  data()
     // <-> update(data) / including play ???
 
     // <-  read(frame)  / returns image and audio data
 
-    void main();
-
+    // void main();
 
     nlohmann::json data();
+
     nlohmann::json update(nlohmann::json data);
 
-    // reference image and audio for pick up?
-    frame read(std::size_t f);
+    void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
 
     void quit();
 
-
-    nlohmann::json init();
 
     void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 

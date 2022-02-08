@@ -1,40 +1,116 @@
 
 #include "async.h"
 
-AsyncMain::AsyncMain(Napi::Function& callback, Program& program)
+// -- -- -- -- -- Main
+
+// AsyncMain::AsyncMain(Napi::Function& callback, Program& program)
+//   : AsyncWorker(callback), program(program) {
+// };
+//
+// void AsyncMain::Execute() {
+//   program.main();
+// };
+//
+// void AsyncMain::OnOK() {
+//   std::string msg = "main";
+//   Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
+// };
+
+// -- -- -- -- -- Data
+
+AsyncData::AsyncData(Napi::Function& callback, Program& program)
   : AsyncWorker(callback), program(program) {
 };
 
-void AsyncMain::Execute() {
-  program.main();
+void AsyncData::Execute() {
+  m_data = program.data();
 };
 
-void AsyncMain::OnOK() {
-  std::string msg = "main";
-  Callback().Call({Env().Null(), Napi::String::New(Env(), msg)});
-};
-
-// ----- AsyncInit
-
-AsyncInit::AsyncInit(Napi::Function& callback, Program& program)
-  : AsyncWorker(callback), program(program) {
-
-};
-
-void AsyncInit::Execute() {
-  m_data = program.init();
-};
-
-void AsyncInit::OnOK() {
+void AsyncData::OnOK() {
   std::string string = m_data.dump();
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
 
-// ----- AsyncInit END!
+// -- -- -- -- -- Update
+
+AsyncUpdate::AsyncUpdate(Napi::Function& callback, Program& program, nlohmann::json data)
+  : AsyncWorker(callback), program(program), m_data(data) {
+};
+
+void AsyncUpdate::Execute() {
+  m_data = program.update(m_data);
+};
+
+void AsyncUpdate::OnOK() {
+  std::string string = m_data.dump();
+  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+};
+
+// -- -- -- -- -- Read
+
+AsyncRead::AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Array image, Napi::Float32Array left, Napi::Float32Array right, std::size_t frame_index)
+  : AsyncWorker(callback), program(program), p_image(image), p_left(left), p_right(right), m_index(frame_index) {
+
+  nlohmann::json data = program.data();
+
+  m_width  = data::get_width(data["settings"], "preview");
+  m_height = data::get_height(data["settings"], "preview");
+  m_time   = data::get_int(data["settings"], "frame time") / 1000.0 * 44100.0;
+
+  cv::Size size(m_width, m_height);
+
+  m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
+  m_audio = cv::Mat::zeros(cv::Size(2, m_time), CV_64FC1);
+
+};
+
+void AsyncRead::Execute() {
+
+  program.read(m_image, m_audio, m_index);
+
+};
+
+void AsyncRead::OnOK() {
+
+  // writing result to image_buffer
+  std::size_t c, z;
+  uchar* ptr;
+
+  for (std::size_t y = 0; y < m_height; y++) {
+
+    ptr = m_image.ptr<uchar>(y);
+    for (std::size_t x = 0; x < m_width; x++) {
+      z = x * 4;
+      c = x * 3;
+
+      p_image[z]   = ptr[c+2]; // red
+      p_image[z+1] = ptr[c+1]; // green
+      p_image[z+2] = ptr[c];   // blue
+      p_image[z+3] = 255;      // alpha channel
+
+    }
+  }
+
+  double* dptr;
+
+  for (std::size_t i = 0; i < m_time; i++) {
+
+    dptr = m_audio.ptr<double>(i);
+
+    p_left[i] = ptr[0];
+    p_right[i] = ptr[1];
+
+  }
+
+  std::string string = "done";
+
+  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+};
+
+// -- -- -- -- -- Quit
 
 AsyncQuit::AsyncQuit(Napi::Function& callback, Program& program)
   : AsyncWorker(callback), program(program) {
-
 };
 
 void AsyncQuit::Execute() {
@@ -46,30 +122,6 @@ void AsyncQuit::OnOK() {
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
 
-
-// ----- AsyncInit END!
-
-
-// AsyncUpdate
-
-AsyncUpdate::AsyncUpdate(Napi::Function& callback, Program& program, nlohmann::json data)
-  : AsyncWorker(callback), program(program), m_data(data) {
-
-};
-
-void AsyncUpdate::Execute() {
-
-  m_data = program.update(m_data);
-};
-
-void AsyncUpdate::OnOK() {
-
-  std::string string = m_data.dump();
-
-  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
-};
-
-// AsyncPreview
 
 AsyncPreview::AsyncPreview(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right)
   : AsyncWorker(callback), program(program), p_images(images), p_left(left), p_right(right) {

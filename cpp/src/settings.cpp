@@ -135,10 +135,7 @@ cv::Mat Settings::image_frame(std::size_t frame_index) {
   width = data::get_width(m_data, "output");
   height = data::get_height(m_data, "output");
 
-  cv::Size size(width, height);
-
-  cv::Mat image = cv::Mat(size, CV_8UC3);
-  image = 0;
+  cv::Mat image = cv::Mat::zeros(cv::Size(width, height), CV_8UC3);
 
   flip_image(image);
 
@@ -150,18 +147,6 @@ cv::Mat Settings::audio_frame(std::size_t frame_index) {
   std::size_t height = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
 
   cv::Mat audio = cv::Mat::zeros(cv::Size(2, height), CV_64FC1);
-
-  double* ptr;
-
-  for (std::size_t y = 0; y < height; y++) {
-
-    ptr = audio.ptr<double>(y);
-    for (std::size_t x = 0; x < 2; x++) {
-
-        ptr[x] = 0.0;
-
-    }
-  }
 
   return audio;
 }
@@ -293,7 +278,7 @@ void Settings::save_audio(stk::StkFrames& audio, std::string file) {
 
   stk::FileWvOut output;
   try {
-      output.openFile( file, audio.channels(), stk::FileWrite::FILE_AIF, stk::Stk::STK_SINT16 );
+      output.openFile(file, audio.channels(), stk::FileWrite::FILE_AIF, stk::Stk::STK_SINT16 );
   } catch (stk::StkError &) {
       exit(1);
   }

@@ -1,18 +1,18 @@
 
-const {program_main, program_data, program_update, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_data, program_update, program_read, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
   constructor() {
   } // constructor
 
-  main() {
-    return new Promise((resolve) => {
-      program_main((err, result) => {
-        resolve(result)
-      })
-    })
-  } // main()
+  // main() {
+  //   return new Promise((resolve) => {
+  //     program_main((err, result) => {
+  //       resolve(result)
+  //     })
+  //   })
+  // } // main()
 
   data() {
     return new Promise((resolve) => {
@@ -33,13 +33,23 @@ class Program{
     })
   } // update(data)
 
+  read(image, left, right, frame_index) {
+
+    return new Promise((resolve) => {
+      program_read(images, left, right, frame_index, (err, result) => {
+        resolve(result)
+      })
+    })
+
+  } // read(image, left, right, frame_index)
+
   quit() {
     return new Promise((resolve) => {
       program_quit((err, result) => {
         resolve(result)
       })
     })
-  } // quit
+  } // quit()
 
 
 

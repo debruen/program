@@ -1,7 +1,7 @@
 
 #include "program.h"
 
-Program::Program() {
+Program::Program() : m_main{} {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -9,6 +9,7 @@ Program::Program() {
 
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
+  m_main = std::thread{&Program::main, this};
 }
 
 void Program::create_frame(std::size_t frame_index) {
@@ -36,7 +37,7 @@ void Program::create_frame(std::size_t frame_index) {
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::size_t relation =  elapsed.count() / m_frame_time + 1;
+  std::size_t relation =  elapsed.count() / m_frame_time + 2;
 
   std::cout << "frame_index: " << frame_index << '\n';
   std::cout << "m_buffer_size: " << m_buffer_size << '\n';
@@ -44,7 +45,7 @@ void Program::create_frame(std::size_t frame_index) {
   std::cout << "elapsed: " << elapsed.count() << '\n';
   std::cout << "relation: " << relation << '\n';
 
-  if(relation < 1) relation = 2;
+  if(relation < 2) relation = 2;
 
   m_buffer_size = relation;
 
@@ -67,20 +68,25 @@ void Program::update_buffer() {
 
 }
 
-void Program::clean_buffer() {
+void Program::clear_buffer() {
 
   std::vector<frame> temp_buffer;
 
-  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+  if (m_update) {
 
-    if (m_buffer[i].index >= m_current_frame) {
-      temp_buffer.push_back(m_buffer[i]);
+    m_update = false;
+
+  } else {
+
+    for (std::size_t i = 0; i < m_buffer.size(); i++) {
+      if (m_buffer[i].index >= m_current_frame) {
+        temp_buffer.push_back(m_buffer[i]);
+      }
     }
 
   }
 
   m_buffer = temp_buffer;
-
 }
 
 std::size_t Program::last_buffer_index() {
@@ -126,21 +132,14 @@ void Program::main() {
     // check data
     // work on buffer
 
-    if (m_update) {
-      std::vector<frame> temp_buffer;
-      m_buffer = temp_buffer;
-
-      m_update = false;
-    }
-
-    clean_buffer();
+    clear_buffer();
 
     //
     update_buffer();
 
   }
 
-  m_running = false;
+  std::cout << "*** quit ***" << '\n';
 
 }
 
@@ -160,7 +159,7 @@ nlohmann::json Program::update(nlohmann::json data) {
   return m_data;
 }
 
-frame Program::read(std::size_t frame_index) {
+void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
   frame frame;
 
@@ -172,7 +171,6 @@ frame Program::read(std::size_t frame_index) {
 
   }
 
-  return frame;
 }
 
 void Program::quit() {
@@ -180,20 +178,9 @@ void Program::quit() {
   std::cout << "****** quit ******" << '\n';
   m_work = false;
 
-  std::size_t a{0};
-  while (m_running) {
-    std::cout << "a ## " << a << '\n';
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-    a++;
-  }
+  m_main.join();
 }
 
-
-nlohmann::json Program::init() {
-  return m_data;
-} // data()
 
 void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
