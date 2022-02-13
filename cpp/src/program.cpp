@@ -50,11 +50,11 @@ void Program::create_frame(std::size_t frame_index) {
   m_buffer_size = relation;
 
   m_buffer.push_back(new_frame);
-
 }
 
 void Program::update_buffer() {
 
+  m_buffer_mutex.lock();
   if(m_buffer.size() < m_buffer_size) {
 
     std::size_t new_frame_index{m_current_frame};
@@ -65,11 +65,12 @@ void Program::update_buffer() {
 
     create_frame(new_frame_index);
   }
-
+  m_buffer_mutex.unlock();
 }
 
 void Program::clear_buffer() {
 
+  m_buffer_mutex.lock();
   std::vector<frame> temp_buffer;
 
   if (m_update) {
@@ -87,6 +88,7 @@ void Program::clear_buffer() {
   }
 
   m_buffer = temp_buffer;
+  m_buffer_mutex.unlock();
 }
 
 std::size_t Program::last_buffer_index() {
@@ -112,6 +114,7 @@ frame Program::get_frame(std::size_t f) {
   frame frame;
   bool check = false;
 
+  m_buffer_mutex.lock();
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
     if (m_buffer[i].index == f) {
       frame = m_buffer[i];
@@ -119,8 +122,7 @@ frame Program::get_frame(std::size_t f) {
       break;
     }
   }
-
-  if(!check) throw std::invalid_argument("no matching frame");
+  m_buffer_mutex.unlock();
 
   return frame;
 }
@@ -140,7 +142,6 @@ void Program::main() {
   }
 
   std::cout << "*** quit ***" << '\n';
-
 }
 
 nlohmann::json Program::data() {
@@ -161,16 +162,11 @@ nlohmann::json Program::update(nlohmann::json data) {
 
 void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
-  frame frame;
+  frame frame = get_frame(frame_index);
 
-  try {
+  cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
 
-    frame = get_frame(frame_index);
-
-  } catch (const std::invalid_argument& e) {
-
-  }
-
+  audio = frame.audio;
 }
 
 void Program::quit() {
@@ -181,7 +177,6 @@ void Program::quit() {
   m_main.join();
 }
 
-
 void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
   m_settings.preview(images, audio);
@@ -191,7 +186,6 @@ void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
   m_output.process(images, audio);
 
   m_settings.flip_back(images);
-
 } // preview()
 
 void Program::save() {
@@ -208,5 +202,4 @@ void Program::save() {
   m_settings.flip_back(images);
 
   m_settings.save(images, audio);
-
 } // save

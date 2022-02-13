@@ -5,6 +5,7 @@
 #include <string>
 #include <chrono>
 #include <thread>
+#include <mutex>
 
 #include "settings.h"
 #include "filter.h"
@@ -34,6 +35,7 @@ class Program {
     Output   m_output;
 
     std::vector<frame> m_buffer;
+    std::mutex m_buffer_mutex;
 
     void create_frame(std::size_t frame_index);
 

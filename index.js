@@ -36,7 +36,7 @@ class Program{
   read(image, left, right, frame_index) {
 
     return new Promise((resolve) => {
-      program_read(images, left, right, frame_index, (err, result) => {
+      program_read(image, left, right, frame_index, (err, result) => {
         resolve(result)
       })
     })

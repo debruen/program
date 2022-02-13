@@ -28,6 +28,7 @@ class Mask {
     virtual cv::Mat frame(cv::Mat& mask, std::size_t index) = 0;
 
     virtual void process(cv::Mat& mask, std::size_t index) = 0;
+
 };
 
 #endif // mask_h END

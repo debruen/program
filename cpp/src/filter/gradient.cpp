@@ -15,7 +15,7 @@ Gradient::Gradient() {
 
   m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
 
-  m_data.push_back(data::data_float("phase", -1, 1, m_phase));
+  m_data.push_back(data::data_float("phase", m_phase_min, m_phase_max, m_phase));
 
   m_data.push_back(data::data_float("tilt", 0, 1, m_tilt));
 
@@ -40,6 +40,8 @@ double Gradient::frame_phase(std::size_t index) {
     }
     phase += m_frequency * multiplier;
   }
+
+//  phase = math::circle(m_phase_min, m_phase_max, phase);
 
   return phase;
 }
@@ -142,8 +144,7 @@ double Gradient::discrete(std::size_t& y, std::size_t& x, double& frequency, dou
     }
 
   }
-
-  return math::normalize(-1, 1, sinus);
+  return math::normalize(m_sine_min, m_sine_max, sinus);
 }
 
 nlohmann::json Gradient::init() {
@@ -158,8 +159,7 @@ nlohmann::json Gradient::update(nlohmann::json data) {
   m_amplitude = data::get_float(data, "amplitude");
   m_phase     = data::get_float(data, "phase");
 
-  double tilt = data::get_float(data, "tilt");
-  m_tilt      = math::circle(0, 1, tilt);
+  m_tilt      = data::get_float(data, "tilt");
   m_filter    = data::get_str(data, "filter");
 
   m_data = data;
@@ -231,7 +231,7 @@ void Gradient::process(cv::Mat& mask, std::size_t index) {
 
       if (filter_select == 1) frequency = math::project(m_freq_min, m_freq_max, ptr[x]);
       if (filter_select == 2) amplitude = ptr[x];
-      if (filter_select == 3) phase     = math::project(-1, 1, ptr[x]);
+      if (filter_select == 3) phase     = math::project(m_phase_min, m_phase_max, ptr[x]);
       if (filter_select == 4) tilt      = ptr[x];
 
       if (frequency == 0) {
