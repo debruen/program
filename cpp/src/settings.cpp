@@ -231,11 +231,9 @@ void Settings::file(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
 } // process()
 
-void Settings::flip_back(std::vector<cv::Mat>& images) {
+void Settings::flip_back(cv::Mat& image) {
 
-  for (std::size_t i = 0; i < images.size(); i++) {
-    flip_image(images[i], true);
-  } // loop over frames end
+  flip_image(image, true);
 
 } // flip_back()
 

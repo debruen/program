@@ -33,6 +33,7 @@ class Program {
     Settings m_settings;
     Filter   m_filter;
     Output   m_output;
+    std::mutex m_objects_mutex;
 
     std::vector<frame> m_buffer;
     std::mutex m_buffer_mutex;
@@ -46,7 +47,9 @@ class Program {
 
     std::size_t last_buffer_index();
 
-    frame get_frame(std::size_t f);
+    frame get_frame(std::size_t frame_index);
+
+    bool frame_exists(std::size_t frame_index);
 
     std::thread m_main;
     void main();
@@ -72,9 +75,9 @@ class Program {
     void quit();
 
 
-    void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
+    // void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 
-    void save();
+    // void save();
 
 };
 

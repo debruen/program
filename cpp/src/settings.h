@@ -49,7 +49,7 @@ class Settings {
 
     void file(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 
-    void flip_back(std::vector<cv::Mat>& images);
+    void flip_back(cv::Mat& image);
 
     void save(std::vector<cv::Mat>& images, stk::StkFrames& audio);
 

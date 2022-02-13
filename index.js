@@ -53,25 +53,25 @@ class Program{
 
 
 
-  preview(images, left, right) {
-
-    return new Promise((resolve) => {
-      program_preview(images, left, right, (err, result) => {
-        resolve(result)
-      })
-    })
-
-  } // preview
-
-  save() {
-
-    return new Promise((resolve) => {
-      program_save((err, result) => {
-        resolve(result)
-      })
-    })
-
-  } // save
+  // preview(images, left, right) {
+  //
+  //   return new Promise((resolve) => {
+  //     program_preview(images, left, right, (err, result) => {
+  //       resolve(result)
+  //     })
+  //   })
+  //
+  // } // preview
+  //
+  // save() {
+  //
+  //   return new Promise((resolve) => {
+  //     program_save((err, result) => {
+  //       resolve(result)
+  //     })
+  //   })
+  //
+  // } // save
 
 } // Program
 

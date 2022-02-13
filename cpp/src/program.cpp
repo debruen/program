@@ -19,6 +19,8 @@ void Program::create_frame(std::size_t frame_index) {
   // settings
   std::string type = data::get_string(m_data["settings"], "type");
 
+  m_objects_mutex.lock();
+
   cv::Mat image = m_settings.image_frame(frame_index);
   cv::Mat audio = m_settings.audio_frame(frame_index);
 
@@ -31,6 +33,10 @@ void Program::create_frame(std::size_t frame_index) {
     m_filter.image_frame(image, frame_index);
     m_output.image_frame(image, audio, frame_index);
   }
+
+  m_settings.flip_back(image);
+
+  m_objects_mutex.unlock();
 
   frame new_frame = {.index = frame_index, .image = image, .audio = audio};
 
@@ -109,16 +115,14 @@ std::size_t Program::last_buffer_index() {
 }
 
 
-frame Program::get_frame(std::size_t f) {
+frame Program::get_frame(std::size_t frame_index) {
 
   frame frame;
-  bool check = false;
 
   m_buffer_mutex.lock();
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
-    if (m_buffer[i].index == f) {
+    if (m_buffer[i].index == frame_index) {
       frame = m_buffer[i];
-      check = true;
       break;
     }
   }
@@ -126,6 +130,22 @@ frame Program::get_frame(std::size_t f) {
 
   return frame;
 }
+
+bool Program::frame_exists(std::size_t frame_index) {
+  bool check = false;
+
+  m_buffer_mutex.lock();
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == frame_index) {
+      check = true;
+      break;
+    }
+  }
+  m_buffer_mutex.unlock();
+
+  return check;
+}
+
 
 void Program::main() {
 
@@ -149,17 +169,19 @@ nlohmann::json Program::data() {
 }
 nlohmann::json Program::update(nlohmann::json data) {
 
-  m_buffer_mutex.lock();
-
-  std::string type = data::get_string(data["settings"], "type");
+  m_objects_mutex.lock();
 
   m_data["settings"] = m_settings.update(data["settings"]);
+
+  m_frame_time = data::get_int(m_data["settings"], "frame time");
+  std::string type = data::get_string(m_data["settings"], "type");
+
   m_data["filter"]   = m_filter.update(data["filter"], type);
   m_data["output"]   = m_output.update(data["output"], type);
 
-  m_update = true;
+  m_objects_mutex.unlock();
 
-  m_buffer_mutex.unlock();
+  m_update = true;
 
   return m_data;
 }
@@ -167,12 +189,23 @@ nlohmann::json Program::update(nlohmann::json data) {
 void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
   m_current_frame = frame_index;
+  frame frame;
 
-  frame frame = get_frame(frame_index);
+  while (m_buffer.size() != m_buffer_size) {
+    if (frame_exists(frame_index)){
+       break;
+    }
+    std::cout << "waiting" << '\n';
+  }
 
-  cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
+  if (frame_exists(frame_index)){
 
-  audio = frame.audio;
+    frame = get_frame(frame_index);
+    cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
+    audio = frame.audio;
+
+  }
+
 }
 
 void Program::quit() {
@@ -183,29 +216,29 @@ void Program::quit() {
   m_main.join();
 }
 
-void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
+// void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
+//
+//   m_settings.preview(images, audio);
+//
+//   m_filter.process(images, audio);
+//
+//   m_output.process(images, audio);
+//
+//   m_settings.flip_back(images);
+// } // preview()
 
-  m_settings.preview(images, audio);
-
-  m_filter.process(images, audio);
-
-  m_output.process(images, audio);
-
-  m_settings.flip_back(images);
-} // preview()
-
-void Program::save() {
-
-  std::vector<cv::Mat> images;
-  stk::StkFrames audio;
-
-  m_settings.file(images, audio);
-
-  m_filter.process(images, audio);
-
-  m_output.process(images, audio);
-
-  m_settings.flip_back(images);
-
-  m_settings.save(images, audio);
-} // save
+// void Program::save() {
+//
+//   std::vector<cv::Mat> images;
+//   stk::StkFrames audio;
+//
+//   m_settings.file(images, audio);
+//
+//   m_filter.process(images, audio);
+//
+//   m_output.process(images, audio);
+//
+//   m_settings.flip_back(images);
+//
+//   m_settings.save(images, audio);
+// } // save
