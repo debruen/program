@@ -149,6 +149,8 @@ nlohmann::json Program::data() {
 }
 nlohmann::json Program::update(nlohmann::json data) {
 
+  m_buffer_mutex.lock();
+
   std::string type = data::get_string(data["settings"], "type");
 
   m_data["settings"] = m_settings.update(data["settings"]);
@@ -157,10 +159,14 @@ nlohmann::json Program::update(nlohmann::json data) {
 
   m_update = true;
 
+  m_buffer_mutex.unlock();
+
   return m_data;
 }
 
 void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+
+  m_current_frame = frame_index;
 
   frame frame = get_frame(frame_index);
 
