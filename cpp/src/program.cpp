@@ -27,11 +27,12 @@ void Program::create_frame(std::size_t frame_index) {
   // filter
   if(type == "audio") {
     m_filter.audio_frame(audio, frame_index);
-    m_output.audio_frame(image, audio, frame_index);
+    // m_output.audio_frame(image, audio, frame_index);
 
   } else {
     m_filter.image_frame(image, frame_index);
-    m_output.image_frame(image, audio, frame_index);
+
+    // m_output.image_frame(image, audio, frame_index);
   }
 
   m_settings.flip_back(image);
@@ -43,13 +44,7 @@ void Program::create_frame(std::size_t frame_index) {
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::size_t relation =  elapsed.count() / m_frame_time + 2;
-
-  std::cout << "frame_index: " << frame_index << '\n';
-  std::cout << "m_buffer_size: " << m_buffer_size << '\n';
-  std::cout << "m_frame_time: " << m_frame_time << '\n';
-  std::cout << "elapsed: " << elapsed.count() << '\n';
-  std::cout << "relation: " << relation << '\n';
+  std::size_t relation =  elapsed.count() / m_frame_time + 1;
 
   if(relation < 2) relation = 2;
 

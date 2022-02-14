@@ -143,7 +143,11 @@ void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
   // set_sine(sine_bands);
 
+  std::cout << "C.A" << '\n';
+
   std::vector< std::vector<stk::SineWave> > sine = make_sine(sine_bands);
+
+  std::cout << "C.B" << '\n';
 
   double freq, keys, base, narrowing, table_hsl[256], table_lr[sine_bands][2], x_correction;
 
@@ -159,9 +163,13 @@ void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
   }
   base = pow(2, 1/12.0);
 
+  std::cout << "C.C" << '\n';
+
   // creating normalised LUT for Hsl
   for (int i = 0; i < 256; ++i)
     table_hsl[i] = static_cast<double>(i) / 255;
+
+  std::cout << "C.D" << '\n';
 
   n_length = round(narrowing * sine_bands / 2);
   x_correction = 8.0 / (static_cast<double>(sine_bands));
@@ -181,65 +189,81 @@ void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
   }
 
-  double left, right, h, s, l, b_freq, vol, s_freq, basefreq, tonefreq, discrete_l, discrete_r;
-  unsigned int index{0};
+  std::cout << "C.E" << '\n';
 
-  cv::Mat audio_image;
-
-  cv::cvtColor(image, audio_image, cv::COLOR_BGR2HLS_FULL);
-  cv::flip(audio_image, audio_image, 0);
-  cv::Size size(sine_bands, audio_frames);
-  cv::resize(audio_image, audio_image, size, 0, 0, cv::INTER_CUBIC);
-
-  std::cout << "audio_image width: " << audio_image.cols << '\n';
-  std::cout << "audio_image height: " << audio_image.rows << '\n';
-
-  uchar* ptr;
-  double* dptr;
-
-  for (std::size_t y = 0; y < audio_frames; y++) {
-
-    left = 0;
-    right = 0;
-
-    ptr = audio_image.ptr<uchar>(y);
-    for (std::size_t x = 0; x < sine_bands; x++) {
-      index = x + x + x;
-
-      h = table_hsl[ptr[index]];
-      s = table_hsl[ptr[index + 2]];
-      l = table_hsl[ptr[index + 1]];
-
-      if(ca == 0) b_freq = h;
-      if(ca == 1) b_freq = s;
-      if(ca == 2) b_freq = l;
-
-      if(cb == 0) vol = h;
-      if(cb == 1) vol = s;
-      if(cb == 2) vol = l;
-
-      if(cc == 0) s_freq = h;
-      if(cc == 1) s_freq = s;
-      if(cc == 2) s_freq = l;
-
-      basefreq = pow(base, b_freq * 12.0) * freq;
-      tonefreq = pow(base, s_freq * keys) * basefreq;
-
-      sine[0][x].setFrequency(tonefreq);
-      sine[1][x].setFrequency(tonefreq);
-
-      discrete_l = sine[0][x].tick() * vol;
-      discrete_r = sine[1][x].tick() * vol;
-
-      left = left + discrete_l * table_lr[x][0];
-      right = right + discrete_r * table_lr[x][1];
-    }
-
-    dptr = audio.ptr<double>(y);
-    dptr[0] = left;
-    dptr[1] = right;
-
-  }
+  // double left, right, h, s, l, b_freq, vol, s_freq, basefreq, tonefreq, discrete_l, discrete_r;
+  // unsigned int index{0};
+  //
+  // cv::Mat audio_image;
+  //
+  // cv::cvtColor(image, audio_image, cv::COLOR_BGR2HLS_FULL);
+  // std::cout << "C.F" << '\n';
+  //
+  // cv::flip(audio_image, audio_image, 0);
+  // std::cout << "C.G" << '\n';
+  //
+  // cv::Size size(sine_bands, audio_frames);
+  // std::cout << "C.H" << '\n';
+  // std::cout << "audio_frames: " << audio_frames << '\n';
+  //
+  // try {
+  //   cv::resize(audio_image, audio_image, size, 0, 0, cv::INTER_CUBIC);
+  // } catch( cv::Exception& e ) {
+  //   const char* err_msg = e.what();
+  //   std::cout << "exception caught: " << err_msg << std::endl;
+  // }
+  //
+  // std::cout << "C.I" << '\n';
+  //
+  // std::cout << "audio_image width: " << audio_image.cols << '\n';
+  // std::cout << "audio_image height: " << audio_image.rows << '\n';
+  //
+  // uchar* ptr;
+  // double* dptr;
+  //
+  // for (std::size_t y = 0; y < audio_frames; y++) {
+  //
+  //   left = 0;
+  //   right = 0;
+  //
+  //   ptr = audio_image.ptr<uchar>(y);
+  //   for (std::size_t x = 0; x < sine_bands; x++) {
+  //     index = x + x + x;
+  //
+  //     h = table_hsl[ptr[index]];
+  //     s = table_hsl[ptr[index + 2]];
+  //     l = table_hsl[ptr[index + 1]];
+  //
+  //     if(ca == 0) b_freq = h;
+  //     if(ca == 1) b_freq = s;
+  //     if(ca == 2) b_freq = l;
+  //
+  //     if(cb == 0) vol = h;
+  //     if(cb == 1) vol = s;
+  //     if(cb == 2) vol = l;
+  //
+  //     if(cc == 0) s_freq = h;
+  //     if(cc == 1) s_freq = s;
+  //     if(cc == 2) s_freq = l;
+  //
+  //     basefreq = pow(base, b_freq * 12.0) * freq;
+  //     tonefreq = pow(base, s_freq * keys) * basefreq;
+  //
+  //     sine[0][x].setFrequency(tonefreq);
+  //     sine[1][x].setFrequency(tonefreq);
+  //
+  //     discrete_l = sine[0][x].tick() * vol;
+  //     discrete_r = sine[1][x].tick() * vol;
+  //
+  //     left = left + discrete_l * table_lr[x][0];
+  //     right = right + discrete_r * table_lr[x][1];
+  //   }
+  //
+  //   dptr = audio.ptr<double>(y);
+  //   dptr[0] = left;
+  //   dptr[1] = right;
+  //
+  // }
 
 }
 

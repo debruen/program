@@ -80,7 +80,7 @@ void AsyncRead::OnOK() {
 
     ptr = m_image.ptr<uchar>(y);
     for (std::size_t x = 0; x < m_width; x++) {
-      z = x * 4;
+      z = (y * m_width + x) * 4;
       c = x * 3;
 
       p_image[z]   = ptr[c+2]; // red
@@ -97,8 +97,8 @@ void AsyncRead::OnOK() {
 
     dptr = m_audio.ptr<double>(i);
 
-    p_left[i] = ptr[0];
-    p_right[i] = ptr[1];
+    p_left[i] = dptr[0];
+    p_right[i] = dptr[1];
 
   }
 
