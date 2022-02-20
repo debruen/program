@@ -15,6 +15,8 @@ class Settings {
 
     nlohmann::json m_data = nlohmann::json::array();
 
+    std::size_t m_audio_channels{2};
+
     void update_data(nlohmann::json& data);
 
     void flip_image(cv::Mat& image, bool back = false);

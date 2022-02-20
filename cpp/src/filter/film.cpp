@@ -47,28 +47,3 @@ cv::Mat Film::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
   return m_coat->audio_frame(audio, frame_index);
 }
-
-
-
-cv::Mat Film::frame(std::size_t frame, std::size_t width, std::size_t height) {
-
-  return m_coat->frame(width, height);
-}
-
-
-stk::StkFrames Film::frame(std::size_t length) {
-
-  return m_coat->frame(length);
-
-}
-
-std::vector<cv::Mat> Film::images(std::size_t frames, std::size_t width, std::size_t height) {
-
-  std::vector<cv::Mat> film;
-
-  for (size_t i = 0; i < frames; i++) {
-    film.push_back(m_coat->frame(width, height));
-  }
-
-  return film;
-}

@@ -43,35 +43,5 @@ void Layer::image_frame(cv::Mat& image, std::size_t frame_index) {
 void Layer::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
   cv::Mat film = m_film->audio_frame(audio, frame_index);
-
-  // m_blend->process(audio, film);
-}
-
-void Layer::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
-
-  if (m_type == "audio") {
-
-    std::size_t length = audio.frames();
-    stk::StkFrames audio_film;
-
-    audio_film = m_film->frame(length);
-    m_blend->process(audio, audio_film);
-
-  } else {
-
-    std::size_t frames, width, height;
-    frames = images.size();
-    width = images[0].cols;
-    height = images[0].rows;
-
-    std::vector<cv::Mat> image_films;
-
-    image_films = m_film->images(frames, width, height);
-
-    // images = image_films;
-
-    m_blend->process(images, image_films);
-
-  }
-
+  m_blend->audio_frame(audio, film, frame_index);
 }

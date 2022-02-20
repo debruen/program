@@ -4,13 +4,15 @@
 
 #include "mask.h"
 
+#include "areasine.h"
+
 class Gradient : public Mask{
 
   private:
 
     nlohmann::json m_data;
 
-    const double m_freq_min{0}, m_freq_max{1000}, m_phase_min{-1}, m_phase_max{1}, m_sine_min{-1}, m_sine_max{1}, m_frq_gamma{6};
+    const double m_freq_min{0}, m_freq_max{1000}, m_phase_min{0}, m_phase_max{1}, m_sine_min{-1}, m_sine_max{1}, m_frq_gamma{6};
 
     std::string m_shape{"sine"}, m_filter{"none"};
 
@@ -25,6 +27,8 @@ class Gradient : public Mask{
 
     double discrete(std::size_t& y, std::size_t& x, double& frequency, double& phase, double& tilt);
 
+    void set_area_frequency(double& frequency);
+
   public:
     Gradient();
 
@@ -32,9 +36,9 @@ class Gradient : public Mask{
 
     virtual nlohmann::json update(nlohmann::json data);
 
-    virtual cv::Mat frame(cv::Mat& mask, std::size_t index);
+    virtual cv::Mat frame(cv::Mat& mask, std::size_t frame_index);
 
-    virtual void process(cv::Mat& mask, std::size_t index);
+    virtual void process(cv::Mat& mask, std::size_t frame_index);
 };
 
 #endif // gradient_h END

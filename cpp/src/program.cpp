@@ -24,12 +24,15 @@ void Program::create_frame(std::size_t frame_index) {
   cv::Mat image = m_settings.image_frame(frame_index);
   cv::Mat audio = m_settings.audio_frame(frame_index);
 
+
   // filter
   if(type == "audio") {
+    std::cout << "audio type: " << type << '\n';
     m_filter.audio_frame(audio, frame_index);
     // m_output.audio_frame(image, audio, frame_index);
 
   } else {
+    std::cout << "image type: " << type << '\n';
     m_filter.image_frame(image, frame_index);
 
     // m_output.image_frame(image, audio, frame_index);
@@ -210,30 +213,3 @@ void Program::quit() {
 
   m_main.join();
 }
-
-// void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
-//
-//   m_settings.preview(images, audio);
-//
-//   m_filter.process(images, audio);
-//
-//   m_output.process(images, audio);
-//
-//   m_settings.flip_back(images);
-// } // preview()
-
-// void Program::save() {
-//
-//   std::vector<cv::Mat> images;
-//   stk::StkFrames audio;
-//
-//   m_settings.file(images, audio);
-//
-//   m_filter.process(images, audio);
-//
-//   m_output.process(images, audio);
-//
-//   m_settings.flip_back(images);
-//
-//   m_settings.save(images, audio);
-// } // save

@@ -29,7 +29,6 @@ class Program {
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
 
-    // just for the data
     Settings m_settings;
     Filter   m_filter;
     Output   m_output;

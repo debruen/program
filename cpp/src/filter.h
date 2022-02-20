@@ -25,10 +25,6 @@ class Filter {
 
     void audio_frame(cv::Mat& audio, std::size_t frame_index);
 
-
-
-    void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
 };
 
 #endif /* filter_h */

@@ -40,7 +40,8 @@
 
             "cpp/src/out/out.cpp",
             "cpp/src/out/hsl.cpp",
-            "cpp/src/out/specone.cpp"
+
+            "cpp/src/filter/areasine.cpp"
 
 
         ],

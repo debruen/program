@@ -29,10 +29,6 @@ class Layer {
 
     void audio_frame(cv::Mat& audio, std::size_t frame_index);
 
-
-
-    void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
 };
 
 #endif // layer_h END

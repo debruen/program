@@ -29,11 +29,6 @@ public:
 
   virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index) = 0;
 
-
-  virtual cv::Mat frame(std::size_t width, std::size_t height) = 0;
-
-  virtual stk::StkFrames frame(std::size_t length) = 0;
-
 };
 
 #endif // coat_h END

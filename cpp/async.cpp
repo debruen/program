@@ -60,45 +60,43 @@ AsyncRead::AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Arra
   cv::Size size(m_width, m_height);
 
   m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
-  m_audio = cv::Mat::zeros(cv::Size(2, m_time), CV_64FC1);
-
+  m_audio = cv::Mat::zeros(cv::Size(2, m_time), CV_32F);
 };
 
 void AsyncRead::Execute() {
-
   program.read(m_image, m_audio, m_index);
-
 };
 
 void AsyncRead::OnOK() {
 
   // writing result to image_buffer
   std::size_t c, z;
-  uchar* ptr;
+  uchar* image_ptr;
 
   for (std::size_t y = 0; y < m_height; y++) {
 
-    ptr = m_image.ptr<uchar>(y);
+    image_ptr = m_image.ptr<uchar>(y);
     for (std::size_t x = 0; x < m_width; x++) {
       z = (y * m_width + x) * 4;
       c = x * 3;
 
-      p_image[z]   = ptr[c+2]; // red
-      p_image[z+1] = ptr[c+1]; // green
-      p_image[z+2] = ptr[c];   // blue
+      p_image[z]   = image_ptr[c+2]; // red
+      p_image[z+1] = image_ptr[c+1]; // green
+      p_image[z+2] = image_ptr[c];   // blue
       p_image[z+3] = 255;      // alpha channel
-
     }
   }
 
-  double* dptr;
+  std::cout << "audio width: " << m_audio.cols << '\n';
+
+  float* audio_ptr;
 
   for (std::size_t i = 0; i < m_time; i++) {
 
-    dptr = m_audio.ptr<double>(i);
+    audio_ptr = m_audio.ptr<float>(i);
 
-    p_left[i] = dptr[0];
-    p_right[i] = dptr[1];
+    p_left[i]  = audio_ptr[0];
+    p_right[i] = audio_ptr[1];
 
   }
 

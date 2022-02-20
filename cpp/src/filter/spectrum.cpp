@@ -21,7 +21,7 @@ Spectrum::Spectrum() {
 
   m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
 
-  m_data.push_back(data::data_float("phase", -1, 1, m_phase));
+  m_data.push_back(data::data_float("phase", 0, 1, m_phase));
 
   m_data.push_back(data::data_float("tilt", 0, 1, m_tilt));
 
@@ -57,128 +57,6 @@ std::vector< std::vector<unsigned char> > Spectrum::rgb_spectrum() {
   return rgb;
 }
 
-double Spectrum::frame_phase(std::size_t index) {
-
-  double phase = m_phase, multiplier;
-
-  for (std::size_t i = 0; i < index; i++) {
-    if(m_tilt <= 0.25) {
-      multiplier = 1 - m_tilt * 4;
-    } else if (m_tilt <= 0.5) {
-      multiplier = (m_tilt - 0.25) * (-4);
-    } else if (m_tilt <= 0.75) {
-      multiplier = 1 - (m_tilt - 0.5) * 4;
-    } else {
-      multiplier = (m_tilt - 0.75) * (-4);
-    }
-    phase += m_frequency * multiplier;
-  }
-
-  return phase;
-}
-
-double Spectrum::discrete(std::size_t& y, std::size_t& x, double& frequency, double& phase, double& tilt) {
-
-  static double prev_shape;
-
-  double f, p, t, w, h, rp, ra, ya, xa, ry, yv, xv, degrees, sinus;
-
-  f = frequency * 360;
-  p = phase * 360;
-  t = 1 - tilt;
-
-  w = static_cast<double>(m_width - 1);
-  h = static_cast<double>(m_height - 1);
-
-  if(t <= 0.25) {
-    ya = 1 - t * 4;
-    xa = t * 4;
-    rp = 0;
-  } else if (t <= 0.5) {
-    ra = t - 0.25;
-    ya = ra * 4;
-    xa = 1 - ra * 4;
-    rp = 0;
-  } else if (t <= 0.75) {
-    ra = t - 0.5;
-    ya = 1 - ra * 4;
-    xa = ra * 4;
-    rp = 180;
-  } else {
-    ra = t - 0.75;
-    ya = ra * 4;
-    xa = 1 - ra * 4;
-    rp = 180;
-  }
-
-  if(t <= 0.25) {
-    ry = y;          // √
-  } else if (t <= 0.5) {
-    ry = h - y;
-  } else if (t <= 0.75) {
-    ry = y;
-  } else {
-    ry = h - y;
-  }
-
-  yv = (ry / h * ya);
-  xv = (x / w * xa);
-
-  // pattern here
-  // to part of the function
-
-  degrees = ((xv + yv) * f) + p + rp;
-
-  sinus = sin(math::radian(degrees));
-
-  if (m_shape == "square") {
-    if (sinus >= 0)
-      sinus = 1;
-    else
-      sinus = -1;
-  }
-
-  if (m_shape == "triangle")
-    sinus = acos(sinus) / M_PI_2 - 1;
-
-  if (m_shape == "saw") {
-
-    double sin_a, sin_b;
-
-    sinus = acos(sinus) / M_PI_2 - 1;
-
-    if(sinus <= prev_shape) {
-      sin_a = sinus / 2 - 0.5;
-      sin_b = sinus * (-1) / 2 + 0.5;
-    } else {
-      sin_a = sinus * (-1) / 2 + 0.5;
-      sin_b = sinus / 2 - 0.5;
-    }
-
-    if (m_tilt == 0 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else if (m_tilt == 1 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else if (m_tilt == 0.5 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_b;
-    } else if (m_tilt > 0 && m_tilt < 0.5) {
-      prev_shape = sinus;
-      sinus = sin_b;
-    } else if (m_tilt > 0.5 && m_tilt < 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else {
-      sinus = sin_a;
-    }
-
-  }
-
-  return math::normalize(-1, 1, sinus);
-}
-
 nlohmann::json Spectrum::data() {
 
   return m_data;
@@ -194,6 +72,12 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   m_data = data;
 
   return m_data;
+}
+
+void Spectrum::set_audio_frequency(const std::size_t& height, double& frequency) {
+  frequency = pow(m_frequency, m_frq_gamma);
+  frequency = math::project(m_audio_min, m_audio_max, frequency);
+  frequency = frequency * height / 44100.0;
 }
 
 cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index) {
@@ -217,117 +101,31 @@ cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index) {
 
 cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
-  m_width = audio.cols;
-  m_height = audio.rows;
+  const std::size_t& width(audio.cols),& height(audio.rows);
 
-  cv::Size size(m_width, m_height);
+  AreaSine sine(width, height, frame_index, m_shape);
 
-  cv::Mat film = cv::Mat(size, CV_64FC1);
+  cv::Mat film = cv::Mat(cv::Size(width, height), CV_32F);
 
   double frequency, amplitude, phase, tilt;
 
-  frequency = pow(m_frequency, m_frq_gamma);
-  frequency = math::project(m_audio_min, m_audio_max, frequency);
-
-  frequency = frequency * m_height / 44100.0;
-  // ?? adjust frequency to audio here !!
+  set_audio_frequency(height, frequency);
 
   amplitude = m_amplitude;
-  phase     = frame_phase(frame_index);
+  phase     = m_phase;
   tilt      = m_tilt;
 
-  std::cout << "frequency: " << frequency << '\n';
-  double* ptr;
+  float* ptr;
 
-  for (std::size_t y = 0; y < m_height; y++) {
+  for (std::size_t y = 0; y < height; y++) {
 
-    ptr = film.ptr<double>(y);
-    for (std::size_t x = 0; x < m_width; x++) {
+    ptr = film.ptr<float>(y);
+    for (std::size_t x = 0; x < width; x++) {
 
-      if (frequency == 0) {
-        ptr[x] = 0 * amplitude;
-      } else {
-        ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
-      }
+      ptr[x] = sine.point(y, x, frequency, phase, tilt) * amplitude;
 
     }
   }
-
 
   return film;
-}
-
-cv::Mat Spectrum::frame(std::size_t width, std::size_t height) {
-
-  cv::Size size(width, height);
-  cv::Mat image = cv::Mat(size, CV_8UC3);
-
-  std::size_t color_index = round((1 - m_frequency) * (m_spectral_rgb.size() - 1));
-
-  unsigned char r, g, b;
-
-  r = m_spectral_rgb[color_index][0];
-  g = m_spectral_rgb[color_index][1];
-  b = m_spectral_rgb[color_index][2];
-
-  image = cv::Scalar(r, g, b);
-
-  return image;
-}
-
-stk::StkFrames Spectrum::frame(std::size_t length) {
-
-  stk::StkFrames signal(length, 1);
-  double frequency, amplitude, phase, phase_min, phase_max, tick;
-
-  phase_min = -1;
-  phase_max = 1;
-
-  frequency = pow(m_frequency, m_frq_gamma);
-  amplitude = m_amplitude;
-  phase = m_phase;
-
-  frequency = frequency * (m_audio_max - m_audio_min) + m_audio_min;
-  phase = phase * (phase_max - phase_min) + phase_min;
-
-  stk::SineWave sine;
-
-  sine.setFrequency(frequency);
-
-  sine.addPhaseOffset(phase);
-
-  double temp_signal, prev;
-
-  for(std::size_t i = 0; i < length; ++i) {
-
-    tick = sine.tick();
-
-    if (m_shape == "square") {
-      if (tick >= 0)
-        tick = 1;
-      else
-        tick = -1;
-    }
-
-    if (m_shape == "triangle")
-      tick = acos(tick) / M_PI_2 - 1;
-
-    if (m_shape == "saw") {
-
-      tick = acos(tick) / M_PI_2 - 1;
-
-      if(tick <= prev) {
-        temp_signal = tick / 2 - 0.5;
-      } else {
-        temp_signal = tick * (-1) / 2 + 0.5;
-      }
-      prev = tick;
-      tick = temp_signal;
-    }
-
-    signal[i] = tick * amplitude;
-
-  }
-
-  return signal;
 }

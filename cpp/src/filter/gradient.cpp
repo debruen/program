@@ -167,32 +167,35 @@ nlohmann::json Gradient::update(nlohmann::json data) {
   return m_data;
 }
 
-cv::Mat Gradient::frame(cv::Mat& mask, std::size_t index) {
+void Gradient::set_area_frequency(double& frequency) {
+  frequency = pow(m_frequency, m_frq_gamma);
+  frequency = math::project(m_freq_min, m_freq_max, frequency);
+}
 
-  m_width = mask.cols;
-  m_height = mask.rows;
+cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index) {
+
+  const std::size_t& width(mask.cols),& height(mask.rows);
+
+  AreaSine sine(width, height, frame_index, m_shape);
 
   double frequency, amplitude, phase, tilt;
 
-  frequency = pow(m_frequency, m_frq_gamma);
-  frequency = math::project(m_freq_min, m_freq_max, frequency);
+  set_area_frequency(frequency);
 
   amplitude = m_amplitude;
-  phase     = frame_phase(index);
+  phase     = m_phase;
   tilt      = m_tilt;
 
-  std::cout << "frequency: " << frequency << '\n';
   double* ptr;
-
-  for (std::size_t y = 0; y < m_height; y++) {
+  for (std::size_t y = 0; y < height; y++) {
 
     ptr = mask.ptr<double>(y);
-    for (std::size_t x = 0; x < m_width; x++) {
+    for (std::size_t x = 0; x < width; x++) {
 
       if (frequency == 0) {
         ptr[x] = 1 * amplitude;
       } else {
-        ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
+        ptr[x] = math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
       }
 
     }
@@ -201,10 +204,11 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t index) {
   return mask;
 }
 
-void Gradient::process(cv::Mat& mask, std::size_t index) {
+void Gradient::process(cv::Mat& mask, std::size_t frame_index) {
 
-  m_width = mask.cols;
-  m_height = mask.rows;
+  const std::size_t& width(mask.cols),& height(mask.rows);
+
+  AreaSine sine(width, height, frame_index, m_shape);
 
   unsigned char filter_select = 0;
 
@@ -215,19 +219,18 @@ void Gradient::process(cv::Mat& mask, std::size_t index) {
 
   double frequency, amplitude, phase, tilt;
 
-  frequency = pow(m_frequency, m_frq_gamma);
-  frequency = math::project(m_freq_min, m_freq_max, frequency);
+  set_area_frequency(frequency);
 
   amplitude = m_amplitude;
-  phase     = frame_phase(index);
+  phase     = m_phase;
   tilt      = m_tilt;
 
   double* ptr;
 
-  for (std::size_t y = 0; y < m_height; y++) {
+  for (std::size_t y = 0; y < height; y++) {
 
     ptr = mask.ptr<double>(y);
-    for (std::size_t x = 0; x < m_width; x++) {
+    for (std::size_t x = 0; x < width; x++) {
 
       if (filter_select == 1) frequency = math::project(m_freq_min, m_freq_max, ptr[x]);
       if (filter_select == 2) amplitude = ptr[x];
@@ -237,7 +240,7 @@ void Gradient::process(cv::Mat& mask, std::size_t index) {
       if (frequency == 0) {
         ptr[x] = 1 * amplitude;
       } else {
-        ptr[x] = discrete(y, x, frequency, phase, tilt) * amplitude;
+        ptr[x] =  math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
       }
 
     }

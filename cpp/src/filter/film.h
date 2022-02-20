@@ -27,15 +27,6 @@ class Film {
 
     cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index);
 
-
-
-    // width, height and length should go to m_data
-    cv::Mat frame(std::size_t frame, std::size_t width, std::size_t height);
-
-    stk::StkFrames frame(std::size_t length);
-
-    std::vector<cv::Mat> images(std::size_t frames, std::size_t width, std::size_t height);
-
 };
 
 #endif // film_h END
