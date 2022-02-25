@@ -29,9 +29,6 @@ void AreaSine::frame_phase(const double& frequency, const double& phase, const d
 
   // m_phase = math::circle(0, 1, m_phase);
 
-  std::cout << "AreaSine frame index: " << m_frame_index << '\n';
-  std::cout << "AreaSine phase: " << m_phase << '\n';
-
   m_phase_set = true;
 }
 

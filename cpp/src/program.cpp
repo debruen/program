@@ -3,9 +3,14 @@
 
 Program::Program() : m_main{} {
 
+  m_play_data.push_back(data::init_bool("play", false));
+  m_play_data.push_back(data::init_int("frame", 0, 100, 0));
+  m_play_data.push_back(data::init_time("time", 0, 3000, 0));
+
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
   m_data["output"]   = m_output.data();
+
 
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
@@ -159,7 +164,18 @@ void Program::main() {
 
   }
 
-  std::cout << "*** quit ***" << '\n';
+  std::cout << "main quit" << '\n';
+}
+
+void Program::play() {
+
+  while(m_work) {
+
+
+
+  }
+
+  std::cout << "play quit" << '\n';
 }
 
 nlohmann::json Program::data() {
@@ -203,6 +219,19 @@ void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
     audio = frame.audio;
 
   }
+
+  std::cout << "m_current_frame: " << m_current_frame << '\n';
+}
+
+void Program::buffer(nlohmann::json data, cv::Mat& image) {
+
+  while (!frame_exists(m_current_frame)) {
+
+    std::cout << "waiting" << '\n';
+  }
+
+  frame frame = get_frame(m_current_frame);
+  cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
 
 }
 

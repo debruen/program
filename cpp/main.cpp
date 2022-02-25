@@ -59,6 +59,23 @@ Napi::Value program_read(const Napi::CallbackInfo& info) {
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
+// -- -- -- -- -- Buffer
+
+Napi::Value program_buffer(const Napi::CallbackInfo& info) {
+
+  std::string string = info[0].As<Napi::String>().Utf8Value();
+  Napi::Uint8Array image_buffer = info[1].As<Napi::Uint8Array>();
+  Napi::Function callback = info[2].As<Napi::Function>();
+
+  nlohmann::json json = nlohmann::json::parse(string);
+
+  AsyncBuffer* read = new AsyncBuffer(callback, program, json, image_buffer);
+  read->Queue();
+
+  std::string msg = "read queued";
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
 // -- -- -- -- -- Quit
 
 Napi::Value program_quit(const Napi::CallbackInfo& info) {
@@ -104,6 +121,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports["program_update"] = Napi::Function::New(env, program_update, std::string("program_update"));
 
   exports["program_read"]   = Napi::Function::New(env, program_read, std::string("program_read"));
+
+  exports["program_buffer"]   = Napi::Function::New(env, program_buffer, std::string("program_buffer"));
 
   exports["program_quit"]   = Napi::Function::New(env, program_quit, std::string("program_quit"));
 

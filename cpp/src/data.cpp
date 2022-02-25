@@ -95,6 +95,8 @@ nlohmann::json data::init_time(std::string name, std::size_t min, std::size_t ma
   return data;
 }
 
+// data float
+
 nlohmann::json data::init_float(std::string name, double min, double max, double value) {
 
   nlohmann::json data;
@@ -125,6 +127,38 @@ double data::get_float(nlohmann::json& data, std::string name) {
   double value = 0.0;
 
   if(select["type"] == "float") value = select["value"];
+
+  return value;
+}
+
+nlohmann::json data::init_bool(std::string name, bool value) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "bool";
+  data["type"] = "bool";
+  data["value"] = value;
+
+  return data;
+}
+
+bool data::get_bool(nlohmann::json& data, std::string name) {
+
+  nlohmann::json select;
+
+  std::size_t size = array_size(data);
+
+  for (std::size_t i = 0; i < size; i++) {
+    if (data[i]["name"] == name) {
+      select = data[i];
+      break;
+    }
+  }
+
+  bool value = false;
+
+  if(select["type"] == "bool") value = select["value"];
 
   return value;
 }
@@ -298,27 +332,6 @@ void data::set_array(nlohmann::json& data, std::string name, nlohmann::json arra
     }
   }
 
-}
-
-
-bool data::get_bool(nlohmann::json& data, std::string name) {
-
-  nlohmann::json select;
-
-  std::size_t size = array_size(data);
-
-  for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
-      select = data[i];
-      break;
-    }
-  }
-
-  bool value = false;
-
-  if(select["type"] == "bool") value = select["value"];
-
-  return value;
 }
 
 std::string data::get_string(nlohmann::json& data, std::string name) {

@@ -32,8 +32,13 @@ namespace data {
   // time functions
   nlohmann::json init_time(std::string name, std::size_t min, std::size_t max, std::size_t value);
 
+  // float functions
   nlohmann::json init_float(std::string name, double min, double max, double value);
   double get_float(nlohmann::json& data, std::string name);
+
+  // boolean
+  nlohmann::json init_bool(std::string name, bool value = true);
+  bool get_bool(nlohmann::json& data, std::string name);
 
   nlohmann::json init_1d_float_data(std::string name, std::vector<double> values);
   nlohmann::json init_2d_uchar_data(std::string name, std::vector< std::vector<unsigned char> > values);
@@ -57,7 +62,6 @@ namespace data {
   nlohmann::json get_array(nlohmann::json& data, std::string name);
   void set_array(nlohmann::json& data, std::string name, nlohmann::json array);
 
-  bool get_bool(nlohmann::json& data, std::string name);
 
   std::string get_string(nlohmann::json& data, std::string name);
 

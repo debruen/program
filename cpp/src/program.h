@@ -21,13 +21,11 @@ class Program {
 
   private:
 
-    bool m_work = true;
-
-    bool m_update = false;
-
-    nlohmann::json m_data;
+    nlohmann::json m_data, m_play_data = nlohmann::json::array();
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
+
+    bool m_work = true, m_update = false;
 
     Settings m_settings;
     Filter   m_filter;
@@ -37,39 +35,43 @@ class Program {
     std::vector<frame> m_buffer;
     std::mutex m_buffer_mutex;
 
+    std::thread m_main;
+    std::thread m_play;
+
+    void main();
+    void play();
+
     void create_frame(std::size_t frame_index);
 
     void clear_buffer();
-
     void update_buffer();
-
-
-    std::size_t last_buffer_index();
 
     frame get_frame(std::size_t frame_index);
 
+    std::size_t last_buffer_index();
     bool frame_exists(std::size_t frame_index);
-
-    std::thread m_main;
-    void main();
 
   public:
     Program();
 
+
     // •   main()
+    // •   play()
 
     // <-  data()
-    // <-> update(data) / including play ???
+    // <-> update(data)
 
-    // <-  read(frame)  / returns image and audio data
+    // <-> read(image, data)  / writes to image data, returns play data
 
-    // void main();
+    //  -> quit
 
     nlohmann::json data();
 
     nlohmann::json update(nlohmann::json data);
 
     void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
+
+    void buffer(nlohmann::json data, cv::Mat& image);
 
     void quit();
 

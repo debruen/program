@@ -87,8 +87,6 @@ void AsyncRead::OnOK() {
     }
   }
 
-  std::cout << "audio width: " << m_audio.cols << '\n';
-
   float* audio_ptr;
 
   for (std::size_t i = 0; i < m_time; i++) {
@@ -98,6 +96,48 @@ void AsyncRead::OnOK() {
     p_left[i]  = audio_ptr[0];
     p_right[i] = audio_ptr[1];
 
+  }
+
+  std::string string = "done";
+
+  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+};
+
+// -- -- -- -- -- Buffer
+
+AsyncBuffer::AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image)
+  : AsyncWorker(callback), program(program), m_data(data), p_image(image) {
+
+  m_width  = m_data["width"];
+  m_height = m_data["height"];;
+
+  cv::Size size(m_width, m_height);
+
+  m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
+};
+
+void AsyncBuffer::Execute() {
+  program.buffer(m_data, m_image);
+};
+
+void AsyncBuffer::OnOK() {
+
+  // writing result to image_buffer
+  std::size_t c, z;
+  uchar* image_ptr;
+
+  for (std::size_t y = 0; y < m_height; y++) {
+
+    image_ptr = m_image.ptr<uchar>(y);
+    for (std::size_t x = 0; x < m_width; x++) {
+      z = (y * m_width + x) * 4;
+      c = x * 3;
+
+      p_image[z]   = image_ptr[c+2]; // red
+      p_image[z+1] = image_ptr[c+1]; // green
+      p_image[z+2] = image_ptr[c];   // blue
+      p_image[z+3] = 255;      // alpha channel
+    }
   }
 
   std::string string = "done";

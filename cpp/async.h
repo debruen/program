@@ -84,6 +84,29 @@ class AsyncRead : public Napi::AsyncWorker {
 
 };
 
+// -- -- -- -- -- Buffer
+
+class AsyncBuffer : public Napi::AsyncWorker {
+
+  private:
+    Program& program;
+
+    nlohmann::json m_data;
+
+    Napi::Uint8Array p_image;
+    std::size_t m_width, m_height;
+
+    cv::Mat m_image;
+
+  public:
+    AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array images);
+    virtual ~AsyncBuffer() {};
+
+    void Execute();
+    void OnOK();
+
+};
+
 // -- -- -- -- -- Quit
 
 class AsyncQuit : public Napi::AsyncWorker {

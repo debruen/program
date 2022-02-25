@@ -8,31 +8,25 @@ Settings::Settings() {
   m_data.push_back(data::init_str("type", type_options, type_options[0]));
 
   /// 3: ratio (2:1 - 1:2)
-  m_data.push_back(data::data_float("ratio", 0.5, 2, 1.0/M_SQRT2));
+  m_data.push_back(data::init_float("ratio", 0.5, 2, 1.0/M_SQRT2));
 
   /// 4: area (area dimensions: A6, A5, A4, A3, A2)
   std::vector<std::string> area_options{"A6", "A5", "A4", "A3", "A2"};
-  m_data.push_back(data::data_string("area", true, area_options, area_options[2]));
+  m_data.push_back(data::init_str("area", area_options, area_options[2]));
 
   /// 5: direction
   std::vector<std::string> direction_options{"up", "right", "down", "left"};
-  m_data.push_back(data::data_string("direction", true, direction_options, direction_options[0]));
+  m_data.push_back(data::init_str("direction", direction_options, direction_options[0]));
 
   /// 6: stereo
   std::vector<std::string> stereo_options{"lr", "rl"};
-  m_data.push_back(data::data_string("stereo", true, stereo_options, stereo_options[0]));
+  m_data.push_back(data::init_str("stereo", stereo_options, stereo_options[0]));
 
   /// time per frame (audio length in milliseconds)
   m_data.push_back(data::init_time("frame time", 1000, 60000, 3000));
 
-
-  // /// frames (image frames)
-  // m_data.push_back(data::init_int("frames", 1, 60, 1));
-
-  // /// time (audio length in milliseconds)
-  // m_data.push_back(data::init_time("time", 1000, 60000, 3000));
-
-
+  /// frame
+  m_data.push_back(data::init_int("frame", 1, 100, 1));
 
   /// 7: display size
   m_data.push_back(data::data_size("preview"));
@@ -52,12 +46,6 @@ Settings::Settings() {
   update_data(m_data);
 
 } // constructor() END!
-
-// Settings::Settings(nlohmann::json data) : m_data(data) {
-//
-//   update_data(m_data);
-//
-// } // constructor(data) END!
 
 void Settings::update_data(nlohmann::json& data) {
 
