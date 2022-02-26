@@ -15,6 +15,7 @@ Program::Program() : m_main{} {
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
   m_main = std::thread{&Program::main, this};
+  m_play = std::thread{&Program::play, this};
 }
 
 void Program::create_frame(std::size_t frame_index) {
@@ -167,13 +168,68 @@ void Program::main() {
   std::cout << "main quit" << '\n';
 }
 
+// int Program::saw( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+//          double streamTime, RtAudioStreamStatus status)
+// {
+//   // unsigned int i, j;
+//   // double *buffer = (double *) outputBuffer;
+//   // double *lastValues = (double *) userData;
+//   // if ( status )
+//   //   std::cout << "Stream underflow detected!" << std::endl;
+//   // // Write interleaved audio data.
+//   // for ( i=0; i<nBufferFrames; i++ ) {
+//   //   for ( j=0; j<2; j++ ) {
+//   //     *buffer++ = lastValues[j];
+//   //     lastValues[j] += 0.005 * (j+1+(j*0.1));
+//   //     if ( lastValues[j] >= 1.0 ) lastValues[j] -= 2.0;
+//   //   }
+//   // }
+//   return 0;
+// }
+
+int Program::static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
+    return static_cast<Program*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
+}
+
+int Program::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
+
+  //std::vector<frame> *lastValues = (std::vector<frame> *) userData;
+
+    std::cout << "La La La La ... : " << m_buffer.size() << '\n';
+    // Writes a sine wave to outputBuffer
+    return 0;
+}
+
 void Program::play() {
 
-  while(m_work) {
-
-
-
+  if ( m_rtaudio.getDeviceCount() < 1 ) {
+    std::cout << "\nNo audio devices found!\n";
   }
+
+  RtAudio::StreamParameters parameters;
+  parameters.deviceId = m_rtaudio.getDefaultOutputDevice();
+  parameters.nChannels = 2;
+  parameters.firstChannel = 0;
+  unsigned int sampleRate = 44100;
+  unsigned int bufferFrames = 256; // 256 sample frames
+  std::size_t data = m_buffer_size;
+
+  // int sss = std::bind(saw, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+
+  try {
+    m_rtaudio.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
+                    sampleRate, &bufferFrames, &static_oscillator, this);
+    m_rtaudio.startStream();
+  }
+  catch ( RtAudioError& e ) {
+    e.printMessage();
+  }
+
+  // while(m_work) {
+  //
+  //
+  //
+  // }
 
   std::cout << "play quit" << '\n';
 }
@@ -240,5 +296,6 @@ void Program::quit() {
   std::cout << "****** quit ******" << '\n';
   m_work = false;
 
+  m_play.join();
   m_main.join();
 }

@@ -7,6 +7,8 @@
 #include <thread>
 #include <mutex>
 
+#include "rtaudio/RtAudio.h"
+
 #include "settings.h"
 #include "filter.h"
 #include "output.h"
@@ -16,6 +18,8 @@ typedef struct {
   cv::Mat image;
   cv::Mat audio;
 } frame;
+
+typedef unsigned char (*osc)(void*, void*, unsigned int, double, RtAudioStreamStatus);
 
 class Program {
 
@@ -37,6 +41,12 @@ class Program {
 
     std::thread m_main;
     std::thread m_play;
+
+    static int static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
+
+    int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
+
+    RtAudio m_rtaudio;
 
     void main();
     void play();

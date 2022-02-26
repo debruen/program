@@ -61,6 +61,7 @@
             '-ltiff',
             '-ljpeg',
             '-lstk',
+            '-lrtaudio',
             '-lfftw3'
         ],
         'dependencies': [
