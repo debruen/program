@@ -103,9 +103,9 @@ class Blend {
     void audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index);
 
 
-    void process(std::vector<cv::Mat>& images, std::vector<cv::Mat>& fillings);
-
-    void process(stk::StkFrames& audio, stk::StkFrames& filling);
+    // void process(std::vector<cv::Mat>& images, std::vector<cv::Mat>& fillings);
+    //
+    // void process(stk::StkFrames& audio, stk::StkFrames& filling);
 };
 
 #endif // blend_h END

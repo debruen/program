@@ -11,7 +11,6 @@ Program::Program() : m_main{} {
   m_data["filter"]   = m_filter.data();
   m_data["output"]   = m_output.data();
 
-
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
   m_main = std::thread{&Program::main, this};
@@ -76,6 +75,7 @@ void Program::update_buffer() {
     create_frame(new_frame_index);
   }
   m_buffer_mutex.unlock();
+
 }
 
 void Program::clear_buffer() {
@@ -99,6 +99,7 @@ void Program::clear_buffer() {
 
   m_buffer = temp_buffer;
   m_buffer_mutex.unlock();
+
 }
 
 std::size_t Program::last_buffer_index() {
@@ -187,17 +188,97 @@ void Program::main() {
 //   return 0;
 // }
 
+cv::Mat Program::get_audio(unsigned int nFrames, double streamTime) {
+
+  // std::size_t sizo = m_buffer.size();
+
+  std::size_t current_milliseconds = streamTime * 1000;
+
+  // std::size_t milliseconds_for_buffer = nFrames / 44100 * 1000;
+
+  m_current_frame = current_milliseconds / m_frame_time;
+
+
+  std::size_t past_ticks = streamTime * 44100;
+
+  std::size_t ticks_needed = nFrames;
+
+  // audio height
+  std::size_t frame_ticks = m_frame_time / 1000 * 44100;
+
+  std::size_t start_tick = past_ticks - m_current_frame * frame_ticks;
+
+  std::size_t rest_ticks = frame_ticks - start_tick;
+
+  std::size_t frames_needed = ticks_needed / frame_ticks + 1;
+
+  if(rest_ticks < ticks_needed) frames_needed++;
+
+  // std::size_t milliseconds_of_frame = current_milliseconds - m_current_frame * m_frame_time;
+
+  // std::size_t frames_needed = nFrames / ((m_frame_time / 1000) * 44100) + milliseconds_of_frame / m_frame_time + 1;
+
+  // a.k.a audio height
+  // std::size_t ticks = (m_frame_time / 1000) * 44100;
+
+  std::cout << "frames_needed: " << frames_needed << '\n';
+  std::cout << "start_tick: " << start_tick << '\n';
+
+  std::cout << "m_current_frame: " << m_current_frame << '\n';
+
+
+  cv::Mat buffer_data = cv::Mat::zeros(cv::Size(m_audio_channels, nFrames), CV_64F);
+  double* audio_pointer,* buffer_pointer;
+
+  std::size_t f{m_current_frame}, g{0}, ticks{start_tick};
+
+  for (std::size_t i = 0; i < frames_needed; i++) {
+
+    if(i > 0) ticks = 0;
+
+    frame frame = get_frame(f);
+    f++;
+
+    for (std::size_t j = ticks; j < frame_ticks; j++) {
+      audio_pointer = frame.audio.ptr<double>(j);
+      buffer_pointer = buffer_data.ptr<double>(g);
+
+      for (std::size_t k = 0; k < m_audio_channels; k++) {
+        buffer_pointer[k] = audio_pointer[k];
+      }
+
+      g++;
+      if (g == nFrames) break;
+    }
+
+  }
+
+  return buffer_data;
+}
+
+
 int Program::static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
-    return static_cast<Program*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
+  return static_cast<Program*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
 }
 
 int Program::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
 
-  //std::vector<frame> *lastValues = (std::vector<frame> *) userData;
+  cv::Mat buffer_data = get_audio(nFrames, streamTime);
 
-    std::cout << "La La La La ... : " << m_buffer.size() << '\n';
-    // Writes a sine wave to outputBuffer
-    return 0;
+  double* buffer_pointer,* buffer = (double*) outputBuffer;
+
+  if ( status )
+    std::cout << "Stream underflow detected!" << std::endl;
+  // Write interleaved audio data.
+  unsigned int i, j;
+  for ( i=0; i<nFrames; i++ ) {
+    buffer_pointer = buffer_data.ptr<double>(i);
+    for ( j=0; j<2; j++ ) {
+      *buffer++ = buffer_pointer[j];
+    }
+  }
+
+  return 0;
 }
 
 void Program::play() {
@@ -206,30 +287,42 @@ void Program::play() {
     std::cout << "\nNo audio devices found!\n";
   }
 
+  RtAudio::DeviceInfo info = m_rtaudio.getDeviceInfo(m_rtaudio.getDefaultOutputDevice());
+
+  // nlohmann::json json = info;
+
+  std::cout << "info: " << info.nativeFormats << '\n';
+
   RtAudio::StreamParameters parameters;
   parameters.deviceId = m_rtaudio.getDefaultOutputDevice();
-  parameters.nChannels = 2;
+  parameters.nChannels = m_audio_channels;
   parameters.firstChannel = 0;
   unsigned int sampleRate = 44100;
   unsigned int bufferFrames = 256; // 256 sample frames
-  std::size_t data = m_buffer_size;
+  // double ddd[2] = {0, 0};
 
   // int sss = std::bind(saw, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
 
   try {
     m_rtaudio.openStream(&parameters, NULL, RTAUDIO_FLOAT64,
                     sampleRate, &bufferFrames, &static_oscillator, this);
-    m_rtaudio.startStream();
+    // m_rtaudio.startStream();
   }
   catch ( RtAudioError& e ) {
     e.printMessage();
   }
 
-  // while(m_work) {
-  //
-  //
-  //
-  // }
+  while(m_work) {
+
+    if(m_play_state) {
+      if (!m_rtaudio.isStreamRunning()) m_rtaudio.startStream();
+
+    } else {
+      if (m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+
+    }
+
+  }
 
   std::cout << "play quit" << '\n';
 }
@@ -256,30 +349,33 @@ nlohmann::json Program::update(nlohmann::json data) {
   return m_data;
 }
 
-void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+// void Program::read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+//
+//   m_current_frame = frame_index;
+//   frame frame;
+//
+//   while (m_buffer.size() != m_buffer_size) {
+//     if (frame_exists(frame_index)){
+//        break;
+//     }
+//     std::cout << "waiting" << '\n';
+//   }
+//
+//   if (frame_exists(frame_index)){
+//
+//     frame = get_frame(frame_index);
+//     cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
+//     audio = frame.audio;
+//
+//   }
+//
+//   std::cout << "m_current_frame: " << m_current_frame << '\n';
+// }
 
-  m_current_frame = frame_index;
-  frame frame;
+nlohmann::json Program::buffer(nlohmann::json data, cv::Mat& image) {
 
-  while (m_buffer.size() != m_buffer_size) {
-    if (frame_exists(frame_index)){
-       break;
-    }
-    std::cout << "waiting" << '\n';
-  }
-
-  if (frame_exists(frame_index)){
-
-    frame = get_frame(frame_index);
-    cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
-    audio = frame.audio;
-
-  }
-
-  std::cout << "m_current_frame: " << m_current_frame << '\n';
-}
-
-void Program::buffer(nlohmann::json data, cv::Mat& image) {
+  m_play_state   = data["play"];
+  m_record_state = data["record"];
 
   while (!frame_exists(m_current_frame)) {
 
@@ -289,6 +385,7 @@ void Program::buffer(nlohmann::json data, cv::Mat& image) {
   frame frame = get_frame(m_current_frame);
   cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
 
+  return data;
 }
 
 void Program::quit() {

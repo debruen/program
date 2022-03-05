@@ -136,7 +136,7 @@ cv::Mat Settings::audio_frame(std::size_t frame_index) {
 
   std::size_t height = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
 
-  cv::Mat audio = cv::Mat::zeros(cv::Size(m_audio_channels, height), CV_32F);
+  cv::Mat audio = cv::Mat::zeros(cv::Size(m_audio_channels, height), CV_64F);
 
   return audio;
 }

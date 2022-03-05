@@ -61,28 +61,28 @@ class AsyncUpdate : public Napi::AsyncWorker {
 
 // -- -- -- -- -- Read
 
-class AsyncRead : public Napi::AsyncWorker {
-
-  private:
-    Program& program;
-
-    Napi::Uint8Array p_image;
-    Napi::Float32Array p_left;
-    Napi::Float32Array p_right;
-
-    std::size_t m_width, m_height, m_time, m_index;
-
-    cv::Mat m_image;
-    cv::Mat m_audio;
-
-  public:
-    AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right, std::size_t frame_index);
-    virtual ~AsyncRead() {};
-
-    void Execute();
-    void OnOK();
-
-};
+// class AsyncRead : public Napi::AsyncWorker {
+//
+//   private:
+//     Program& program;
+//
+//     Napi::Uint8Array p_image;
+//     Napi::Float32Array p_left;
+//     Napi::Float32Array p_right;
+//
+//     std::size_t m_width, m_height, m_time, m_index;
+//
+//     cv::Mat m_image;
+//     cv::Mat m_audio;
+//
+//   public:
+//     AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right, std::size_t frame_index);
+//     virtual ~AsyncRead() {};
+//
+//     void Execute();
+//     void OnOK();
+//
+// };
 
 // -- -- -- -- -- Buffer
 

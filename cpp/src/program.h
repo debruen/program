@@ -7,6 +7,7 @@
 #include <thread>
 #include <mutex>
 
+#include "stk/SineWave.h"
 #include "rtaudio/RtAudio.h"
 
 #include "settings.h"
@@ -27,7 +28,7 @@ class Program {
 
     nlohmann::json m_data, m_play_data = nlohmann::json::array();
 
-    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
+    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
 
     bool m_work = true, m_update = false;
 
@@ -46,7 +47,12 @@ class Program {
 
     int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
 
+    cv::Mat get_audio(unsigned int nFrames, double streamTime);
+
     RtAudio m_rtaudio;
+
+    bool m_play_state   = false;
+    bool m_record_state = false;
 
     void main();
     void play();
@@ -79,9 +85,9 @@ class Program {
 
     nlohmann::json update(nlohmann::json data);
 
-    void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
+    // void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
 
-    void buffer(nlohmann::json data, cv::Mat& image);
+    nlohmann::json buffer(nlohmann::json data, cv::Mat& image);
 
     void quit();
 

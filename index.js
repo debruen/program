@@ -1,5 +1,5 @@
 
-const {program_data, program_update, program_read, program_buffer, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_data, program_update, program_buffer, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
@@ -33,15 +33,15 @@ class Program{
     })
   } // update(data)
 
-  read(image, left, right, frame_index) {
-
-    return new Promise((resolve) => {
-      program_read(image, left, right, frame_index, (err, result) => {
-        resolve(result)
-      })
-    })
-
-  } // read(image, left, right, frame_index)
+  // read(image, left, right, frame_index) {
+  //
+  //   return new Promise((resolve) => {
+  //     program_read(image, left, right, frame_index, (err, result) => {
+  //       resolve(result)
+  //     })
+  //   })
+  //
+  // } // read(image, left, right, frame_index)
 
   buffer(data, image) {
     const string = JSON.stringify(data)

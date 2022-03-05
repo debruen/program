@@ -48,60 +48,60 @@ void AsyncUpdate::OnOK() {
 
 // -- -- -- -- -- Read
 
-AsyncRead::AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Array image, Napi::Float32Array left, Napi::Float32Array right, std::size_t frame_index)
-  : AsyncWorker(callback), program(program), p_image(image), p_left(left), p_right(right), m_index(frame_index) {
-
-  nlohmann::json data = program.data();
-
-  m_width  = data::get_width(data["settings"], "preview");
-  m_height = data::get_height(data["settings"], "preview");
-  m_time   = data::get_int(data["settings"], "frame time") / 1000.0 * 44100.0;
-
-  cv::Size size(m_width, m_height);
-
-  m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
-  m_audio = cv::Mat::zeros(cv::Size(2, m_time), CV_32F);
-};
-
-void AsyncRead::Execute() {
-  program.read(m_image, m_audio, m_index);
-};
-
-void AsyncRead::OnOK() {
-
-  // writing result to image_buffer
-  std::size_t c, z;
-  uchar* image_ptr;
-
-  for (std::size_t y = 0; y < m_height; y++) {
-
-    image_ptr = m_image.ptr<uchar>(y);
-    for (std::size_t x = 0; x < m_width; x++) {
-      z = (y * m_width + x) * 4;
-      c = x * 3;
-
-      p_image[z]   = image_ptr[c+2]; // red
-      p_image[z+1] = image_ptr[c+1]; // green
-      p_image[z+2] = image_ptr[c];   // blue
-      p_image[z+3] = 255;      // alpha channel
-    }
-  }
-
-  float* audio_ptr;
-
-  for (std::size_t i = 0; i < m_time; i++) {
-
-    audio_ptr = m_audio.ptr<float>(i);
-
-    p_left[i]  = audio_ptr[0];
-    p_right[i] = audio_ptr[1];
-
-  }
-
-  std::string string = "done";
-
-  Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
-};
+// AsyncRead::AsyncRead(Napi::Function& callback, Program& program, Napi::Uint8Array image, Napi::Float32Array left, Napi::Float32Array right, std::size_t frame_index)
+//   : AsyncWorker(callback), program(program), p_image(image), p_left(left), p_right(right), m_index(frame_index) {
+//
+//   nlohmann::json data = program.data();
+//
+//   m_width  = data::get_width(data["settings"], "preview");
+//   m_height = data::get_height(data["settings"], "preview");
+//   m_time   = data::get_int(data["settings"], "frame time") / 1000.0 * 44100.0;
+//
+//   cv::Size size(m_width, m_height);
+//
+//   m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
+//   m_audio = cv::Mat::zeros(cv::Size(2, m_time), CV_32F);
+// };
+//
+// void AsyncRead::Execute() {
+//   program.read(m_image, m_audio, m_index);
+// };
+//
+// void AsyncRead::OnOK() {
+//
+//   // writing result to image_buffer
+//   std::size_t c, z;
+//   uchar* image_ptr;
+//
+//   for (std::size_t y = 0; y < m_height; y++) {
+//
+//     image_ptr = m_image.ptr<uchar>(y);
+//     for (std::size_t x = 0; x < m_width; x++) {
+//       z = (y * m_width + x) * 4;
+//       c = x * 3;
+//
+//       p_image[z]   = image_ptr[c+2]; // red
+//       p_image[z+1] = image_ptr[c+1]; // green
+//       p_image[z+2] = image_ptr[c];   // blue
+//       p_image[z+3] = 255;      // alpha channel
+//     }
+//   }
+//
+//   float* audio_ptr;
+//
+//   for (std::size_t i = 0; i < m_time; i++) {
+//
+//     audio_ptr = m_audio.ptr<float>(i);
+//
+//     p_left[i]  = audio_ptr[0];
+//     p_right[i] = audio_ptr[1];
+//
+//   }
+//
+//   std::string string = "done";
+//
+//   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+// };
 
 // -- -- -- -- -- Buffer
 
@@ -109,7 +109,7 @@ AsyncBuffer::AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::j
   : AsyncWorker(callback), program(program), m_data(data), p_image(image) {
 
   m_width  = m_data["width"];
-  m_height = m_data["height"];;
+  m_height = m_data["height"];
 
   cv::Size size(m_width, m_height);
 
@@ -117,7 +117,7 @@ AsyncBuffer::AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::j
 };
 
 void AsyncBuffer::Execute() {
-  program.buffer(m_data, m_image);
+  m_data = program.buffer(m_data, m_image);
 };
 
 void AsyncBuffer::OnOK() {
@@ -140,8 +140,7 @@ void AsyncBuffer::OnOK() {
     }
   }
 
-  std::string string = "done";
-
+  std::string string = m_data.dump();
   Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
 };
 

@@ -45,19 +45,19 @@ Napi::Value program_update(const Napi::CallbackInfo& info) {
 
 // -- -- -- -- -- Read
 
-Napi::Value program_read(const Napi::CallbackInfo& info) {
-  Napi::Uint8Array image_buffer = info[0].As<Napi::Uint8Array>();
-  Napi::Float32Array left_buffer = info[1].As<Napi::Float32Array>();
-  Napi::Float32Array right_buffer = info[2].As<Napi::Float32Array>();
-  std::size_t frame_index = info[3].ToNumber().Int64Value();
-  Napi::Function callback = info[4].As<Napi::Function>();
-
-  AsyncRead* read = new AsyncRead(callback, program, image_buffer, left_buffer, right_buffer, frame_index);
-  read->Queue();
-
-  std::string msg = "read queued";
-  return Napi::String::New(info.Env(),msg.c_str());
-};
+// Napi::Value program_read(const Napi::CallbackInfo& info) {
+//   Napi::Uint8Array image_buffer = info[0].As<Napi::Uint8Array>();
+//   Napi::Float32Array left_buffer = info[1].As<Napi::Float32Array>();
+//   Napi::Float32Array right_buffer = info[2].As<Napi::Float32Array>();
+//   std::size_t frame_index = info[3].ToNumber().Int64Value();
+//   Napi::Function callback = info[4].As<Napi::Function>();
+//
+//   AsyncRead* read = new AsyncRead(callback, program, image_buffer, left_buffer, right_buffer, frame_index);
+//   read->Queue();
+//
+//   std::string msg = "read queued";
+//   return Napi::String::New(info.Env(),msg.c_str());
+// };
 
 // -- -- -- -- -- Buffer
 
@@ -120,7 +120,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports["program_data"]   = Napi::Function::New(env, program_data, std::string("program_data"));
   exports["program_update"] = Napi::Function::New(env, program_update, std::string("program_update"));
 
-  exports["program_read"]   = Napi::Function::New(env, program_read, std::string("program_read"));
+  // exports["program_read"]   = Napi::Function::New(env, program_read, std::string("program_read"));
 
   exports["program_buffer"]   = Napi::Function::New(env, program_buffer, std::string("program_buffer"));
 
