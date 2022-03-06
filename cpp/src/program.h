@@ -26,11 +26,12 @@ class Program {
 
   private:
 
-    nlohmann::json m_data, m_play_data = nlohmann::json::array();
-
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
 
-    bool m_work = true, m_update = false;
+    bool m_work = true, m_update_main = false,  m_update_play = false;
+
+
+    nlohmann::json m_data;
 
     Settings m_settings;
     Filter   m_filter;
@@ -41,7 +42,20 @@ class Program {
     std::mutex m_buffer_mutex;
 
     std::thread m_main;
+    void main();
+
+
+    std::vector<frame> m_buffer_storage;
+    std::mutex m_buffer_storage_mutex;
+
+    void takeaway();
+    std::thread m_takeaway;
+
+
+    void play();
     std::thread m_play;
+
+
 
     static int static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
 
@@ -53,9 +67,6 @@ class Program {
 
     bool m_play_state   = false;
     bool m_record_state = false;
-
-    void main();
-    void play();
 
     void create_frame(std::size_t frame_index);
 
@@ -82,12 +93,13 @@ class Program {
     //  -> quit
 
     nlohmann::json data();
-
     nlohmann::json update(nlohmann::json data);
 
     // void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
 
+
     nlohmann::json buffer(nlohmann::json data, cv::Mat& image);
+
 
     void quit();
 

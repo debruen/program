@@ -3,9 +3,9 @@
 
 Program::Program() : m_main{} {
 
-  m_play_data.push_back(data::init_bool("play", false));
-  m_play_data.push_back(data::init_int("frame", 0, 100, 0));
-  m_play_data.push_back(data::init_time("time", 0, 3000, 0));
+  // m_play_data.push_back(data::init_bool("play", false));
+  // m_play_data.push_back(data::init_int("frame", 0, 100, 0));
+  // m_play_data.push_back(data::init_time("time", 0, 3000, 0));
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -14,6 +14,7 @@ Program::Program() : m_main{} {
   m_frame_time = data::get_int(m_data["settings"], "frame time");
 
   m_main = std::thread{&Program::main, this};
+  m_takeaway = std::thread{&Program::takeaway, this};
   m_play = std::thread{&Program::play, this};
 }
 
@@ -52,29 +53,34 @@ void Program::create_frame(std::size_t frame_index) {
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-  std::size_t relation =  elapsed.count() / m_frame_time + 1;
+  std::size_t relation =  elapsed.count() / m_frame_time + 2;
 
   if(relation < 2) relation = 2;
 
   m_buffer_size = relation;
 
+  m_buffer_mutex.lock();
   m_buffer.push_back(new_frame);
+  m_buffer_mutex.unlock();
+
 }
 
 void Program::update_buffer() {
 
   m_buffer_mutex.lock();
-  if(m_buffer.size() < m_buffer_size) {
+  std::size_t size = m_buffer.size();
+  m_buffer_mutex.unlock();
+
+  if(size < m_buffer_size) {
 
     std::size_t new_frame_index{m_current_frame};
 
-    if(m_buffer.size() != 0) {
+    if(size != 0) {
       new_frame_index = last_buffer_index() + 1;
     }
 
     create_frame(new_frame_index);
   }
-  m_buffer_mutex.unlock();
 
 }
 
@@ -83,9 +89,9 @@ void Program::clear_buffer() {
   m_buffer_mutex.lock();
   std::vector<frame> temp_buffer;
 
-  if (m_update) {
+  if (m_update_main) {
 
-    m_update = false;
+    m_update_main = false;
 
   } else {
 
@@ -167,6 +173,15 @@ void Program::main() {
   }
 
   std::cout << "main quit" << '\n';
+}
+
+void Program::takeaway() {
+
+  while(m_work) {
+
+  }
+
+  std::cout << "takeaway quit" << '\n';
 }
 
 // int Program::saw( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
@@ -322,6 +337,16 @@ void Program::play() {
 
     }
 
+    if(m_update_play) {
+      if (m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+      m_rtaudio.setStreamTime(0.0);
+
+      m_play_state = false;
+      m_record_state = false;
+
+      m_update_play = false;
+    }
+
   }
 
   std::cout << "play quit" << '\n';
@@ -344,7 +369,8 @@ nlohmann::json Program::update(nlohmann::json data) {
 
   m_objects_mutex.unlock();
 
-  m_update = true;
+  m_update_main = true;
+  m_update_play = true;
 
   return m_data;
 }
@@ -394,5 +420,6 @@ void Program::quit() {
   m_work = false;
 
   m_play.join();
+  m_takeaway.join();
   m_main.join();
 }
