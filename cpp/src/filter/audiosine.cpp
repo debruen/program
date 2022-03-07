@@ -1,52 +1,45 @@
 
-#include "areasine.h"
+#include "audiosine.h"
 
-AreaSine::AreaSine(const std::size_t& width, const std::size_t& height, const std::size_t& frame_index, const std::string& shape)
-  : m_width(width), m_height(height), m_frame_index(frame_index), m_shape(shape) {
+AudioSine::AudioSine(const std::size_t& width, const std::size_t& height, const std::size_t& frame_index, const double& frequency, double phase, const double& tilt, const std::string& shape)
+  : m_width(width), m_height(height), m_frame_index(frame_index), m_frequency(frequency), m_phase(phase), m_tilt(tilt), m_shape(shape) {
 
 }
 
-void AreaSine::frame_phase(const double& frequency, const double& phase, const double& tilt) {
+void AudioSine::frame_phase() {
 
   double multiplier{1};
-  m_phase = phase;
-  m_tilt = tilt;
-  // m_tilt = math::circle(0, 1, m_tilt);
 
   for (std::size_t i = 0; i < m_frame_index; i++) {
-    if(tilt <= 0.25) {
-      multiplier = 1 - tilt * 4;
-    } else if (tilt <= 0.5) {
-      multiplier = (tilt - 0.25) * (-4);
-    } else if (tilt <= 0.75) {
-      multiplier = 1 - (tilt - 0.5) * 4;
+    if(m_tilt <= 0.25) {
+      multiplier = 1 - m_tilt * 4;
+    } else if (m_tilt <= 0.5) {
+      multiplier = (m_tilt - 0.25) * (-4);
+    } else if (m_tilt <= 0.75) {
+      multiplier = 1 - (m_tilt - 0.5) * 4;
     } else {
-      multiplier = (tilt - 0.75) * (-4);
+      multiplier = (m_tilt - 0.75) * (-4);
     }
-    m_phase += frequency * multiplier;
+    m_phase += m_frequency * multiplier;
   }
 
-  m_phase_set = true;
 }
 
-double AreaSine::point(const std::size_t& y, const std::size_t& x, const double& frequency, const double& phase, const double& tilt) {
-
-  if(!m_phase_set) frame_phase(frequency, phase, tilt);
+double AudioSine::point(std::size_t& y, std::size_t& x) {
 
   double
     // freguency
-    f{frequency * 360},
+    f{m_frequency * 360},
     // phase
     p{m_phase * 360},
-    // tilt
-    t{1 - tilt},
+    // m_tilt
+    t{1 - m_tilt},
     // width
     w{static_cast<double>(m_width - 1)},
     // height
     h{static_cast<double>(m_height - 1)},
 
     rp, ra, ya, xa, ry, yv, xv, degrees, sinus;
-
 
   if(t <= 0.25) {
     ya = 1 - t * 4;
@@ -110,19 +103,19 @@ double AreaSine::point(const std::size_t& y, const std::size_t& x, const double&
       sin_b = sinus / 2 - 0.5;
     }
 
-    if (tilt == 0 && x == m_width - 1) {
+    if (m_tilt == 0 && x == m_width - 1) {
       m_shape_note = sinus;
       sinus = sin_a;
-    } else if (tilt == 1 && x == m_width - 1) {
+    } else if (m_tilt == 1 && x == m_width - 1) {
       m_shape_note = sinus;
       sinus = sin_a;
-    } else if (tilt == 0.5 && x == m_width - 1) {
+    } else if (m_tilt == 0.5 && x == m_width - 1) {
       m_shape_note = sinus;
       sinus = sin_b;
-    } else if (tilt > 0 && tilt < 0.5) {
+    } else if (m_tilt > 0 && m_tilt < 0.5) {
       m_shape_note = sinus;
       sinus = sin_b;
-    } else if (tilt > 0.5 && tilt < 1) {
+    } else if (m_tilt > 0.5 && m_tilt < 1) {
       m_shape_note = sinus;
       sinus = sin_a;
     } else {

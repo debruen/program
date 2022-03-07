@@ -103,29 +103,24 @@ cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
   const std::size_t& width(audio.cols),& height(audio.rows);
 
-  AreaSine sine(width, height, frame_index, m_shape);
-
   cv::Mat film = cv::Mat(cv::Size(width, height), CV_64F);
 
-  double frequency, amplitude, phase, tilt;
+  double frequency, amplitude;
 
   set_audio_frequency(height, frequency);
 
   amplitude = m_amplitude;
-  phase     = m_phase;
-  tilt      = m_tilt;
 
-  double* ptr;
+  AudioSine sine(width, height, frame_index, frequency, m_phase, m_tilt, m_shape);
 
-  for (std::size_t y = 0; y < height; y++) {
-
-    ptr = film.ptr<double>(y);
-    for (std::size_t x = 0; x < width; x++) {
-
-      ptr[x] = sine.point(y, x, frequency, phase, tilt) * amplitude;
-
+  cv::parallel_for_(cv::Range(0, height), [&](const cv::Range &range) {
+    for (std::size_t y = range.start; y < range.end; y++) {
+      for (std::size_t x = 0; x < width; x++) {
+        film.ptr<double>(y)[x] = sine.point(y, x) * m_amplitude;
+        // film.ptr<double>(y)[x] = 0;
+      }
     }
-  }
+  });
 
   return film;
 }

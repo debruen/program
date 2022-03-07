@@ -2,6 +2,9 @@
 #ifndef coat_h
 #define coat_h
 
+#include <thread>
+#include <future>
+
 #include "../data.h"
 #include "../math.h"
 

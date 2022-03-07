@@ -20,7 +20,6 @@ Program::Program() : m_main{} {
 
 void Program::create_frame(std::size_t frame_index) {
 
-  auto start = std::chrono::system_clock::now();
 
   // settings
   std::string type = data::get_string(m_data["settings"], "type");
@@ -50,15 +49,6 @@ void Program::create_frame(std::size_t frame_index) {
 
   frame new_frame = {.index = frame_index, .image = image, .audio = audio};
 
-  auto end = std::chrono::system_clock::now();
-  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-  std::size_t relation =  elapsed.count() / m_frame_time + 2;
-
-  if(relation < 2) relation = 2;
-
-  m_buffer_size = relation;
-
   m_buffer_mutex.lock();
   m_buffer.push_back(new_frame);
   m_buffer_mutex.unlock();
@@ -72,14 +62,22 @@ void Program::update_buffer() {
   m_buffer_mutex.unlock();
 
   if(size < m_buffer_size) {
-
+    m_buffer_full = false;
     std::size_t new_frame_index{m_current_frame};
 
     if(size != 0) {
       new_frame_index = last_buffer_index() + 1;
     }
 
+    auto start = std::chrono::system_clock::now();
     create_frame(new_frame_index);
+    auto end = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::size_t relation =  elapsed.count() / m_frame_time + 1;
+    if(relation < 2) relation = 2;
+    m_buffer_size = relation + 1;
+  } else {
+    m_buffer_full = true;
   }
 
 }

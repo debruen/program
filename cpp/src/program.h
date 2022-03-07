@@ -28,7 +28,7 @@ class Program {
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
 
-    bool m_work = true, m_update_main = false,  m_update_play = false;
+    bool m_work = true, m_update_main = false,  m_update_play = false, m_buffer_full = false;
 
 
     nlohmann::json m_data;

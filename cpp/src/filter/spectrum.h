@@ -6,7 +6,7 @@
 
 #include "coat.h"
 
-#include "areasine.h"
+#include "audiosine.h"
 
 class Spectrum : public Coat {
 
