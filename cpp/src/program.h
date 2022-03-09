@@ -14,22 +14,13 @@
 #include "filter.h"
 #include "output.h"
 
-typedef struct {
-  std::size_t index;
-  cv::Mat image;
-  cv::Mat audio;
-} frame;
-
-typedef unsigned char (*osc)(void*, void*, unsigned int, double, RtAudioStreamStatus);
+#include "record.h"
 
 class Program {
 
   private:
 
-    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
-
-    bool m_work = true, m_update_main = false,  m_update_play = false, m_buffer_full = false;
-
+    bool m_work = true;
 
     nlohmann::json m_data;
 
@@ -37,6 +28,12 @@ class Program {
     Filter   m_filter;
     Output   m_output;
     std::mutex m_objects_mutex;
+
+
+    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
+
+    bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false};
+
 
     std::vector<frame> m_buffer;
     std::mutex m_buffer_mutex;
@@ -48,14 +45,8 @@ class Program {
     std::vector<frame> m_buffer_storage;
     std::mutex m_buffer_storage_mutex;
 
-    void takeaway();
-    std::thread m_takeaway;
-
-
     void play();
     std::thread m_play;
-
-
 
     static int static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
 
@@ -81,32 +72,12 @@ class Program {
   public:
     Program();
 
-
-    // •   main()
-    // •   play()
-
-    // <-  data()
-    // <-> update(data)
-
-    // <-> read(image, data)  / writes to image data, returns play data
-
-    //  -> quit
-
     nlohmann::json data();
     nlohmann::json update(nlohmann::json data);
 
-    // void read(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
-
-
     nlohmann::json buffer(nlohmann::json data, cv::Mat& image);
 
-
     void quit();
-
-
-    // void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
-    // void save();
 
 };
 

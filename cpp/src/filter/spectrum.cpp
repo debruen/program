@@ -115,10 +115,11 @@ cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
   cv::parallel_for_(cv::Range(0, height), [&](const cv::Range &range) {
     for (std::size_t y = range.start; y < range.end; y++) {
+
       for (std::size_t x = 0; x < width; x++) {
         film.ptr<double>(y)[x] = sine.point(y, x) * m_amplitude;
-        // film.ptr<double>(y)[x] = 0;
       }
+
     }
   });
 

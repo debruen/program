@@ -16,6 +16,12 @@
 
 #include "stk/SineWave.h"
 
+typedef struct {
+  std::size_t index;
+  cv::Mat image;
+  cv::Mat audio;
+} frame;
+
 namespace data {
 
   // internal functions

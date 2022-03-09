@@ -42,8 +42,9 @@
             "cpp/src/out/hsl.cpp",
 
             "cpp/src/filter/areasine.cpp",
-            "cpp/src/filter/audiosine.cpp"
+            "cpp/src/filter/audiosine.cpp",
 
+            "cpp/src/record.cpp"
 
 
         ],

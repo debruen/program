@@ -1,18 +1,11 @@
 
-const {program_data, program_update, program_buffer, program_quit, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_data, program_update, program_buffer, program_quit} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
   constructor() {
-  } // constructor
 
-  // main() {
-  //   return new Promise((resolve) => {
-  //     program_main((err, result) => {
-  //       resolve(result)
-  //     })
-  //   })
-  // } // main()
+  }
 
   data() {
     return new Promise((resolve) => {
@@ -21,7 +14,7 @@ class Program{
         resolve(json)
       })
     })
-  } // data()
+  }
 
   update(data) {
     const string = JSON.stringify(data)
@@ -31,27 +24,18 @@ class Program{
         resolve(json)
       })
     })
-  } // update(data)
-
-  // read(image, left, right, frame_index) {
-  //
-  //   return new Promise((resolve) => {
-  //     program_read(image, left, right, frame_index, (err, result) => {
-  //       resolve(result)
-  //     })
-  //   })
-  //
-  // } // read(image, left, right, frame_index)
+  }
 
   buffer(data, image) {
     const string = JSON.stringify(data)
     return new Promise((resolve) => {
       program_buffer(string, image, (err, result) => {
-        resolve(result)
+        const json = JSON.parse(result)
+        resolve(json)
       })
     })
 
-  } // read(image, left, right, frame_index)
+  }
 
   quit() {
     return new Promise((resolve) => {
@@ -59,30 +43,8 @@ class Program{
         resolve(result)
       })
     })
-  } // quit()
+  }
 
-
-
-  // preview(images, left, right) {
-  //
-  //   return new Promise((resolve) => {
-  //     program_preview(images, left, right, (err, result) => {
-  //       resolve(result)
-  //     })
-  //   })
-  //
-  // } // preview
-  //
-  // save() {
-  //
-  //   return new Promise((resolve) => {
-  //     program_save((err, result) => {
-  //       resolve(result)
-  //     })
-  //   })
-  //
-  // } // save
-
-} // Program
+}
 
 module.exports = Program;
