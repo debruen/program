@@ -163,6 +163,64 @@ bool data::get_bool(nlohmann::json& data, std::string name) {
   return value;
 }
 
+nlohmann::json data::init_button(std::string name, bool value) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "button";
+  // data["select"] = select;
+  data["type"] = "bool";
+  data["value"] = value;
+
+  return data;
+} // data_bool END
+
+nlohmann::json data::init_value(std::string name, double value) {
+
+  nlohmann::json data;
+
+  data["name"]  = name;
+  data["form"]  = "data";
+  data["type"]  = "value";
+  data["value"] = value;
+
+  return data;
+}
+
+double data::get_value(nlohmann::json& data, std::string name) {
+
+  nlohmann::json select;
+
+  std::size_t size = array_size(data);
+
+  for (std::size_t i = 0; i < size; i++) {
+    if (data[i]["name"] == name) {
+      select = data[i];
+      break;
+    }
+  }
+
+  double value = 0.0;
+
+  if(select["type"] == "float") value = select["value"];
+
+  return value;
+}
+
+nlohmann::json data::init_min_max(std::string name, double min, double max) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "data";
+  data["type"] = "data";
+  data["min"] = min;
+  data["max"] = max;
+
+  return data;
+}
+
 // json data functions
 
 nlohmann::json data::init_1d_float_data(std::string name, std::vector<double> values) {
@@ -188,13 +246,14 @@ nlohmann::json data::init_2d_uchar_data(std::string name, std::vector< std::vect
 }
 
 // -------------
-double data::normalize(double min, double max, double value) {
-  return (value - min) / (max - min);
-}
 
-double data::project(double min, double max, double value) {
-    return (value * (max - min)) + min;
-}
+// double data::normalize(double min, double max, double value) {
+//   return (value - min) / (max - min);
+// }
+//
+// double data::project(double min, double max, double value) {
+//     return (value * (max - min)) + min;
+// }
 
 nlohmann::json data::data_int(std::string name, int min, int max, int value, bool select) {
 
@@ -263,26 +322,6 @@ nlohmann::json data::data_path(std::string name, std::string value) {
   data["value"] = value;
 
   return data;
-}
-
-double data::get_value(nlohmann::json& data, std::string name) {
-
-  nlohmann::json select;
-
-  std::size_t size = array_size(data);
-
-  for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
-      select = data[i];
-      break;
-    }
-  }
-
-  double value = 0.0;
-
-  if(select["type"] == "float") value = select["value"];
-
-  return value;
 }
 
 nlohmann::json data::get_data(nlohmann::json& data, std::string name) {
@@ -379,34 +418,6 @@ unsigned int data::get_height(nlohmann::json& data, std::string name) {
 
   return data[index]["height"];
 }
-
-void data::compute_size(nlohmann::json& data, std::string name, std::string area, double ratio) {
-
-  std::size_t index{0}, size = array_size(data);
-
-  for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
-      index = i;
-      break;
-    }
-  }
-
-  // base area = A4 @ 300 dpi
-  int width, height, base_area{2480 * 3508};
-
-  if (area == "A6") base_area = base_area / 4;
-  if (area == "A5") base_area = base_area / 2;
-  // if (area == "A4") base_area = base_area;
-  if (area == "A3") base_area = base_area * 2;
-  if (area == "A2") base_area = base_area * 4;
-
-  height = round(sqrt(base_area / ratio));
-  width = round(height * ratio);
-
-  data[index]["width"] = width;
-  data[index]["height"] = height;
-
-} // data_int END
 
 nlohmann::json data::data_object(std::string name, std::string type, std::vector<std::string> options, std::string value, bool select) {
 

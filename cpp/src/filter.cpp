@@ -2,7 +2,7 @@
 #include "filter.h"
 
 Filter::Filter() {
-  m_data = nlohmann::json::array();
+  // m_data = nlohmann::json::array();
 }
 
 nlohmann::json Filter::data() {
@@ -10,7 +10,7 @@ nlohmann::json Filter::data() {
   return m_data;
 }
 
-nlohmann::json Filter::update(nlohmann::json data, std::string type) {
+nlohmann::json Filter::update(nlohmann::json data) {
 
   nlohmann::json new_data = nlohmann::json::array();
   std::vector< Layer* > new_layer;
@@ -21,17 +21,16 @@ nlohmann::json Filter::update(nlohmann::json data, std::string type) {
 
     if(data[i] == "add") {
       new_layer.push_back(new Layer());
-      new_data.push_back(new_layer[i]->init(type));
+      new_data.push_back(new_layer[i]->init());
     } else {
       new_layer.push_back(m_layer[c]);
-      new_data.push_back(new_layer[i]->update(data[i], type));
+      new_data.push_back(new_layer[i]->update(data[i]));
 
       c++;
     }
 
   }
 
-  m_type = type;
   m_data = new_data;
   m_layer = new_layer;
 

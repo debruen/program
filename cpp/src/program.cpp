@@ -1,7 +1,8 @@
 
 #include "program.h"
 
-Program::Program() : m_main{} {
+Program::Program()
+    : m_main{}, m_play{} {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -15,15 +16,12 @@ Program::Program() : m_main{} {
 
 void Program::create_frame(std::size_t frame_index) {
 
-
-  // settings
-  std::string type = data::get_string(m_data["settings"], "type");
+  std::string type = data::get_str(m_data["settings"], "type");
 
   m_objects_mutex.lock();
 
-  cv::Mat image = m_settings.image_frame(frame_index);
-  cv::Mat audio = m_settings.audio_frame(frame_index);
-
+  cv::Mat image = m_settings.image();
+  cv::Mat audio = m_settings.audio();
 
   // filter
   if(type == "audio") {
@@ -38,7 +36,7 @@ void Program::create_frame(std::size_t frame_index) {
     // m_output.image_frame(image, audio, frame_index);
   }
 
-  m_settings.flip_back(image);
+  m_settings.flip(image, true);
 
   m_objects_mutex.unlock();
 
@@ -225,7 +223,7 @@ cv::Mat Program::get_audio(unsigned int nFrames, double streamTime) {
 }
 
 
-int Program::static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
+int Program::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
   return static_cast<Program*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
 }
 
@@ -268,7 +266,7 @@ void Program::play() {
   unsigned int bufferFrames = 256; // 256 sample frames
 
   try {
-    m_rtaudio.openStream(&parameters, NULL, RTAUDIO_FLOAT64, sampleRate, &bufferFrames, &static_oscillator, this);
+    m_rtaudio.openStream(&parameters, NULL, RTAUDIO_FLOAT64, sampleRate, &bufferFrames, &oscillator, this);
   }
   catch ( RtAudioError& e ) {
     e.printMessage();
@@ -334,9 +332,9 @@ nlohmann::json Program::update(nlohmann::json data) {
   m_data["settings"] = m_settings.update(data["settings"]);
 
   m_frame_time = data::get_int(m_data["settings"], "frame time");
-  std::string type = data::get_string(m_data["settings"], "type");
+  std::string type = data::get_str(m_data["settings"], "type");
 
-  m_data["filter"]   = m_filter.update(data["filter"], type);
+  m_data["filter"]   = m_filter.update(data["filter"]);
   m_data["output"]   = m_output.update(data["output"], type);
 
   m_objects_mutex.unlock();

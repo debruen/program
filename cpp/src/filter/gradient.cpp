@@ -9,15 +9,15 @@ Gradient::Gradient() {
   m_data.push_back(data::init_str("shape", shape_values, m_shape));
   m_data.push_back(data::init_1d_float_data("frequency range", {m_freq_min, m_freq_max}));
 
-  m_data.push_back(data::data_value("frequency gamma", m_frq_gamma));
+  m_data.push_back(data::init_value("frequency gamma", m_frq_gamma));
 
-  m_data.push_back(data::data_float("frequency", 0, 1, m_frequency));
+  m_data.push_back(data::init_float("frequency", 0, 1, m_frequency));
 
-  m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
+  m_data.push_back(data::init_float("amplitude", 0, 1, m_amplitude));
 
-  m_data.push_back(data::data_float("phase", m_phase_min, m_phase_max, m_phase));
+  m_data.push_back(data::init_float("phase", m_phase_min, m_phase_max, m_phase));
 
-  m_data.push_back(data::data_float("tilt", 0, 1, m_tilt));
+  m_data.push_back(data::init_float("tilt", 0, 1, m_tilt));
 
   std::vector<std::string> filter_options{"none", "frequency", "amplitude", "phase", "tilt"};
   m_data.push_back(data::init_str("filter", filter_options, m_filter));

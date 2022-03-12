@@ -16,7 +16,7 @@ nlohmann::json Film::data() {
 
 nlohmann::json Film::update(nlohmann::json data) {
 
-  std::string type = data::get_string(data, "type");
+  std::string type = data::get_str(data, "type");
 
   if (type != m_coat_type) {
 

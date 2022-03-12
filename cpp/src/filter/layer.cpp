@@ -12,15 +12,11 @@ Layer::Layer() {
 
 }
 
-nlohmann::json Layer::init(std::string type) {
-  m_type = type;
-
+nlohmann::json Layer::init() {
   return m_data;
 }
 
-nlohmann::json Layer::update(nlohmann::json data, std::string type) {
-
-  m_type = type;
+nlohmann::json Layer::update(nlohmann::json data) {
 
   nlohmann::json new_data = nlohmann::json::array();
 

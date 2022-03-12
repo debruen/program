@@ -22,18 +22,19 @@ class Program {
 
     bool m_work = true;
 
+    /// main data object
     nlohmann::json m_data;
 
+    /// main creation classes
     Settings m_settings;
     Filter   m_filter;
     Output   m_output;
-    std::mutex m_objects_mutex;
 
+    std::mutex m_objects_mutex;
 
     std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
 
     bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false};
-
 
     std::vector<frame> m_buffer;
     std::mutex m_buffer_mutex;
@@ -48,7 +49,7 @@ class Program {
     void play();
     std::thread m_play;
 
-    static int static_oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
+    static int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
 
     int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
 

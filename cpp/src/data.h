@@ -46,12 +46,20 @@ namespace data {
   nlohmann::json init_bool(std::string name, bool value = true);
   bool get_bool(nlohmann::json& data, std::string name);
 
+  nlohmann::json init_button(std::string name, bool value = true);
+
+  // value
+  nlohmann::json init_value(std::string name, double value);
+  double get_value(nlohmann::json& data, std::string name);
+
+  nlohmann::json init_min_max(std::string name, double min, double max);
+
   nlohmann::json init_1d_float_data(std::string name, std::vector<double> values);
   nlohmann::json init_2d_uchar_data(std::string name, std::vector< std::vector<unsigned char> > values);
 
-  // math functions
-  double normalize(double min, double max, double value);
-  double project(double min, double max, double value);
+  // // math functions
+  // double normalize(double min, double max, double value);
+  // double project(double min, double max, double value);
 
   // create data object
   nlohmann::json data_int(std::string name, int min = 0, int max = 256, int value = 0, bool select = true);
@@ -59,9 +67,6 @@ namespace data {
   nlohmann::json data_float(std::string name, double min = 0.0, double max = 1.0, double value = 0, bool select = true);
   nlohmann::json data_value(std::string name, double value);
   nlohmann::json data_path(std::string name, std::string value);
-
-  // get data value
-  double get_value(nlohmann::json& data, std::string name);
 
   nlohmann::json get_data(nlohmann::json& data, std::string name);
 
@@ -74,11 +79,8 @@ namespace data {
   unsigned int get_width(nlohmann::json& data, std::string name);
   unsigned int get_height(nlohmann::json& data, std::string name);
 
-
-  void compute_size(nlohmann::json& data, std::string name, std::string area, double ratio);
-
-  void spectral_rgb(double& r, double& g, double& b, double l);
-  std::vector< std::vector<unsigned char> > rgb_spectrum();
+  // void spectral_rgb(double& r, double& g, double& b, double l);
+  // std::vector< std::vector<unsigned char> > rgb_spectrum();
 
   nlohmann::json data_object(std::string name, std::string type, std::vector<std::string> options, std::string value, bool select);
 

@@ -5,7 +5,7 @@ Out::Out() {
 
   /// 0: output type selection
   std::vector<std::string> type_options {"hsl", "rgb"};
-  nlohmann::json type = data::data_string("type", true, type_options, type_options[0]);
+  nlohmann::json type = data::init_str("type", type_options, type_options[0]);
   out_data.push_back(type);
 
 }
@@ -17,7 +17,7 @@ nlohmann::json Out::get_data() {
 
 nlohmann::json Out::get_save() {
 
-  nlohmann::json save = data::data_button("save", true, false);
+  nlohmann::json save = data::init_button("save", false);
 
   return save;
 }

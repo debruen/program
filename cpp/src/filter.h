@@ -8,9 +8,7 @@ class Filter {
 
   private:
 
-    std::string m_type;
-
-    nlohmann::json m_data;
+    nlohmann::json m_data = nlohmann::json::array();
 
     std::vector< Layer* > m_layer;
 
@@ -19,7 +17,7 @@ class Filter {
 
     nlohmann::json data();
 
-    nlohmann::json update(nlohmann::json data, std::string type);
+    nlohmann::json update(nlohmann::json data);
 
     void image_frame(cv::Mat& image, std::size_t frame_index);
 

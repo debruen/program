@@ -8,7 +8,7 @@ Blend::Blend() {
   m_data = nlohmann::json::array();
 
   std::vector<std::string> blend_options{"normal", "arithmetic", "geometric", "harmonic", "darken", "multiply", "colorburn", "linearburn", "lighten", "screen", "colordodge", "lineardodge", "overlay", "softlight", "hardlight", "vividlight", "linearlight", "pinlight", "hardmix", "difference", "exclusion"};
-  data_blend   = data::data_string("blend", true, blend_options, blend_options[0]);
+  data_blend   = data::init_str("blend", blend_options, blend_options[0]);
   data_array   = nlohmann::json::array();
 
   m_masks.push_back(new Gradient);
@@ -26,7 +26,7 @@ Blend::Blend() {
 
 blendchar Blend::get_blendc(nlohmann::json data, std::string label) {
 
-  std::string blend = data::get_string(data, label);
+  std::string blend = data::get_str(data, label);
 
   blendchar function = normal;
 
@@ -57,7 +57,7 @@ blendchar Blend::get_blendc(nlohmann::json data, std::string label) {
 
 blendfloat Blend::get_blendf(nlohmann::json data, std::string label) {
 
-  std::string blend = data::get_string(data, label);
+  std::string blend = data::get_str(data, label);
 
   blendfloat function = normal;
 
@@ -457,11 +457,11 @@ nlohmann::json Blend::update(nlohmann::json data) {
   std::string new_type, old_type, new_filter, none;
   std::size_t size = data::array_size(array);
 
-  new_filter = data::get_string(array[size - 1], "filter");
+  new_filter = data::get_str(array[size - 1], "filter");
 
   for (std::size_t i = 0; i < size; i++) {
-    new_type = data::get_string(array[i], "type");
-    old_type = data::get_string(m_array[i], "type");
+    new_type = data::get_str(array[i], "type");
+    old_type = data::get_str(m_array[i], "type");
 
     if (new_type == old_type) {
       new_masks.push_back(m_masks[i]);
@@ -473,7 +473,7 @@ nlohmann::json Blend::update(nlohmann::json data) {
       new_array.push_back(new_masks[i]->init());
     }
 
-    none = data::get_string(array[i], "filter");
+    none = data::get_str(array[i], "filter");
     if (none == "none") {
       break;
     }
@@ -567,89 +567,3 @@ void Blend::audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index) 
   }
 
 }
-
-
-
-// void Blend::process(std::vector<cv::Mat>& images, std::vector<cv::Mat>& fillings) {
-//
-//   std::size_t width = images[0].cols, height = images[0].rows;
-//   cv::Size size(width, height);
-//
-//   cv::Mat mask = cv::Mat(size, CV_64F);
-//
-//   std::size_t c;
-//   uchar* image_ptr, * fill_ptr;
-//   double* mask_ptr;
-//
-//   for (std::size_t f = 0; f < images.size(); f++) {
-//
-//     for (std::size_t i = m_masks.size(); i --> 0; ) {
-//       if (i == m_masks.size()) {
-//         mask = m_masks[i]->frame(mask, f);
-//       } else {
-//         m_masks[i]->process(mask, f);
-//       }
-//     }
-//
-//     for (std::size_t  y = 0; y < height; y++) {
-//
-//       image_ptr = images[f].ptr<uchar>(y);
-//       fill_ptr = fillings[f].ptr<uchar>(y);
-//       mask_ptr = mask.ptr<double>(y);
-//
-//       for (std::size_t  x = 0; x < width; x++) {
-//         c = x * 3;
-//
-//         image_ptr[c + 2] = m_blendc(image_ptr[c + 2], fill_ptr[c + 2], mask_ptr[x]);
-//         image_ptr[c + 1] = m_blendc(image_ptr[c + 1], fill_ptr[c + 1], mask_ptr[x]);
-//         image_ptr[c]     = m_blendc(image_ptr[c],     fill_ptr[c],     mask_ptr[x]);
-//       }
-//     }
-//
-//   }
-//
-// }
-
-// void Blend::process(stk::StkFrames& audio, stk::StkFrames& filling) {
-//
-//   std::size_t width = 2, length = audio.frames();
-//
-//   cv::Size size(width, length);
-//
-//   cv::Mat mask = cv::Mat(size, CV_64F);
-//
-//   double* mask_ptr;
-//
-//   stk::StkFrames framesL(length, 1), framesR(length, 1), fillingL(length, 1), fillingR(length, 1);
-//   framesL.setChannel(0, audio, 0);
-//   framesR.setChannel(0, audio, 1);
-//   fillingL.setChannel(0, filling, 0);
-//   fillingR.setChannel(0, filling, 1);
-//
-//
-//   for (std::size_t i = m_masks.size(); i --> 0; ) {
-//     if (i == m_masks.size()) {
-//       mask = m_masks[i]->frame(mask, 0);
-//     } else {
-//       m_masks[i]->process(mask, 0);
-//     }
-//   }
-//
-//   for (std::size_t  y = 0; y < length; y++) {
-//
-//     mask_ptr = mask.ptr<double>(y);
-//
-//     for (std::size_t  x = 0; x < width; x++) {
-//
-//       if (x == 0)
-//         framesL[y] = m_blendf(framesL[y], fillingL[y], mask_ptr[x]);
-//       else
-//         framesR[y] = m_blendf(framesR[y], fillingR[y], mask_ptr[x]);
-//
-//     }
-//   }
-//
-//   audio.setChannel(0, framesL, 0);
-//   audio.setChannel(1, framesR, 0);
-//
-// }

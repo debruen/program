@@ -5,7 +5,7 @@ Spectrum::Spectrum() {
 
   m_data = coat_data();
 
-  m_data.push_back(data::data_data("color range", m_color_min, m_color_max));
+  m_data.push_back(data::init_min_max("color range", m_color_min, m_color_max));
 
   m_spectral_rgb = rgb_spectrum();
   m_data.push_back(data::init_2d_uchar_data("rgb", m_spectral_rgb));
@@ -13,17 +13,17 @@ Spectrum::Spectrum() {
   std::vector<std::string> shape_options{"sine", "saw", "square", "triangle"};
   m_data.push_back(data::init_str("shape", shape_options, m_shape));
 
-  m_data.push_back(data::data_data("audio range", m_audio_min, m_audio_max));
+  m_data.push_back(data::init_min_max("audio range", m_audio_min, m_audio_max));
 
-  m_data.push_back(data::data_value("frequency gamma", m_frq_gamma));
+  m_data.push_back(data::init_value("frequency gamma", m_frq_gamma));
 
-  m_data.push_back(data::data_float("frequency", 0, 1, m_frequency));
+  m_data.push_back(data::init_float("frequency", 0, 1, m_frequency));
 
-  m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
+  m_data.push_back(data::init_float("amplitude", 0, 1, m_amplitude));
 
-  m_data.push_back(data::data_float("phase", 0, 1, m_phase));
+  m_data.push_back(data::init_float("phase", 0, 1, m_phase));
 
-  m_data.push_back(data::data_float("tilt", 0, 1, m_tilt));
+  m_data.push_back(data::init_float("tilt", 0, 1, m_tilt));
 
 }
 
@@ -64,7 +64,7 @@ nlohmann::json Spectrum::data() {
 
 nlohmann::json Spectrum::update(nlohmann::json data) {
 
-  m_shape     = data::get_string(data, "shape");
+  m_shape     = data::get_str(data, "shape");
   m_frequency = data::get_float(data, "frequency");
   m_amplitude = data::get_float(data, "amplitude");
   m_phase     = data::get_float(data, "phase");

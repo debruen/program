@@ -9,7 +9,7 @@ class Layer {
 
   private:
 
-    std::string m_type;
+    // std::string m_type;
 
     nlohmann::json m_data;
 
@@ -20,9 +20,9 @@ class Layer {
 
     Layer();
 
-    nlohmann::json init(std::string type);
+    nlohmann::json init();
 
-    nlohmann::json update(nlohmann::json data, std::string type);
+    nlohmann::json update(nlohmann::json data);
 
 
     void image_frame(cv::Mat& image, std::size_t frame_index);

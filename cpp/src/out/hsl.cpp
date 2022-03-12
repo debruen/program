@@ -12,22 +12,22 @@ Hsl::Hsl() {
 
   // 2
   std::vector<std::string> keys_options {"97", "88"};
-  nlohmann::json keys = data::data_string("keys", true, keys_options, keys_options[0]);
+  nlohmann::json keys = data::init_str("keys", keys_options, keys_options[0]);
 
   hsl_data.push_back(keys);
 
   std::vector<std::string> channel_options {"H", "s", "l"};
   /// 3:
 
-  nlohmann::json a = data::data_string("a", true, channel_options, channel_options[0]);
+  nlohmann::json a = data::init_str("a", channel_options, channel_options[0]);
   hsl_data.push_back(a);
 
   /// 4:
-  nlohmann::json b = data::data_string("b", true, channel_options, channel_options[1]);
+  nlohmann::json b = data::init_str("b", channel_options, channel_options[1]);
   hsl_data.push_back(b);
 
   /// 5:
-  nlohmann::json c = data::data_string("c", true, channel_options, channel_options[2]);
+  nlohmann::json c = data::init_str("c", channel_options, channel_options[2]);
   hsl_data.push_back(c);
 
   nlohmann::json save = get_save();
@@ -106,7 +106,7 @@ nlohmann::json Hsl::data() {
 nlohmann::json Hsl::update(nlohmann::json data) {
 
   /// set output type value
-  set_value(data::get_string(data, "type"));
+  set_value(data::get_str(data, "type"));
 
   /// set hsl data
   hsl_data = data;
@@ -118,9 +118,9 @@ void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
 
   std::string chan_a, chan_b, chan_c, keyboard;
 
-  chan_a = data::get_string(hsl_data, "a");
-  chan_b = data::get_string(hsl_data, "b");
-  chan_c = data::get_string(hsl_data, "c");
+  chan_a = data::get_str(hsl_data, "a");
+  chan_b = data::get_str(hsl_data, "b");
+  chan_c = data::get_str(hsl_data, "c");
 
   uchar ca, cb, cc;
   if(chan_a == "H") ca = 0;
@@ -152,7 +152,7 @@ void Hsl::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
   double freq, keys, base, narrowing, table_hsl[256], table_lr[sine_bands][2], x_correction;
 
   narrowing = data::get_float(hsl_data, "narrowing");
-  keyboard = data::get_string(hsl_data, "keys");
+  keyboard = data::get_str(hsl_data, "keys");
 
   if(keyboard == "88") {
     freq = 27.5000;
@@ -396,9 +396,9 @@ void Hsl::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 
   std::string chan_a, chan_b, chan_c;
 
-  chan_a = data::get_string(hsl_data, "a");
-  chan_b = data::get_string(hsl_data, "b");
-  chan_c = data::get_string(hsl_data, "c");
+  chan_a = data::get_str(hsl_data, "a");
+  chan_b = data::get_str(hsl_data, "b");
+  chan_c = data::get_str(hsl_data, "c");
 
   uchar ca, cb, cc;
   if(chan_a == "H") ca = 0;
