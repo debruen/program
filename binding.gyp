@@ -15,7 +15,6 @@
         ],
         "sources": [
             "cpp/main.cpp",
-            "cpp/async.cpp",
 
             # program
             "cpp/src/math.cpp",
@@ -29,11 +28,9 @@
             "cpp/src/filter/layer.cpp",
 
             "cpp/src/filter/film.cpp",
-            "cpp/src/filter/coat.cpp",
             "cpp/src/filter/spectrum.cpp",
 
             "cpp/src/filter/blend.cpp",
-            "cpp/src/filter/mask.cpp",
             "cpp/src/filter/gradient.cpp",
 
             "cpp/src/output.cpp",

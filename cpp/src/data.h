@@ -57,10 +57,6 @@ namespace data {
   nlohmann::json init_1d_float_data(std::string name, std::vector<double> values);
   nlohmann::json init_2d_uchar_data(std::string name, std::vector< std::vector<unsigned char> > values);
 
-  // // math functions
-  // double normalize(double min, double max, double value);
-  // double project(double min, double max, double value);
-
   // create data object
   nlohmann::json data_int(std::string name, int min = 0, int max = 256, int value = 0, bool select = true);
   nlohmann::json data_time(std::string name, int min = 1000, int max = 10000, int value = 1000, bool select = true);
@@ -69,37 +65,6 @@ namespace data {
   nlohmann::json data_path(std::string name, std::string value);
 
   nlohmann::json get_data(nlohmann::json& data, std::string name);
-
-  nlohmann::json get_array(nlohmann::json& data, std::string name);
-  void set_array(nlohmann::json& data, std::string name, nlohmann::json array);
-
-
-  std::string get_string(nlohmann::json& data, std::string name);
-
-  unsigned int get_width(nlohmann::json& data, std::string name);
-  unsigned int get_height(nlohmann::json& data, std::string name);
-
-  // void spectral_rgb(double& r, double& g, double& b, double l);
-  // std::vector< std::vector<unsigned char> > rgb_spectrum();
-
-  nlohmann::json data_object(std::string name, std::string type, std::vector<std::string> options, std::string value, bool select);
-
-  nlohmann::json data_array(std::string name, bool select = true);
-
-  nlohmann::json data_bool(std::string name, bool select = true, bool value = true);
-  nlohmann::json data_button(std::string name, bool select = true, bool value = true);
-
-  nlohmann::json data_string(std::string name, bool select = true, std::vector<std::string> options = {}, std::string value = "");
-
-  nlohmann::json data_size(std::string name, bool select = false, int width = 0, int height = 0);
-
-  nlohmann::json data_mask(std::string name, std::string type, bool select = true);
-
-  nlohmann::json data_spectral_color(std::string name);
-
-  nlohmann::json data_data(std::string name, double min, double max);
-
-  nlohmann::json data_sine(std::string name, bool select = true);
 
 }
 

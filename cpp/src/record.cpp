@@ -107,7 +107,7 @@ void Record::save_audio(cv::Mat& audio) {
 
   stk::StkFrames left(audio.rows, 1), right(audio.rows, 1), output(audio.rows, 2);
   std::cout << "A" << '\n';
-  for (std::size_t i = 0; i < audio.rows; i++) {
+  for (int i = 0; i < audio.rows; i++) {
 
     double* ptr = audio.ptr<double>(i);
 

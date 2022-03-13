@@ -18,9 +18,14 @@ private:
 
 protected:
 
-  Coat();
+  Coat() {
+    std::vector<std::string> type_options{"spectrum"};
+    m_coat.push_back(data::init_str("type", type_options, m_type));
+  };
 
-  nlohmann::json coat_data();
+  nlohmann::json coat_data() {
+    return m_coat;
+  };
 
 public:
 

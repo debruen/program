@@ -15,9 +15,14 @@ class Mask {
 
   protected:
 
-    Mask();
+    Mask() {
+      std::vector<std::string> type_options{"gradient"};
+      m_mask.push_back(data::init_str("type", type_options, m_type));
+    };
 
-    nlohmann::json get_data();
+    nlohmann::json get_data() {
+      return m_mask;
+    };
 
   public:
 

@@ -1,8 +1,8 @@
 
 #include "audiosine.h"
 
-AudioSine::AudioSine(const std::size_t& width, const std::size_t& height, const std::size_t& frame_index, const double& frequency, double phase, const double& tilt, const std::string& shape)
-  : m_width(width), m_height(height), m_frame_index(frame_index), m_frequency(frequency), m_phase(phase), m_tilt(tilt), m_shape(shape) {
+AudioSine::AudioSine(const int& width, const int& height, const std::size_t& frame_index, const double& frequency, const double& tilt, const std::string& shape, double phase)
+  : m_width(width), m_height(height), m_frame_index(frame_index), m_frequency(frequency), m_tilt(tilt), m_shape(shape), m_phase(phase) {
 
 }
 
@@ -25,7 +25,7 @@ void AudioSine::frame_phase() {
 
 }
 
-double AudioSine::point(std::size_t& y, std::size_t& x) {
+double AudioSine::point(int& y, int& x) {
 
   double
     // freguency

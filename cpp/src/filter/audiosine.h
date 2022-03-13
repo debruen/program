@@ -11,19 +11,19 @@ class AudioSine {
 
   private:
 
-    const std::size_t& m_width,& m_height,& m_frame_index;
-    const std::string& m_shape;
-
+    const int& m_width,& m_height;
+    const std::size_t& m_frame_index;
     const double& m_frequency,& m_tilt;
+    const std::string& m_shape;
 
     double m_phase, m_shape_note{0};
 
     void frame_phase();
 
   public:
-    AudioSine(const std::size_t& width, const std::size_t& height, const std::size_t& frame_index, const double& frequency, double phase, const double& tilt, const std::string& shape);
+    AudioSine(const int& width, const int& height, const std::size_t& frame_index, const double& frequency, const double& tilt, const std::string& shape, double phase);
 
-    double point(std::size_t& y, std::size_t& x);
+    double point(int& y, int& x);
 
 };
 
