@@ -15,7 +15,7 @@ Spectrum::Spectrum() {
 
   m_data.push_back(data::init_min_max("audio range", m_audio_min, m_audio_max));
 
-  m_data.push_back(data::init_value("frequency gamma", m_frq_gamma));
+  m_data.push_back(data::init_value("frequency gamma", m_audio_gamma));
 
   m_data.push_back(data::init_float("frequency", 0, 1, m_frequency));
 
@@ -45,9 +45,10 @@ std::vector< std::vector<unsigned char> > Spectrum::rgb_spectrum() {
   std::vector< std::vector<unsigned char> > rgb;
   double r, g, b;
 
-  for (std::size_t l = 400; l <= 700; l++) {
+  for (int l = 400; l <= 700; l++) {
     std::vector<unsigned char> value;
     spectral_rgb(r, g, b, l);
+
     value.push_back(round(b * 255));
     value.push_back(round(g * 255));
     value.push_back(round(r * 255));
@@ -75,7 +76,7 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
 }
 
 void Spectrum::set_audio_frequency(const std::size_t& height, double& frequency) {
-  frequency = pow(m_frequency, m_frq_gamma);
+  frequency = pow(m_frequency, m_audio_gamma);
   frequency = math::project(m_audio_min, m_audio_max, frequency);
   frequency = frequency * height / 44100.0;
 }
@@ -101,25 +102,19 @@ cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index) {
 
 cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
-  const int& width(audio.cols),& height(audio.rows);
+  cv::Mat film = cv::Mat(cv::Size(audio.cols, audio.rows), CV_64F);
 
-  cv::Mat film = cv::Mat(cv::Size(width, height), CV_64F);
+  double frequency;
 
-  double frequency, amplitude;
+  set_audio_frequency(audio.rows, frequency);
 
-  set_audio_frequency(height, frequency);
+  AudioSine sine(audio.cols, audio.rows, frame_index, frequency, m_tilt, m_shape, m_phase);
 
-  amplitude = m_amplitude;
-
-  AudioSine sine(width, height, frame_index, frequency, m_tilt, m_shape, m_phase);
-
-  cv::parallel_for_(cv::Range(0, height), [&](const cv::Range &range) {
+  cv::parallel_for_(cv::Range(0, audio.rows), [&](const cv::Range &range) {
     for (int y = range.start; y < range.end; y++) {
-
-      for (int x = 0; x < width; x++) {
+      for (int x = 0; x < audio.cols; x++) {
         film.ptr<double>(y)[x] = sine.point(y, x) * m_amplitude;
       }
-
     }
   });
 

@@ -18,16 +18,47 @@ class Layer {
 
   public:
 
-    Layer();
+    Layer() {
 
-    nlohmann::json init();
+      m_data = nlohmann::json::array();
 
-    nlohmann::json update(nlohmann::json data);
+      m_blend = new Blend();
+      m_film = new Film();
+      m_data.push_back(m_film->data());
+      m_data.push_back(m_blend->data());
+
+    };
+
+    nlohmann::json init() {
+      return m_data;
+    };
+
+    nlohmann::json update(nlohmann::json data) {
+
+      nlohmann::json new_data = nlohmann::json::array();
+
+      new_data.push_back(m_film->update(data[0]));
+      new_data.push_back(m_blend->update(data[1]));
+
+      m_data = new_data;
+
+      return m_data;
+    };
 
 
-    void image_frame(cv::Mat& image, std::size_t frame_index);
+    void image_frame(cv::Mat& image, std::size_t frame_index) {
 
-    void audio_frame(cv::Mat& audio, std::size_t frame_index);
+      cv::Mat film = m_film->image_frame(image, frame_index);
+      m_blend->image_frame(image, film, frame_index);
+
+      // m_blend->process(image, film);
+    };
+
+    void audio_frame(cv::Mat& audio, std::size_t frame_index) {
+
+      cv::Mat film = m_film->audio_frame(audio, frame_index);
+      m_blend->audio_frame(audio, film, frame_index);
+    };
 
 };
 

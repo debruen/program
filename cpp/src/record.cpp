@@ -59,7 +59,7 @@ bool Record::start() {
   m_audio = file(m_name, m_path, "audio");
 
   try {
-    audio_out.openFile(m_audio, 2, stk::FileWrite::FILE_AIF, stk::Stk::STK_SINT16);
+    audio_out.openFile(m_audio, 2, stk::FileWrite::FILE_AIF, stk::Stk::STK_FLOAT32);
   } catch (stk::StkError &) {
     exit(1);
   }

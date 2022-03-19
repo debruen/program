@@ -2,8 +2,12 @@
 #include "audiosine.h"
 
 AudioSine::AudioSine(const int& width, const int& height, const std::size_t& frame_index, const double& frequency, const double& tilt, const std::string& shape, double phase)
-  : m_width(width), m_height(height), m_frame_index(frame_index), m_frequency(frequency), m_tilt(tilt), m_shape(shape), m_phase(phase) {
+  : m_width{width}, m_height{height}, m_frame_index{frame_index}, m_frequency(frequency * 360.0), m_tilt(tilt), m_shape(shape), m_phase(phase) {
 
+  frame_phase();
+  std::cout << "index: " << m_frame_index << '\n';
+  std::cout << "frequency: " << m_frequency << '\n';
+  std::cout << "phase: " << m_phase << '\n';
 }
 
 void AudioSine::frame_phase() {
@@ -28,54 +32,48 @@ void AudioSine::frame_phase() {
 double AudioSine::point(int& y, int& x) {
 
   double
-    // freguency
-    f{m_frequency * 360},
-    // phase
-    p{m_phase * 360},
-    // m_tilt
-    t{1 - m_tilt},
     // width
-    w{static_cast<double>(m_width - 1)},
+    x_max{static_cast<double>(m_width - 1)},
     // height
-    h{static_cast<double>(m_height - 1)},
+    y_max{static_cast<double>(m_height - 1)},
 
     rp, ra, ya, xa, ry, yv, xv, degrees, sinus;
 
-  if(t <= 0.25) {
-    ya = 1 - t * 4;
-    xa = t * 4;
+  if(m_tilt <= 0.25) {
+    ya = 1 - m_tilt * 4;
+    xa = m_tilt * 4;
     rp = 0;
-  } else if (t <= 0.5) {
-    ra = t - 0.25;
+  } else if (m_tilt <= 0.5) {
+    ra = m_tilt - 0.25;
     ya = ra * 4;
     xa = 1 - ra * 4;
     rp = 0;
-  } else if (t <= 0.75) {
-    ra = t - 0.5;
+  } else if (m_tilt <= 0.75) {
+    ra = m_tilt - 0.5;
     ya = 1 - ra * 4;
     xa = ra * 4;
     rp = 180;
   } else {
-    ra = t - 0.75;
+    ra = m_tilt - 0.75;
     ya = ra * 4;
     xa = 1 - ra * 4;
     rp = 180;
   }
 
-  if(t <= 0.25) {
+  if(m_tilt <= 0.25) {
     ry = y;          // √
-  } else if (t <= 0.5) {
-    ry = h - y;
-  } else if (t <= 0.75) {
+  } else if (m_tilt <= 0.5) {
+    ry = y_max - y;
+  } else if (m_tilt <= 0.75) {
     ry = y;
   } else {
-    ry = h - y;
+    ry = y_max - y;
   }
 
-  yv = (ry / h * ya);
-  xv = (x / w * xa);
+  yv = (ry / y_max * ya);
+  xv = (x / x_max * xa);
 
-  degrees = ((xv + yv) * f) + p + rp;
+  degrees = ((xv + yv) * m_frequency) + m_phase + rp;
 
   sinus = sin(math::radian(degrees));
 

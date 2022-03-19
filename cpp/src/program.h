@@ -32,7 +32,9 @@ class Program {
 
     std::mutex m_objects_mutex;
 
-    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0}, m_audio_channels{2};
+    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
+
+    int m_audio_channels{2};
 
     bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false};
 
@@ -41,7 +43,6 @@ class Program {
 
     std::thread m_main;
     void main();
-
 
     std::vector<frame> m_buffer_storage;
     std::mutex m_buffer_storage_mutex;

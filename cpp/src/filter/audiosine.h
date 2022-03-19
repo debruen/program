@@ -13,7 +13,7 @@ class AudioSine {
 
     const int& m_width,& m_height;
     const std::size_t& m_frame_index;
-    const double& m_frequency,& m_tilt;
+    const double m_frequency, m_tilt;
     const std::string& m_shape;
 
     double m_phase, m_shape_note{0};

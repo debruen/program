@@ -24,129 +24,6 @@ Gradient::Gradient() {
 
 }
 
-double Gradient::frame_phase(std::size_t index) {
-
-  double phase = m_phase, multiplier;
-
-  for (std::size_t i = 0; i < index; i++) {
-    if(m_tilt <= 0.25) {
-      multiplier = 1 - m_tilt * 4;
-    } else if (m_tilt <= 0.5) {
-      multiplier = (m_tilt - 0.25) * (-4);
-    } else if (m_tilt <= 0.75) {
-      multiplier = 1 - (m_tilt - 0.5) * 4;
-    } else {
-      multiplier = (m_tilt - 0.75) * (-4);
-    }
-    phase += m_frequency * multiplier;
-  }
-
-//  phase = math::circle(m_phase_min, m_phase_max, phase);
-
-  return phase;
-}
-
-double Gradient::discrete(std::size_t& y, std::size_t& x, double& frequency, double& phase, double& tilt) {
-
-  static double prev_shape;
-
-  double f, p, t, w, h, rp, ra, ya, xa, ry, yv, xv, degrees, sinus;
-
-  f = frequency * 360;
-  p = phase * 360;
-  t = 1 - tilt;
-
-  w = static_cast<double>(m_width - 1);
-  h = static_cast<double>(m_height - 1);
-
-  if(t <= 0.25) {
-    ya = 1 - t * 4;
-    xa = t * 4;
-    rp = 0;
-  } else if (t <= 0.5) {
-    ra = t - 0.25;
-    ya = ra * 4;
-    xa = 1 - ra * 4;
-    rp = 0;
-  } else if (t <= 0.75) {
-    ra = t - 0.5;
-    ya = 1 - ra * 4;
-    xa = ra * 4;
-    rp = 180;
-  } else {
-    ra = t - 0.75;
-    ya = ra * 4;
-    xa = 1 - ra * 4;
-    rp = 180;
-  }
-
-  if(t <= 0.25) {
-    ry = y;          // √
-  } else if (t <= 0.5) {
-    ry = h - y;
-  } else if (t <= 0.75) {
-    ry = y;
-  } else {
-    ry = h - y;
-  }
-
-  yv = (ry / h * ya);
-  xv = (x / w * xa);
-
-  // pattern here
-  // to part of the function
-
-  degrees = ((xv + yv) * f) + p + rp;
-
-  sinus = sin(math::radian(degrees));
-
-  if (m_shape == "square") {
-    if (sinus >= 0)
-      sinus = 1;
-    else
-      sinus = -1;
-  }
-
-  if (m_shape == "triangle")
-    sinus = acos(sinus) / M_PI_2 - 1;
-
-  if (m_shape == "saw") {
-
-    double sin_a, sin_b;
-
-    sinus = acos(sinus) / M_PI_2 - 1;
-
-    if(sinus <= prev_shape) {
-      sin_a = sinus / 2 - 0.5;
-      sin_b = sinus * (-1) / 2 + 0.5;
-    } else {
-      sin_a = sinus * (-1) / 2 + 0.5;
-      sin_b = sinus / 2 - 0.5;
-    }
-
-    if (m_tilt == 0 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else if (m_tilt == 1 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else if (m_tilt == 0.5 && x == m_width - 1) {
-      prev_shape = sinus;
-      sinus = sin_b;
-    } else if (m_tilt > 0 && m_tilt < 0.5) {
-      prev_shape = sinus;
-      sinus = sin_b;
-    } else if (m_tilt > 0.5 && m_tilt < 1) {
-      prev_shape = sinus;
-      sinus = sin_a;
-    } else {
-      sinus = sin_a;
-    }
-
-  }
-  return math::normalize(m_sine_min, m_sine_max, sinus);
-}
-
 nlohmann::json Gradient::init() {
 
   return m_data;
@@ -174,7 +51,7 @@ void Gradient::set_area_frequency(double& frequency) {
 
 cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index) {
 
-  const std::size_t& width(mask.cols),& height(mask.rows);
+  const int& width(mask.cols),& height(mask.rows);
 
   AreaSine sine(width, height, frame_index, m_shape);
 
@@ -187,10 +64,10 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index) {
   tilt      = m_tilt;
 
   double* ptr;
-  for (std::size_t y = 0; y < height; y++) {
+  for (int y = 0; y < height; y++) {
 
     ptr = mask.ptr<double>(y);
-    for (std::size_t x = 0; x < width; x++) {
+    for (int x = 0; x < width; x++) {
 
       if (frequency == 0) {
         ptr[x] = 1 * amplitude;

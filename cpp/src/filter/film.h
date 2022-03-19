@@ -17,15 +17,50 @@ class Film {
 
   public:
 
-    Film();
+    Film() {
 
-    nlohmann::json data();
+      m_coat_type = "spectrum";
 
-    nlohmann::json update(nlohmann::json data);
+      m_coat = new Spectrum();
+      m_data = m_coat->data();
+    };
 
-    cv::Mat image_frame(cv::Mat& image, std::size_t frame_index);
+    nlohmann::json data() {
+      return m_data;
+    };
 
-    cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index);
+    nlohmann::json update(nlohmann::json data) {
+
+      std::string type = data::get_str(data, "type");
+
+      if (type != m_coat_type) {
+
+        if (type == "noise")
+          m_coat = new Spectrum();
+        else
+          m_coat = new Spectrum();
+
+        m_data = m_coat->data();
+
+      } else {
+        m_data = m_coat->update(data);
+      }
+
+      m_coat_type = type;
+
+
+      return m_data;
+    };
+
+    cv::Mat image_frame(cv::Mat& image, std::size_t frame_index) {
+
+      return m_coat->image_frame(image, frame_index);
+    };
+
+    cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index) {
+
+      return m_coat->audio_frame(audio, frame_index);
+    };
 
 };
 

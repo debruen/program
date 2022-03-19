@@ -57,15 +57,6 @@ namespace data {
   nlohmann::json init_1d_float_data(std::string name, std::vector<double> values);
   nlohmann::json init_2d_uchar_data(std::string name, std::vector< std::vector<unsigned char> > values);
 
-  // create data object
-  nlohmann::json data_int(std::string name, int min = 0, int max = 256, int value = 0, bool select = true);
-  nlohmann::json data_time(std::string name, int min = 1000, int max = 10000, int value = 1000, bool select = true);
-  nlohmann::json data_float(std::string name, double min = 0.0, double max = 1.0, double value = 0, bool select = true);
-  nlohmann::json data_value(std::string name, double value);
-  nlohmann::json data_path(std::string name, std::string value);
-
-  nlohmann::json get_data(nlohmann::json& data, std::string name);
-
 }
 
 #endif /* data_h */

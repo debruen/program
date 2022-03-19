@@ -77,7 +77,6 @@ void Program::update_buffer() {
 
 void Program::clear_buffer() {
 
-  m_buffer_mutex.lock();
   std::vector<frame> temp_buffer;
 
   if (m_update_main) {
@@ -86,14 +85,17 @@ void Program::clear_buffer() {
 
   } else {
 
+    m_buffer_mutex.lock();
     for (std::size_t i = 0; i < m_buffer.size(); i++) {
       if (m_buffer[i].index >= m_current_frame) {
         temp_buffer.push_back(m_buffer[i]);
       }
     }
+    m_buffer_mutex.unlock();
 
   }
 
+  m_buffer_mutex.lock();
   m_buffer = temp_buffer;
   m_buffer_mutex.unlock();
 
@@ -103,15 +105,13 @@ std::size_t Program::last_buffer_index() {
 
   std::size_t frame_index{0};
 
+  m_buffer_mutex.lock();
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
-
     if (m_buffer[i].index >= frame_index) {
-
       frame_index = m_buffer[i].index;
-
     }
-
   }
+  m_buffer_mutex.unlock();
 
   return frame_index;
 }
@@ -153,12 +153,8 @@ void Program::main() {
 
   while(m_work) {
 
-    // check data
-    // work on buffer
-
     clear_buffer();
 
-    //
     update_buffer();
 
   }
@@ -168,48 +164,46 @@ void Program::main() {
 
 cv::Mat Program::get_audio(unsigned int nFrames, double streamTime) {
 
-  std::size_t current_milliseconds = streamTime * 1000;
+  m_current_frame = streamTime * 1000 / m_frame_time;
+  // = audio height
+  int frame_ticks = m_frame_time / 1000 * 44100;
 
-  m_current_frame = current_milliseconds / m_frame_time;
+  int start_tick = round(streamTime * 44100 - m_current_frame * static_cast<double>(frame_ticks));
+
+  unsigned int rest_ticks = frame_ticks - start_tick;
+
+  int frames_needed = nFrames / frame_ticks + 1;
+
+  if(rest_ticks < nFrames) frames_needed++;
+
+  std::cout << "current frame: " << m_current_frame << '\n';
+  std::cout << "frame ticks: " << frame_ticks << '\n';
+  std::cout << "rest ticks: " << rest_ticks << '\n';
+
+  std::cout << "frames needed: " << frames_needed << '\n';
+  std::cout << "start ticks: " << start_tick << '\n';
 
 
-  std::size_t past_ticks = streamTime * 44100;
 
-  std::size_t ticks_needed = nFrames;
-
-  // audio height
-  std::size_t frame_ticks = m_frame_time / 1000 * 44100;
-
-  std::size_t start_tick = past_ticks - m_current_frame * frame_ticks;
-
-  std::size_t rest_ticks = frame_ticks - start_tick;
-
-  std::size_t frames_needed = ticks_needed / frame_ticks + 1;
-
-  if(rest_ticks < ticks_needed) frames_needed++;
-
-  std::cout << "frames_needed: " << frames_needed << '\n';
-  std::cout << "start_tick: " << start_tick << '\n';
-
-  std::cout << "m_current_frame: " << m_current_frame << '\n';
-
-  cv::Mat buffer_data = cv::Mat::zeros(cv::Size(m_audio_channels, nFrames), CV_64F);
+  int width = m_audio_channels, height = nFrames;
+  cv::Mat buffer_data = cv::Mat::zeros(cv::Size(width, height), CV_64F);
   double* audio_pointer,* buffer_pointer;
 
-  std::size_t f{m_current_frame}, g{0}, ticks{start_tick};
+  int f(m_current_frame), ticks{start_tick};
+  unsigned int g{0};
 
-  for (std::size_t i = 0; i < frames_needed; i++) {
+  for (int i = 0; i < frames_needed; i++) {
 
     if(i > 0) ticks = 0;
 
     frame frame = get_frame(f);
     f++;
 
-    for (std::size_t j = ticks; j < frame_ticks; j++) {
+    for (int j = ticks; j < frame_ticks; j++) {
       audio_pointer = frame.audio.ptr<double>(j);
       buffer_pointer = buffer_data.ptr<double>(g);
 
-      for (std::size_t k = 0; k < m_audio_channels; k++) {
+      for (int k = 0; k < m_audio_channels; k++) {
         buffer_pointer[k] = audio_pointer[k];
       }
 
@@ -235,6 +229,7 @@ int Program::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFra
 
   if ( status )
     std::cout << "Stream underflow detected!" << std::endl;
+
   // Write interleaved audio data.
   unsigned int i, j;
   for ( i=0; i<nFrames; i++ ) {
@@ -254,7 +249,6 @@ void Program::play() {
   }
 
   RtAudio::DeviceInfo info = m_rtaudio.getDeviceInfo(m_rtaudio.getDefaultOutputDevice());
-
 
   std::cout << "info: " << info.nativeFormats << '\n';
 
@@ -351,7 +345,7 @@ nlohmann::json Program::buffer(nlohmann::json data, cv::Mat& image) {
   m_record_state = data["record"];
 
   while (!frame_exists(m_current_frame)) {
-    std::cout << "waiting" << '\n';
+    // std::cout << "waiting" << '\n';
   }
 
   frame frame = get_frame(m_current_frame);
@@ -361,7 +355,7 @@ nlohmann::json Program::buffer(nlohmann::json data, cv::Mat& image) {
   std::size_t size = m_buffer.size();
   m_buffer_mutex.unlock();
 
-  if (size != m_buffer_size) {
+  if (size < m_buffer_size) {
     data["block"] = true;
   } else {
     data["block"] = false;

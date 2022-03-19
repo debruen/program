@@ -25,9 +25,7 @@
             "cpp/src/settings.cpp",
 
             "cpp/src/filter.cpp",
-            "cpp/src/filter/layer.cpp",
 
-            "cpp/src/filter/film.cpp",
             "cpp/src/filter/spectrum.cpp",
 
             "cpp/src/filter/blend.cpp",
