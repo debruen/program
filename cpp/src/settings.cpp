@@ -24,6 +24,9 @@ Settings::Settings() {
   /// frame time (audio length in milliseconds)
   m_data.push_back(data::init_time("frame time", 1000, 60000, 3000));
 
+  /// frames
+  m_data.push_back(data::init_int("frames", 1, 100, 1));
+
   compute();
 }
 

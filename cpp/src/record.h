@@ -19,7 +19,9 @@ class Record {
 
     stk::FileWvOut audio_out;
 
-    std::size_t m_prev;
+    std::size_t m_prev{0};
+
+    std::size_t m_count{0};
 
     bool exists(const std::string& file);
     std::string file(std::string& filename, std::string& path, std::string type);

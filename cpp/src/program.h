@@ -20,6 +20,26 @@ class Program {
 
   private:
 
+    // dimensions
+
+    // image bit depth {8 16 32}
+    // image color space {RGB HSL Lab Lch}
+
+    // width, height | int
+    // resolution
+    // presets {A6 A5 A4 A3 A2 A1 A0 ...}
+
+    // audio bit depth {16 32 64}
+    // audio sampling rate {44.1 48 88.2 96 176.4 192}
+
+    // channels, frame time | int
+
+    // mask bit depth {32 64}
+
+    // recording length in frames
+
+    // globals image audio mask ??
+
     bool m_work = true;
 
     /// main data object
@@ -32,11 +52,13 @@ class Program {
 
     std::mutex m_objects_mutex;
 
-    std::size_t m_frame_time, m_buffer_size{2}, m_current_frame{0};
+    std::size_t m_frame_time, m_buffer_size{2}, m_frames{1}, m_current_frame{0};
 
     int m_audio_channels{2};
 
-    bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false};
+    bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false}, m_stop{false};
+    std::mutex m_stop_mutex;
+
 
     std::vector<frame> m_buffer;
     std::mutex m_buffer_mutex;

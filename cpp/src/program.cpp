@@ -9,6 +9,7 @@ Program::Program()
   m_data["output"]   = m_output.data();
 
   m_frame_time = data::get_int(m_data["settings"], "frame time");
+  m_frames = data::get_int(m_data["settings"], "frames");
 
   m_main = std::thread{&Program::main, this};
   m_play = std::thread{&Program::play, this};
@@ -54,7 +55,7 @@ void Program::update_buffer() {
   std::size_t size = m_buffer.size();
   m_buffer_mutex.unlock();
 
-  if(size < m_buffer_size) {
+  if(size < m_frames + 1) {
     m_buffer_full = false;
     std::size_t new_frame_index{m_current_frame};
 
@@ -87,9 +88,8 @@ void Program::clear_buffer() {
 
     m_buffer_mutex.lock();
     for (std::size_t i = 0; i < m_buffer.size(); i++) {
-      if (m_buffer[i].index >= m_current_frame) {
+      // if (m_buffer[i].index >= m_current_frame)
         temp_buffer.push_back(m_buffer[i]);
-      }
     }
     m_buffer_mutex.unlock();
 
@@ -178,12 +178,9 @@ cv::Mat Program::get_audio(unsigned int nFrames, double streamTime) {
 
   std::cout << "current frame: " << m_current_frame << '\n';
   std::cout << "frame ticks: " << frame_ticks << '\n';
-  std::cout << "rest ticks: " << rest_ticks << '\n';
-
-  std::cout << "frames needed: " << frames_needed << '\n';
   std::cout << "start ticks: " << start_tick << '\n';
-
-
+  std::cout << "rest ticks: " << rest_ticks << '\n';
+  std::cout << "frames needed: " << frames_needed << '\n';
 
   int width = m_audio_channels, height = nFrames;
   cv::Mat buffer_data = cv::Mat::zeros(cv::Size(width, height), CV_64F);
@@ -289,6 +286,8 @@ void Program::play() {
       std::cout << "start recording" << '\n';
     }
 
+
+
     if(!m_record_state && m_recording) {
       if (m_play_state) m_play_state = false;
       if (m_record_state) m_record_state = false;
@@ -301,14 +300,22 @@ void Program::play() {
       record.save(m_current_frame);
     }
 
-    if(m_update_play) {
+
+
+    if(m_update_play || m_current_frame == m_frames) {
       if (m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
       m_rtaudio.setStreamTime(0.0);
+
+      m_current_frame = 0;
 
       m_play_state = false;
       m_record_state = false;
 
       m_update_play = false;
+
+      m_stop_mutex.lock();
+      m_stop = true;
+      m_stop_mutex.unlock();
     }
 
   }
@@ -325,6 +332,7 @@ nlohmann::json Program::update(nlohmann::json data) {
 
   m_data["settings"] = m_settings.update(data["settings"]);
 
+  m_frames = data::get_int(m_data["settings"], "frames");
   m_frame_time = data::get_int(m_data["settings"], "frame time");
   std::string type = data::get_str(m_data["settings"], "type");
 
@@ -341,8 +349,20 @@ nlohmann::json Program::update(nlohmann::json data) {
 
 nlohmann::json Program::buffer(nlohmann::json data, cv::Mat& image) {
 
-  m_play_state   = data["play"];
-  m_record_state = data["record"];
+  m_stop_mutex.lock();
+  bool test = m_stop;
+  m_stop_mutex.unlock();
+
+  if(test) {
+    data["play"] = false;
+    data["record"] = false;
+    m_stop_mutex.lock();
+    m_stop = false;
+    m_stop_mutex.unlock();
+  } else {
+    m_play_state   = data["play"];
+    m_record_state = data["record"];
+  }
 
   while (!frame_exists(m_current_frame)) {
     // std::cout << "waiting" << '\n';
@@ -355,7 +375,7 @@ nlohmann::json Program::buffer(nlohmann::json data, cv::Mat& image) {
   std::size_t size = m_buffer.size();
   m_buffer_mutex.unlock();
 
-  if (size < m_buffer_size) {
+  if (size < m_frames + 1) {
     data["block"] = true;
   } else {
     data["block"] = false;

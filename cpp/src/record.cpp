@@ -73,7 +73,7 @@ bool Record::stop() {
 }
 
 void Record::save(std::size_t frame_index) {
-  if (m_prev != frame_index) {
+  if (m_prev != frame_index || m_count == 0) {
 
     cv::Mat image, audio;
 
@@ -93,6 +93,7 @@ void Record::save(std::size_t frame_index) {
     std::cout << "save recording" << '\n';
 
   }
+  m_count++;
 }
 
 void Record::save_image(cv::Mat& image, std::size_t frame_index) {
@@ -109,10 +110,10 @@ void Record::save_audio(cv::Mat& audio) {
   std::cout << "A" << '\n';
   for (int i = 0; i < audio.rows; i++) {
 
-    double* ptr = audio.ptr<double>(i);
+    // double* ptr = audio.ptr<double>(i);
 
-    left[i]  = ptr[0];
-    right[i] = ptr[1];
+    left[i]  = audio.ptr<double>(i)[0];
+    right[i] = audio.ptr<double>(i)[1];
 
   }
   std::cout << "B" << '\n';
