@@ -19,7 +19,7 @@ Gradient::Gradient() {
 
   m_data.push_back(data::init_float("tilt", 0, 1, m_tilt));
 
-  std::vector<std::string> filter_options{"none", "frequency", "amplitude", "phase", "tilt"};
+  std::vector<std::string> filter_options{"none", "amplitude"};
   m_data.push_back(data::init_str("filter", filter_options, m_filter));
 
 }
@@ -51,76 +51,92 @@ void Gradient::set_area_frequency(double& frequency) {
 
 cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index) {
 
-  const int& width(mask.cols),& height(mask.rows);
-
-  AreaSine sine(width, height, frame_index, m_shape);
-
-  double frequency, amplitude, phase, tilt;
+  double frequency;
 
   set_area_frequency(frequency);
 
-  amplitude = m_amplitude;
-  phase     = m_phase;
-  tilt      = m_tilt;
+  AudioSine sine(mask.cols, mask.rows, frame_index, frequency, m_tilt, m_shape, m_phase);
 
-  double* ptr;
-  for (int y = 0; y < height; y++) {
-
-    ptr = mask.ptr<double>(y);
-    for (int x = 0; x < width; x++) {
-
-      if (frequency == 0) {
-        ptr[x] = 1 * amplitude;
-      } else {
-        ptr[x] = math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
+  cv::parallel_for_(cv::Range(0, mask.rows), [&](const cv::Range &range) {
+    for (int y = range.start; y < range.end; y++) {
+      for (int x = 0; x < mask.cols; x++) {
+        mask.ptr<double>(y)[x] = math::normalize(m_norm_low, m_norm_high, sine.point(y, x) * m_amplitude);
       }
-
     }
-  }
+  });
 
   return mask;
+
+  // const int& width(mask.cols),& height(mask.rows);
+  //
+  // AreaSine sine(width, height, frame_index, m_shape);
+  //
+  // double frequency, amplitude, phase, tilt;
+  //
+  // set_area_frequency(frequency);
+  //
+  // amplitude = m_amplitude;
+  // phase     = m_phase;
+  // tilt      = m_tilt;
+  //
+  // double* ptr;
+  // for (int y = 0; y < height; y++) {
+  //
+  //   ptr = mask.ptr<double>(y);
+  //   for (int x = 0; x < width; x++) {
+  //
+  //     if (frequency == 0) {
+  //       ptr[x] = 1 * amplitude;
+  //     } else {
+  //       ptr[x] = math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
+  //     }
+  //
+  //   }
+  // }
+  //
+  // return mask;
 }
 
 void Gradient::process(cv::Mat& mask, std::size_t frame_index) {
 
-  const std::size_t& width(mask.cols),& height(mask.rows);
-
-  AreaSine sine(width, height, frame_index, m_shape);
-
   unsigned char filter_select = 0;
+  if (m_filter == "amplitude") filter_select = 1;
 
-  if (m_filter == "frequency") filter_select = 1;
-  if (m_filter == "amplitude") filter_select = 2;
-  if (m_filter == "phase") filter_select = 3;
-  if (m_filter == "tilt") filter_select = 4;
+  double frequency, amplitude;
 
-  double frequency, amplitude, phase, tilt;
+  amplitude = m_amplitude;
 
   set_area_frequency(frequency);
 
-  amplitude = m_amplitude;
-  phase     = m_phase;
-  tilt      = m_tilt;
+  AudioSine sine(mask.cols, mask.rows, frame_index, frequency, m_tilt, m_shape, m_phase);
 
-  double* ptr;
-
-  for (std::size_t y = 0; y < height; y++) {
-
-    ptr = mask.ptr<double>(y);
-    for (std::size_t x = 0; x < width; x++) {
-
-      if (filter_select == 1) frequency = math::project(m_freq_min, m_freq_max, ptr[x]);
-      if (filter_select == 2) amplitude = ptr[x];
-      if (filter_select == 3) phase     = math::project(m_phase_min, m_phase_max, ptr[x]);
-      if (filter_select == 4) tilt      = ptr[x];
-
-      if (frequency == 0) {
-        ptr[x] = 1 * amplitude;
-      } else {
-        ptr[x] =  math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
+  // cv::parallel_for_(cv::Range(0, mask.rows), [&](const cv::Range &range) {
+    double* ptr;
+    for (int y = 0; y < mask.rows; y++) {
+      ptr = mask.ptr<double>(y);
+      for (int x = 0; x < mask.cols; x++) {
+        if (filter_select == 1) amplitude = ptr[x];
+        ptr[x] = math::normalize(m_norm_low, m_norm_high, sine.point(y, x)) * amplitude;
       }
-
     }
-  }
+  // });
+
+  //
+  //
+  // for (std::size_t y = 0; y < height; y++) {
+  //
+  //   ptr = mask.ptr<double>(y);
+  //   for (std::size_t x = 0; x < width; x++) {
+  //
+  //     if (filter_select == 1) amplitude = ptr[x];
+  //
+  //     if (frequency == 0) {
+  //       ptr[x] = 1 * amplitude;
+  //     } else {
+  //       ptr[x] =  math::normalize(-1, 1, sine.point(y, x) * amplitude);
+  //     }
+  //
+  //   }
+  // }
 
 }

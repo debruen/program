@@ -96,6 +96,16 @@ class Program {
   public:
     Program();
 
+    // synthesis_data
+    // synthesis_update
+
+    // controls_data
+    // controls_update
+
+    // display
+
+    // quit
+
     nlohmann::json data();
     nlohmann::json update(nlohmann::json data);
 

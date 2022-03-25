@@ -4,7 +4,7 @@
 /// takes value in the range min, max
 /// returns value in the range of 0 to 1
 
-double math::normalize(const double& min, const double& max, const double& value) {
+double math::normalize(double& min, double& max, double value) {
   return (value - min) / (max - min);
 }
 
