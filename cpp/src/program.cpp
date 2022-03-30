@@ -2,7 +2,7 @@
 #include "program.h"
 
 Program::Program()
-    : m_main{}, m_play{} {
+    : m_main{}, m_play_thread{}, m_record_thread{} {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -11,9 +11,16 @@ Program::Program()
   m_frame_time = data::get_int(m_data["settings"], "frame time");
   m_frames = data::get_int(m_data["settings"], "frames");
 
+  // //
+  // m_control["reset"]  = m_reset;
+  // m_control["play"]   = m_play;
+  // m_control["record"] = m_record;
+
   m_main = std::thread{&Program::main, this};
-  m_play = std::thread{&Program::play, this};
+  m_play_thread = std::thread{&Program::play, this};
 }
+
+// private
 
 void Program::create_frame(std::size_t frame_index) {
 
@@ -323,6 +330,12 @@ void Program::play() {
   std::cout << "play quit" << '\n';
 }
 
+// public
+
+// nlohmann::json init_controls(){
+//   return m_control;
+// }
+
 nlohmann::json Program::data() {
   return m_data;
 }
@@ -389,6 +402,6 @@ void Program::quit() {
   std::cout << "****** quit ******" << '\n';
   m_work = false;
 
-  m_play.join();
+  m_play_thread.join();
   m_main.join();
 }

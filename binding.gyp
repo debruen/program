@@ -22,6 +22,12 @@
 
             "cpp/src/program.cpp",
 
+
+            "cpp/src/control.cpp",
+            "cpp/src/control/play.cpp",
+            "cpp/src/control/record.cpp",
+
+
             "cpp/src/settings.cpp",
 
             "cpp/src/filter.cpp",
