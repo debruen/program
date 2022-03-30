@@ -9,9 +9,12 @@
 
 namespace math {
 
-  double normalize(const double& min, const double& max, double& value);
-  double project(const double& min, const double& max, double& value);
+  double normalize(double& min, double& max, double value);
+
+  double project(const double& min, const double& max, const double& value);
+
   double circle(const double& min, const double& max, double& value);
+
   double radian(double& degree);
 
 }

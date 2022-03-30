@@ -5,10 +5,13 @@
 
 #include <chrono>
 #include <thread>
+#include <iomanip>
 
 #include "src/program.h"
 
-class AsyncInit : public Napi::AsyncWorker {
+// -- -- -- -- -- Data
+
+class AsyncData : public Napi::AsyncWorker {
 
   private:
 
@@ -16,13 +19,21 @@ class AsyncInit : public Napi::AsyncWorker {
     nlohmann::json m_data;
 
   public:
-    AsyncInit(Napi::Function& callback, Program& program);
-    virtual ~AsyncInit() {};
+    AsyncData(Napi::Function& callback, Program& program)
+      : AsyncWorker(callback), program(program) {
+    };
+    virtual ~AsyncData() {};
 
-    void Execute();
-    void OnOK();
-
+    void Execute() {
+      m_data = program.data();
+    };
+    void OnOK() {
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
 };
+
+// -- -- -- -- -- Update
 
 class AsyncUpdate : public Napi::AsyncWorker {
 
@@ -32,50 +43,97 @@ class AsyncUpdate : public Napi::AsyncWorker {
     nlohmann::json m_data;
 
   public:
-    AsyncUpdate(Napi::Function& callback, Program& program, nlohmann::json data);
+    AsyncUpdate(Napi::Function& callback, Program& program, nlohmann::json data)
+      : AsyncWorker(callback), program(program), m_data(data) {
+    };
     virtual ~AsyncUpdate() {};
 
-    void Execute();
-    void OnOK();
-
+    void Execute() {
+      m_data = program.update(m_data);
+    };
+    void OnOK() {
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
 };
 
-class AsyncPreview : public Napi::AsyncWorker {
+// -- -- -- -- -- Buffer
+
+class AsyncBuffer : public Napi::AsyncWorker {
 
   private:
     Program& program;
 
-    Napi::Uint8Array p_images;
-    Napi::Float32Array p_left;
-    Napi::Float32Array p_right;
+    nlohmann::json m_data;
 
-    unsigned int m_width, m_height, m_frames, m_time;
+    Napi::Uint8Array p_image;
+    int m_width, m_height;
 
-    std::vector<cv::Mat> m_images;
-    stk::StkFrames m_audio;
+    cv::Mat m_image;
 
   public:
-    AsyncPreview(Napi::Function& callback, Program& program, Napi::Uint8Array images, Napi::Float32Array left, Napi::Float32Array right);
-    virtual ~AsyncPreview() {};
+    AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image)
+      : AsyncWorker(callback), program(program), m_data(data), p_image(image) {
 
-    void Execute();
-    void OnOK();
+      m_width  = m_data["width"];
+      m_height = m_data["height"];
+
+      cv::Size size(m_width, m_height);
+
+      m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
+    };
+    virtual ~AsyncBuffer() {};
+
+    void Execute() {
+      m_data = program.buffer(m_data, m_image);
+    };
+    void OnOK() {
+
+      // writing result to image_buffer
+      int c, z;
+      uchar* image_ptr;
+
+      for (int y = 0; y < m_height; y++) {
+
+        image_ptr = m_image.ptr<uchar>(y);
+        for (int x = 0; x < m_width; x++) {
+          z = (y * m_width + x) * 4;
+          c = x * 3;
+
+          p_image[z]   = image_ptr[c+2]; // red
+          p_image[z+1] = image_ptr[c+1]; // green
+          p_image[z+2] = image_ptr[c];   // blue
+          p_image[z+3] = 255;      // alpha channel
+        }
+      }
+
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
 
 };
 
-class AsyncSave : public Napi::AsyncWorker {
+// -- -- -- -- -- Quit
+
+class AsyncQuit : public Napi::AsyncWorker {
 
   private:
 
     Program& program;
 
   public:
-    AsyncSave(Napi::Function& callback, Program& program);
-    virtual ~AsyncSave() {};
+    AsyncQuit(Napi::Function& callback, Program& program)
+      : AsyncWorker(callback), program(program) {
+    };
+    virtual ~AsyncQuit() {};
 
-    void Execute();
-    void OnOK();
-
+    void Execute() {
+      program.quit();
+    };
+    void OnOK() {
+      std::string string = "program: quit done";
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
 };
 
-#endif /* async_h */
+#endif

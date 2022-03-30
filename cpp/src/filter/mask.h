@@ -15,9 +15,14 @@ class Mask {
 
   protected:
 
-    Mask();
+    Mask() {
+      std::vector<std::string> type_options{"gradient"};
+      m_mask.push_back(data::init_str("type", type_options, m_type));
+    };
 
-    nlohmann::json get_data();
+    nlohmann::json get_data() {
+      return m_mask;
+    };
 
   public:
 
@@ -28,6 +33,7 @@ class Mask {
     virtual cv::Mat frame(cv::Mat& mask, std::size_t index) = 0;
 
     virtual void process(cv::Mat& mask, std::size_t index) = 0;
+
 };
 
 #endif // mask_h END

@@ -4,15 +4,15 @@
 /// takes value in the range min, max
 /// returns value in the range of 0 to 1
 
-double math::normalize(const double& min, const double& max, double& value) {
+double math::normalize(double& min, double& max, double value) {
   return (value - min) / (max - min);
 }
 
 /// takes value in the range 0 to 1
 /// returns value in the range min, max
 
-double math::project(const double& min, const double& max, double& value) {
-    return (value * (max - min)) + min;
+double math::project(const double& min, const double& max, const double& value) {
+  return (value * (max - min)) + min;
 }
 
 double math::circle(const double& min, const double& max, double& value) {
@@ -31,7 +31,5 @@ double math::circle(const double& min, const double& max, double& value) {
 }
 
 double math::radian(double& degree) {
-  double result = math::circle(0, 360, degree);
-
-  return result * M_PI / 180;
+  return math::circle(0, 360, degree) * M_PI / 180;
 }

@@ -7,7 +7,7 @@ Output::Output() {
   m_data = m_base->data();
 }
 
-nlohmann::json Output::init() {
+nlohmann::json Output::data() {
 
   return m_data;
 }
@@ -16,17 +16,22 @@ nlohmann::json Output::update(nlohmann::json data, std::string type) {
 
   m_type = type;
 
+  std::string old_t, new_t;
+
+  old_t = data::get_str(m_data, "type");
+  new_t = data::get_str(data, "type");
+
   /// clear transform class if value is changed
-  if(data[0]["value"] != m_data[0]["value"]) {
-    if (data[0]["value"] == "hsl")
+  if(new_t != old_t) {
+    if (new_t == "hsl")
       m_base = new Hsl();
 
-    if (data[0]["value"] == "rgb")
+    if (new_t == "rgb")
       m_base = new Hsl();
 
     data = m_base->data();
   } else {
-    data = m_base->data(data);
+    data = m_base->update(data);
 
   }
 
@@ -34,6 +39,16 @@ nlohmann::json Output::update(nlohmann::json data, std::string type) {
 
   return m_data;
 }
+
+void Output::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+  m_base->image_frame(image, audio, frame_index);
+}
+
+void Output::audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
+  m_base->audio_frame(image, audio, frame_index);
+}
+
+
 
 void Output::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
 

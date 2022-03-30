@@ -9,23 +9,58 @@ class Film {
 
   private:
 
-    std::string m_fill_type;
+    std::string m_coat_type;
 
     nlohmann::json m_data;
 
-    Coat* m_fill;
+    Coat* m_coat;
 
   public:
 
-    Film();
+    Film() {
 
-    nlohmann::json init();
+      m_coat_type = "spectrum";
 
-    nlohmann::json update(nlohmann::json data);
+      m_coat = new Spectrum();
+      m_data = m_coat->data();
+    };
 
-    std::vector<cv::Mat> images(std::size_t frames, std::size_t width, std::size_t height);
+    nlohmann::json data() {
+      return m_data;
+    };
 
-    stk::StkFrames audio(std::size_t length);
+    nlohmann::json update(nlohmann::json data) {
+
+      std::string type = data::get_str(data, "type");
+
+      if (type != m_coat_type) {
+
+        if (type == "noise")
+          m_coat = new Spectrum();
+        else
+          m_coat = new Spectrum();
+
+        m_data = m_coat->data();
+
+      } else {
+        m_data = m_coat->update(data);
+      }
+
+      m_coat_type = type;
+
+
+      return m_data;
+    };
+
+    cv::Mat image_frame(cv::Mat& image, std::size_t frame_index) {
+
+      return m_coat->image_frame(image, frame_index);
+    };
+
+    cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index) {
+
+      return m_coat->audio_frame(audio, frame_index);
+    };
 
 };
 

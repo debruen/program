@@ -15,7 +15,6 @@
         ],
         "sources": [
             "cpp/main.cpp",
-            "cpp/async.cpp",
 
             # program
             "cpp/src/math.cpp",
@@ -26,21 +25,21 @@
             "cpp/src/settings.cpp",
 
             "cpp/src/filter.cpp",
-            "cpp/src/filter/layer.cpp",
 
-            "cpp/src/filter/film.cpp",
-            "cpp/src/filter/coat.cpp",
             "cpp/src/filter/spectrum.cpp",
 
             "cpp/src/filter/blend.cpp",
-            "cpp/src/filter/mask.cpp",
             "cpp/src/filter/gradient.cpp",
 
             "cpp/src/output.cpp",
 
             "cpp/src/out/out.cpp",
             "cpp/src/out/hsl.cpp",
-            "cpp/src/out/specone.cpp"
+
+            "cpp/src/filter/areasine.cpp",
+            "cpp/src/filter/audiosine.cpp",
+
+            "cpp/src/record.cpp"
 
 
         ],
@@ -60,6 +59,7 @@
             '-ltiff',
             '-ljpeg',
             '-lstk',
+            '-lrtaudio',
             '-lfftw3'
         ],
         'dependencies': [

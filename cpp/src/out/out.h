@@ -34,11 +34,19 @@ class Out {
     std::vector<stk::SineWave> m_sine_l, m_sine_r;
     void set_sine(unsigned int bands);
 
+    std::vector< std::vector<stk::SineWave> > make_sine(unsigned int bands);
+
   public:
 
     virtual nlohmann::json data() = 0;
 
-    virtual nlohmann::json data(nlohmann::json data) = 0;
+    virtual nlohmann::json update(nlohmann::json data) = 0;
+
+    virtual void image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) = 0;
+
+    virtual void audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) = 0;
+
+
 
     virtual void process(std::vector<cv::Mat>& images, stk::StkFrames& audio) = 0;
 

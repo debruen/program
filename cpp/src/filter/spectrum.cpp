@@ -3,9 +3,9 @@
 
 Spectrum::Spectrum() {
 
-  m_data = get_data();
+  m_data = coat_data();
 
-  m_data.push_back(data::data_data("color range", m_color_min, m_color_max));
+  m_data.push_back(data::init_min_max("color range", m_color_min, m_color_max));
 
   m_spectral_rgb = rgb_spectrum();
   m_data.push_back(data::init_2d_uchar_data("rgb", m_spectral_rgb));
@@ -13,15 +13,17 @@ Spectrum::Spectrum() {
   std::vector<std::string> shape_options{"sine", "saw", "square", "triangle"};
   m_data.push_back(data::init_str("shape", shape_options, m_shape));
 
-  m_data.push_back(data::data_data("audio range", m_audio_min, m_audio_max));
+  m_data.push_back(data::init_min_max("audio range", m_audio_min, m_audio_max));
 
-  m_data.push_back(data::data_value("frequency gamma", m_frq_gamma));
+  m_data.push_back(data::init_value("frequency gamma", m_audio_gamma));
 
-  m_data.push_back(data::data_float("frequency", 0, 1, m_frequency));
+  m_data.push_back(data::init_float("frequency", 0, 1, m_frequency));
 
-  m_data.push_back(data::data_float("amplitude", 0, 1, m_amplitude));
+  m_data.push_back(data::init_float("amplitude", 0, 1, m_amplitude));
 
-  m_data.push_back(data::data_float("phase", -1, 1, m_phase));
+  m_data.push_back(data::init_float("phase", 0, 1, m_phase));
+
+  m_data.push_back(data::init_float("tilt", 0, 1, m_tilt));
 
 }
 
@@ -43,9 +45,10 @@ std::vector< std::vector<unsigned char> > Spectrum::rgb_spectrum() {
   std::vector< std::vector<unsigned char> > rgb;
   double r, g, b;
 
-  for (std::size_t l = 400; l <= 700; l++) {
+  for (int l = 400; l <= 700; l++) {
     std::vector<unsigned char> value;
     spectral_rgb(r, g, b, l);
+
     value.push_back(round(b * 255));
     value.push_back(round(g * 255));
     value.push_back(round(r * 255));
@@ -55,14 +58,14 @@ std::vector< std::vector<unsigned char> > Spectrum::rgb_spectrum() {
   return rgb;
 }
 
-nlohmann::json Spectrum::init() {
+nlohmann::json Spectrum::data() {
 
   return m_data;
 }
 
 nlohmann::json Spectrum::update(nlohmann::json data) {
 
-  m_shape     = data::get_string(data, "shape");
+  m_shape     = data::get_str(data, "shape");
   m_frequency = data::get_float(data, "frequency");
   m_amplitude = data::get_float(data, "amplitude");
   m_phase     = data::get_float(data, "phase");
@@ -72,10 +75,17 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   return m_data;
 }
 
-cv::Mat Spectrum::image(std::size_t width, std::size_t height) {
+void Spectrum::set_audio_frequency(const std::size_t& height, double& frequency) {
+  frequency = pow(m_frequency, m_audio_gamma);
+  frequency = math::project(m_audio_min, m_audio_max, frequency);
+  frequency = frequency * height / 44100.0;
+}
 
-  cv::Size size(width, height);
-  cv::Mat image = cv::Mat(size, CV_8UC3);
+cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index) {
+
+  cv::Size size(image.cols, image.rows);
+
+  cv::Mat film = cv::Mat(size, CV_8UC3);
 
   std::size_t color_index = round((1 - m_frequency) * (m_spectral_rgb.size() - 1));
 
@@ -85,64 +95,28 @@ cv::Mat Spectrum::image(std::size_t width, std::size_t height) {
   g = m_spectral_rgb[color_index][1];
   b = m_spectral_rgb[color_index][2];
 
-  image = cv::Scalar(r, g, b);
+  film = cv::Scalar(r, g, b);
 
-  return image;
+  return film;
 }
 
-stk::StkFrames Spectrum::audio(std::size_t length) {
+cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index) {
 
-  stk::StkFrames signal(length, 1);
-  double frequency, amplitude, phase, phase_min, phase_max, tick;
+  cv::Mat film = cv::Mat(cv::Size(audio.cols, audio.rows), CV_64F);
 
-  phase_min = -1;
-  phase_max = 1;
+  double frequency;
 
-  frequency = pow(m_frequency, m_frq_gamma);
-  amplitude = m_amplitude;
-  phase = m_phase;
+  set_audio_frequency(audio.rows, frequency);
 
-  frequency = frequency * (m_audio_max - m_audio_min) + m_audio_min;
-  phase = phase * (phase_max - phase_min) + phase_min;
+  AudioSine sine(audio.cols, audio.rows, frame_index, frequency, m_tilt, m_shape, m_phase);
 
-  stk::SineWave sine;
-
-  sine.setFrequency(frequency);
-
-  sine.addPhaseOffset(phase);
-
-  double temp_signal, prev;
-
-  for(std::size_t i = 0; i < length; ++i) {
-
-    tick = sine.tick();
-
-    if (m_shape == "square") {
-      if (tick >= 0)
-        tick = 1;
-      else
-        tick = -1;
-    }
-
-    if (m_shape == "triangle")
-      tick = acos(tick) / M_PI_2 - 1;
-
-    if (m_shape == "saw") {
-
-      tick = acos(tick) / M_PI_2 - 1;
-
-      if(tick <= prev) {
-        temp_signal = tick / 2 - 0.5;
-      } else {
-        temp_signal = tick * (-1) / 2 + 0.5;
+  cv::parallel_for_(cv::Range(0, audio.rows), [&](const cv::Range &range) {
+    for (int y = range.start; y < range.end; y++) {
+      for (int x = 0; x < audio.cols; x++) {
+        film.ptr<double>(y)[x] = sine.point(y, x) * m_amplitude;
       }
-      prev = tick;
-      tick = temp_signal;
     }
+  });
 
-    signal[i] = tick * amplitude;
-
-  }
-
-  return signal;
+  return film;
 }

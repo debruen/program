@@ -8,20 +8,20 @@ class Filter {
 
   private:
 
-    std::string m_type;
-
-    nlohmann::json m_data;
+    nlohmann::json m_data = nlohmann::json::array();
 
     std::vector< Layer* > m_layer;
 
   public:
     Filter();
 
-    nlohmann::json init();
+    nlohmann::json data();
 
-    nlohmann::json update(nlohmann::json data, std::string type);
+    nlohmann::json update(nlohmann::json data);
 
-    void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
+    void image_frame(cv::Mat& image, std::size_t frame_index);
+
+    void audio_frame(cv::Mat& audio, std::size_t frame_index);
 
 };
 

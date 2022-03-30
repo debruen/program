@@ -1,62 +1,50 @@
 
-const {program_init, program_update, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {program_data, program_update, program_buffer, program_quit} = require('./build/Release/emit_from_cpp.node')
 
 class Program{
 
   constructor() {
-  } // constructor
 
-  init() {
+  }
 
+  data() {
     return new Promise((resolve) => {
-      program_init((err, result) => {
-
-        // convert result to JSON
+      program_data((err, result) => {
         const json = JSON.parse(result)
-
         resolve(json)
       })
     })
-
-  } // init
+  }
 
   update(data) {
-
-    // convert data to string
     const string = JSON.stringify(data)
-
     return new Promise((resolve) => {
       program_update(string, (err, result) => {
-
-        // convert result to JSON
         const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
 
+  buffer(data, image) {
+    const string = JSON.stringify(data)
+    return new Promise((resolve) => {
+      program_buffer(string, image, (err, result) => {
+        const json = JSON.parse(result)
         resolve(json)
       })
     })
 
-  } // data
+  }
 
-  preview(images, left, right) {
-
+  quit() {
     return new Promise((resolve) => {
-      program_preview(images, left, right, (err, result) => {
+      program_quit((err, result) => {
         resolve(result)
       })
     })
+  }
 
-  } // preview
-
-  save() {
-
-    return new Promise((resolve) => {
-      program_save((err, result) => {
-        resolve(result)
-      })
-    })
-
-  } // save
-
-} // Program
+}
 
 module.exports = Program;
