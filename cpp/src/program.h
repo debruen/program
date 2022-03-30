@@ -69,9 +69,6 @@ class Program {
     std::vector<frame> m_buffer_storage;
     std::mutex m_buffer_storage_mutex;
 
-    void play();
-    std::thread m_play;
-
     static int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
 
     int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
@@ -93,16 +90,39 @@ class Program {
     std::size_t last_buffer_index();
     bool frame_exists(std::size_t frame_index);
 
+
+    // nlohmann::json m_control = nlohmann::json::array();
+
+    void play();
+    std::thread m_play_thread;
+
+    bool m_play{false};
+
+    void record();
+    std::thread m_record_thread;
+
+    bool m_record{false};
+
+    bool m_reset{false};
+
   public:
     Program();
 
-    // synthesis_data
-    // synthesis_update
+    // init_synthesis
+    // data_synthesis
 
-    // controls_data
-    // controls_update
+      // thread_synthesis
 
-    // display
+
+    // nlohmann::json init_controls();
+    // data_controls
+
+      // thread_play
+      // thread_save
+
+
+    // work_display
+
 
     // quit
 
