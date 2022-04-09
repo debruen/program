@@ -7,9 +7,9 @@
 #include <thread>
 #include <mutex>
 
-#include "settings.h" // dimension
-#include "filter.h"   // admixture
-#include "output.h"   // transform
+#include "synthesis/settings.h" // dimension
+#include "synthesis/filter.h"   // admixture
+#include "synthesis/output.h"   // transform
 
 class Synthesis {
 
@@ -36,8 +36,8 @@ class Synthesis {
 
     void clear_buffer();
     void create_buffer();
-    std::size_t last_buffer_index();
-    void create_frame(std::size_t frame_index);
+    std::size_t last_index();
+    void create_frame(std::size_t index);
 
     void buffer();
     std::thread m_buffer_thread;

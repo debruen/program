@@ -9,23 +9,21 @@
 
 #include "src/program.h"
 
-// -- -- -- -- -- Data
-
-class AsyncData : public Napi::AsyncWorker {
+// -- -- -- -- -- init synthesis
+class AsyncInitSynthesis : public Napi::AsyncWorker {
 
   private:
-
     Program& program;
     nlohmann::json m_data;
 
   public:
-    AsyncData(Napi::Function& callback, Program& program)
+    AsyncInitSynthesis(Napi::Function& callback, Program& program)
       : AsyncWorker(callback), program(program) {
     };
-    virtual ~AsyncData() {};
+    virtual ~AsyncInitSynthesis() {};
 
     void Execute() {
-      m_data = program.data();
+      m_data = program.init_synthesis();
     };
     void OnOK() {
       std::string string = m_data.dump();
@@ -33,23 +31,21 @@ class AsyncData : public Napi::AsyncWorker {
     };
 };
 
-// -- -- -- -- -- Update
-
-class AsyncUpdate : public Napi::AsyncWorker {
+// -- -- -- -- -- data synthesis
+class AsyncDataSynthesis : public Napi::AsyncWorker {
 
   private:
-
     Program& program;
     nlohmann::json m_data;
 
   public:
-    AsyncUpdate(Napi::Function& callback, Program& program, nlohmann::json data)
+    AsyncDataSynthesis(Napi::Function& callback, Program& program, nlohmann::json data)
       : AsyncWorker(callback), program(program), m_data(data) {
     };
-    virtual ~AsyncUpdate() {};
+    virtual ~AsyncDataSynthesis() {};
 
     void Execute() {
-      m_data = program.update(m_data);
+      m_data = program.data_synthesis(m_data);
     };
     void OnOK() {
       std::string string = m_data.dump();
@@ -57,22 +53,85 @@ class AsyncUpdate : public Napi::AsyncWorker {
     };
 };
 
-// -- -- -- -- -- Buffer
 
-class AsyncBuffer : public Napi::AsyncWorker {
+// -- -- -- -- -- init control
+class AsyncInitControl : public Napi::AsyncWorker {
 
   private:
     Program& program;
-
     nlohmann::json m_data;
 
+  public:
+    AsyncInitControl(Napi::Function& callback, Program& program)
+      : AsyncWorker(callback), program(program) {
+    };
+    virtual ~AsyncInitControl() {};
+
+    void Execute() {
+      m_data = program.init_control();
+    };
+    void OnOK() {
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
+};
+
+// -- -- -- -- -- data control
+class AsyncDataControl : public Napi::AsyncWorker {
+
+  private:
+    Program& program;
+    nlohmann::json m_data;
+
+  public:
+    AsyncDataControl(Napi::Function& callback, Program& program, nlohmann::json data)
+      : AsyncWorker(callback), program(program), m_data(data) {
+    };
+    virtual ~AsyncDataControl() {};
+
+    void Execute() {
+      m_data = program.data_control(m_data);
+    };
+    void OnOK() {
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+    };
+};
+
+
+// -- -- -- -- -- new frame
+class AsyncNewFrame : public Napi::AsyncWorker {
+
+  private:
+    Program& program;
+    bool m_new = false;
+
+  public:
+    AsyncNewFrame(Napi::Function& callback, Program& program)
+      : AsyncWorker(callback), program(program) {
+    };
+    virtual ~AsyncNewFrame() {};
+
+    void Execute() {
+      m_new = program.new_frame();
+    };
+    void OnOK() {
+      Callback().Call({Env().Null(), Napi::Boolean::New(Env(), m_new)});
+    };
+};
+
+// -- -- -- -- -- display
+class AsyncDisplay : public Napi::AsyncWorker {
+
+  private:
+    Program& program;
+    nlohmann::json m_data;
     Napi::Uint8Array p_image;
     int m_width, m_height;
-
     cv::Mat m_image;
 
   public:
-    AsyncBuffer(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image)
+    AsyncDisplay(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image)
       : AsyncWorker(callback), program(program), m_data(data), p_image(image) {
 
       m_width  = m_data["width"];
@@ -82,10 +141,10 @@ class AsyncBuffer : public Napi::AsyncWorker {
 
       m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
     };
-    virtual ~AsyncBuffer() {};
+    virtual ~AsyncDisplay() {};
 
     void Execute() {
-      m_data = program.buffer(m_data, m_image);
+      program.display(m_image);
     };
     void OnOK() {
 
@@ -107,19 +166,18 @@ class AsyncBuffer : public Napi::AsyncWorker {
         }
       }
 
-      std::string string = m_data.dump();
-      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+      bool ready = true;
+      Callback().Call({Env().Null(), Napi::Boolean::New(Env(), ready)});
     };
-
 };
 
-// -- -- -- -- -- Quit
 
+// -- -- -- -- -- quit
 class AsyncQuit : public Napi::AsyncWorker {
 
   private:
-
     Program& program;
+    bool m_quit = false;
 
   public:
     AsyncQuit(Napi::Function& callback, Program& program)
@@ -128,11 +186,10 @@ class AsyncQuit : public Napi::AsyncWorker {
     virtual ~AsyncQuit() {};
 
     void Execute() {
-      program.quit();
+      m_quit = program.quit();
     };
     void OnOK() {
-      std::string string = "program: quit done";
-      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
+      Callback().Call({Env().Null(), Napi::Boolean::New(Env(), m_quit)});
     };
 };
 

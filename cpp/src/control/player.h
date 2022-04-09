@@ -7,7 +7,7 @@
 
 #include "rtaudio/RtAudio.h"
 
-#include "../data.h"
+#include "../functionality/data.h"
 
 class Player {
 
@@ -31,7 +31,6 @@ class Player {
     // bool reset
     nlohmann::json m_data;
 
-    unsigned int m_sample_rate{44100}
     int m_sample_rate{44100}, m_channels{}, m_frame_time{}, m_frame_count{-1};
     bool m_new{true};
     std::size_t m_current_frame{0};
@@ -53,6 +52,8 @@ class Player {
     void init(nlohmann::json& data);
 
     void data(nlohmann::json& data);
+
+    bool new_frame();
 
     void display(cv::Mat& image);
 };

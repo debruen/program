@@ -10,7 +10,7 @@ void Player::set() {
 
   m_info_mutex.lock();
   m_channels = m_info.channels;
-  m_frame_time = m_info.frame_time;
+  m_frame_time = m_info.time;
   m_info_mutex.unlock();
 
   if(m_rtaudio.getDeviceCount() < 1)
@@ -30,7 +30,7 @@ void Player::set() {
   }
 }
 
-bool Program::frame_exists(std::size_t& frame_index) {
+bool Player::frame_exists(std::size_t& frame_index) {
   bool check = false;
 
   m_buffer_mutex.lock();
@@ -63,9 +63,10 @@ frame Player::get_frame(std::size_t& frame_index) {
 cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
 
   m_current_frame = streamTime * 1000 / m_frame_time;
-  if (m_current_frame > m_frame_count) {
+  int cf = m_current_frame;
+  if (m_frame_count < cf) {
     m_new = true;
-    m_frame_count = m_current_frame;
+    m_frame_count = cf;
   }
   // = audio height
   int frame_ticks = m_frame_time / 1000 * 44100;
@@ -162,6 +163,10 @@ void Player::data(nlohmann::json& data) {
     if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
   }
 
+}
+
+bool Player::new_frame() {
+  return m_new;
 }
 
 void Player::display(cv::Mat& image) {

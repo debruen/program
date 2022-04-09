@@ -2,7 +2,7 @@
 #ifndef settings_h
 #define settings_h
 
-#include "data.h"
+#include "../functionality/data.h"
 
 class Settings {
 

@@ -52,8 +52,8 @@ void Synthesis::create_buffer() {
     m_info_mutex.unlock();
     std::size_t new_frame_index{0};
 
-    if(size > 0) {
-      new_frame_index = last_buffer_index() + 1;
+    if(size != 0) {
+      new_frame_index = last_index() + 1;
     }
 
     create_frame(new_frame_index);
@@ -67,7 +67,7 @@ void Synthesis::create_buffer() {
 
 }
 
-std::size_t Synthesis::last_buffer_index() {
+std::size_t Synthesis::last_index() {
 
   std::size_t frame_index{0};
 

@@ -1,37 +1,67 @@
 
-const {program_data, program_update, program_buffer, program_quit} = require('./build/Release/emit_from_cpp.node')
+const {
+  program_init_synthesis,
+  program_data_synthesis,
+
+  program_init_control,
+  program_data_control,
+
+  program_new_frame,
+  program_display,
+
+  program_quit } = require('./build/Release/emit_from_cpp.node')
 
 class Program{
+  constructor() {}
 
-  constructor() {
-
-  }
-
-  data() {
+  initSynthesis() {
     return new Promise((resolve) => {
-      program_data((err, result) => {
+      program_init_synthesis((err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
+  dataSynthesis(data) {
+    const string = JSON.stringify(data)
+    return new Promise((resolve) => {
+      program_data_synthesis(string, (err, result) => {
         const json = JSON.parse(result)
         resolve(json)
       })
     })
   }
 
-  update(data) {
+  initControl() {
+    return new Promise((resolve) => {
+      program_init_control((err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
+  dataControl(data) {
     const string = JSON.stringify(data)
     return new Promise((resolve) => {
-      program_update(string, (err, result) => {
+      program_data_control(string, (err, result) => {
         const json = JSON.parse(result)
         resolve(json)
       })
     })
   }
 
-  buffer(data, image) {
+  newFrame() {
+    return new Promise((resolve) => {
+      program_new_frame((err, result) => {
+        resolve(result)
+      })
+    })
+  }
+  display(data, image) {
     const string = JSON.stringify(data)
     return new Promise((resolve) => {
-      program_buffer(string, image, (err, result) => {
-        const json = JSON.parse(result)
-        resolve(json)
+      program_display(string, image, (err, result) => {
+        resolve(result)
       })
     })
 
@@ -44,7 +74,5 @@ class Program{
       })
     })
   }
-
 }
-
 module.exports = Program;

@@ -4,8 +4,8 @@
 
 #include <cstring>
 
-// #include "../data.h"
-#include "../math.h"
+// #include "../../functionality/data.h"
+#include "../../functionality/math.h"
 
 class AudioSine {
 

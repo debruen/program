@@ -26,6 +26,7 @@ typedef struct {
   int channels;
   int time;
   std::size_t frames;
+  std::size_t start;
   bool update;
   bool next; // display
   bool full;

@@ -2,7 +2,7 @@
 #ifndef output_h
 #define output_h
 
-#include "out/hsl.h"
+#include "output/hsl.h"
 
 class Output {
 

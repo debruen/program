@@ -14,7 +14,7 @@
 
 #include "fftw3.h"
 
-#include "../data.h"
+#include "../../functionality/data.h"
 
 class Out {
 

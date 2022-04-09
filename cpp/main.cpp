@@ -4,36 +4,71 @@
 // init Program class
 Program program;
 
-// -- -- -- -- -- Data
-
-Napi::Value program_data(const Napi::CallbackInfo& info) {
+// -- -- -- -- -- init synthesis
+Napi::Value program_init_synthesis(const Napi::CallbackInfo& info) {
   Napi::Function callback = info[0].As<Napi::Function>();
 
-  AsyncData* data = new AsyncData(callback, program);
-  data->Queue();
+  AsyncInitSynthesis* init_synthesis = new AsyncInitSynthesis(callback, program);
+  init_synthesis->Queue();
 
-  std::string msg = "program: reading data in progress";
+  std::string msg = "program: init synthesis";
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
-// -- -- -- -- -- Update
-
-Napi::Value program_update(const Napi::CallbackInfo& info) {
+// -- -- -- -- -- data synthesis
+Napi::Value program_data_synthesis(const Napi::CallbackInfo& info) {
   std::string string = info[0].As<Napi::String>().Utf8Value();
   Napi::Function callback = info[1].As<Napi::Function>();
 
   nlohmann::json json = nlohmann::json::parse(string);
 
-  AsyncUpdate* update = new AsyncUpdate(callback, program, json);
-  update->Queue();
+  AsyncDataSynthesis* data_synthesis = new AsyncDataSynthesis(callback, program, json);
+  data_synthesis->Queue();
 
-  std::string msg = "program: update data in progress";
+  std::string msg = "program: data synthesis";
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
-// -- -- -- -- -- Buffer
 
-Napi::Value program_buffer(const Napi::CallbackInfo& info) {
+// -- -- -- -- -- init control
+Napi::Value program_init_control(const Napi::CallbackInfo& info) {
+  Napi::Function callback = info[0].As<Napi::Function>();
+
+  AsyncInitControl* init_control = new AsyncInitControl(callback, program);
+  init_control->Queue();
+
+  std::string msg = "program: init control";
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
+// -- -- -- -- -- data control
+Napi::Value program_data_control(const Napi::CallbackInfo& info) {
+  std::string string = info[0].As<Napi::String>().Utf8Value();
+  Napi::Function callback = info[1].As<Napi::Function>();
+
+  nlohmann::json json = nlohmann::json::parse(string);
+
+  AsyncDataControl* data_control = new AsyncDataControl(callback, program, json);
+  data_control->Queue();
+
+  std::string msg = "program: data control";
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
+
+// -- -- -- -- -- new frame
+Napi::Value program_new_frame(const Napi::CallbackInfo& info) {
+  Napi::Function callback = info[0].As<Napi::Function>();
+
+  AsyncNewFrame* new_frame = new AsyncNewFrame(callback, program);
+  new_frame->Queue();
+
+  std::string msg = "program: new frame";
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
+// -- -- -- -- -- display
+Napi::Value program_display(const Napi::CallbackInfo& info) {
 
   std::string string = info[0].As<Napi::String>().Utf8Value();
   Napi::Uint8Array image_buffer = info[1].As<Napi::Uint8Array>();
@@ -41,15 +76,15 @@ Napi::Value program_buffer(const Napi::CallbackInfo& info) {
 
   nlohmann::json json = nlohmann::json::parse(string);
 
-  AsyncBuffer* read = new AsyncBuffer(callback, program, json, image_buffer);
-  read->Queue();
+  AsyncDisplay* display = new AsyncDisplay(callback, program, json, image_buffer);
+  display->Queue();
 
-  std::string msg = "read queued";
+  std::string msg = "display";
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
-// -- -- -- -- -- Quit
 
+// -- -- -- -- -- quit
 Napi::Value program_quit(const Napi::CallbackInfo& info) {
   Napi::Function callback = info[0].As<Napi::Function>();
 
@@ -57,15 +92,21 @@ Napi::Value program_quit(const Napi::CallbackInfo& info) {
   quit->Queue();
 
   std::string msg = "program: quit in progress";
-  std::cout << msg << '\n';
+  // std::cout << msg << '\n';
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
-  exports["program_data"] = Napi::Function::New(env, program_data, std::string("program_data"));
-  exports["program_update"] = Napi::Function::New(env, program_update, std::string("program_update"));
-  exports["program_buffer"] = Napi::Function::New(env, program_buffer, std::string("program_buffer"));
+  exports["program_init_synthesis"] = Napi::Function::New(env, program_init_synthesis, std::string("program_init_synthesis"));
+  exports["program_data_synthesis"] = Napi::Function::New(env, program_data_synthesis, std::string("program_data_synthesis"));
+
+  exports["program_init_control"] = Napi::Function::New(env, program_init_control, std::string("program_init_control"));
+  exports["program_data_control"] = Napi::Function::New(env, program_data_control, std::string("program_data_control"));
+
+  exports["program_new_frame"] = Napi::Function::New(env, program_new_frame, std::string("program_new_frame"));
+  exports["program_display"] = Napi::Function::New(env, program_display, std::string("program_display"));
+
   exports["program_quit"] = Napi::Function::New(env, program_quit, std::string("program_quit"));
 
   return exports;
