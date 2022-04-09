@@ -21,6 +21,7 @@
             "cpp/src/data.cpp",
 
             "cpp/src/program.cpp",
+            "cpp/src/synthesis.cpp",
 
 
             "cpp/src/control.cpp",
@@ -43,9 +44,9 @@
             "cpp/src/out/hsl.cpp",
 
             "cpp/src/filter/areasine.cpp",
-            "cpp/src/filter/audiosine.cpp",
+            "cpp/src/filter/audiosine.cpp"
 
-            "cpp/src/record.cpp"
+            # "cpp/src/record.cpp"
 
 
         ],

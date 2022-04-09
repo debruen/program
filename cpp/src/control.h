@@ -15,11 +15,11 @@ class Control {
     nlohmann::json m_data = nlohmann::json::array();
 
   public:
-    Control(std::vector<frame>& buffer);
+    Control(std::vector<frame>& buffer, std::mutex& mutex);
 
-    nlohmann::json data();
+    nlohmann::json init();
 
-    nlohmann::json update(nlohmann::json data);
+    nlohmann::json data(nlohmann::json data);
 
 };
 

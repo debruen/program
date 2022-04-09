@@ -1,8 +1,8 @@
 
 #include "control.h"
 
-Control::Control(std::vector<frame>& buffer)
-    : m_play(buffer), m_record(buffer) {
+Control::Control(std::vector<frame>& buffer, std::mutex& mutex)
+    : m_play(buffer, mutex), m_record(buffer, mutex) {
 
   m_data.push_back(data::init_bool("play", false));
   m_data.push_back(data::init_bool("ready", false));
@@ -11,12 +11,12 @@ Control::Control(std::vector<frame>& buffer)
 
 }
 
-nlohmann::json Control::data() {
+nlohmann::json Control::init() {
 
   return m_data;
 }
 
-nlohmann::json Control::update(nlohmann::json data) {
+nlohmann::json Control::data(nlohmann::json data) {
 
   bool play, ready, record, reset;
 

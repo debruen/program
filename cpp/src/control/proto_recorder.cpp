@@ -2,31 +2,13 @@
 #include "record.h"
 
 Record::Record(std::vector<frame>& buffer, std::mutex& mutex)
-    : m_buffer(buffer), m_buffer_mutex(mutex), m_recorder_thread{} {
+    : m_buffer(buffer), m_buffer_mutex(mutex), m_thread{} {
 
   m_path = getenv("HOME");
   m_path = m_path + "/Desktop/output/";
   m_name = "output_";
 
-  m_recorder_thread = std::thread{&Record::recorder, this};
-}
-
-void Record::recorder() {
-
-  while(m_thread) {
-
-    if(m_recording){
-
-      start();
-      for(std::size_t i = 0; i < m_frames; i++) {
-        save(i);
-      }
-      m_recording = stop();
-
-    }
-
-  }
-
+  m_thread = std::thread{&Record::thread, this};
 }
 
 bool Record::exists(const std::string& file) {
@@ -73,6 +55,10 @@ std::string Record::file(std::string& filename, std::string& path, std::string t
 
 void Record::start() {
 
+  m_info_mutex.lock();
+  m_frames = m_info.total_frames - m_info.start_frame;
+  m_info_mutex.unlock();
+
   m_image = file(m_name, m_path, "none");
   m_audio = file(m_name, m_path, "audio");
 
@@ -81,6 +67,7 @@ void Record::start() {
   } catch (stk::StkError &) {
     exit(1);
   }
+
 }
 
 bool Record::stop() {
@@ -140,14 +127,43 @@ void Record::save_audio(cv::Mat& audio) {
   audio_out.tick(output);
 }
 
-void Record::record(std::size_t frames) {
+void Record::thread() {
 
-  m_frames = frames;
-  m_recording = true;
+  while(!m_quit) {
+
+    if(m_recording){
+
+      start();
+      for(std::size_t i = 0; i < m_frames; i++) {
+        save(i);
+      }
+      m_recording = stop();
+
+    }
+    m_saved = true;
+  }
 
 }
 
-bool Record::status() {
+void Player::init(nlohmann::json& data) {
+  data["record"] = false;
+}
 
-  return m_recording;
+void Player::data(nlohmann::json& data) {
+
+  //// check check
+  //// m_count ist auch eine möglichkeit
+
+  if (data["record"] && !m_saved) {
+    m_recording = data["record"];
+  } else {
+    data["record"] = m_recording;
+    m_saved = false;
+  }
+
+}
+
+bool Player::quit() {
+  m_quit = true;
+
 }

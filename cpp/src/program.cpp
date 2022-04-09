@@ -2,7 +2,7 @@
 #include "program.h"
 
 Program::Program()
-    : m_main{}, m_play_thread{}, m_record_thread{} {
+    : m_main{}, m_play_thread{}, m_record_thread{}, m_control(m_buffer, m_buffer_mutex) {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -270,7 +270,7 @@ void Program::play() {
     e.printMessage();
   }
 
-  Record record(m_buffer);
+  // Record record(m_buffer);
 
   while(m_work) {
 
@@ -289,7 +289,7 @@ void Program::play() {
       if (m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
       double stream_time = m_current_frame * (m_frame_time / 1000);
       m_rtaudio.setStreamTime(stream_time);
-      m_recording = record.start();
+      // m_recording = record.start();
       std::cout << "start recording" << '\n';
     }
 
@@ -299,12 +299,12 @@ void Program::play() {
       if (m_play_state) m_play_state = false;
       if (m_record_state) m_record_state = false;
       if (m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
-      m_recording = record.stop();
+      // m_recording = record.stop();
       std::cout << "stop recording" << '\n';
     }
 
     if(m_play_state && m_recording) {
-      record.save(m_current_frame);
+      // record.save(m_current_frame);
     }
 
 
@@ -404,4 +404,16 @@ void Program::quit() {
 
   m_play_thread.join();
   m_main.join();
+}
+
+// ---------------------------------------- * ----------------------------------------
+
+nlohmann::json Program::init_control() {
+  nlohmann::json data = m_control.init();
+  return data;
+}
+
+nlohmann::json Program::data_control(nlohmann::json data) {
+  data = m_control.data(data);
+  return data;
 }

@@ -22,6 +22,15 @@ typedef struct {
   cv::Mat audio;
 } frame;
 
+typedef struct {
+  int channels;
+  int time;
+  std::size_t frames;
+  bool update;
+  bool next; // display
+  bool full;
+} info;
+
 namespace data {
 
   // internal functions

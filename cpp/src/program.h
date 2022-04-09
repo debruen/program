@@ -14,11 +14,18 @@
 #include "filter.h"
 #include "output.h"
 
-#include "record.h"
+#include "control.h"
+// #include "record.h"
 
 class Program {
 
   private:
+
+    std::vector<frame> m_buffer;
+    std::mutex m_buffer_mutex;
+
+    info m_info;
+    std::mutex m_info_mutex;
 
     // dimensions
 
@@ -59,10 +66,6 @@ class Program {
     bool m_update_main{false}, m_update_play{false}, m_buffer_full{false}, m_recording{false}, m_stop{false};
     std::mutex m_stop_mutex;
 
-
-    std::vector<frame> m_buffer;
-    std::mutex m_buffer_mutex;
-
     std::thread m_main;
     void main();
 
@@ -91,8 +94,6 @@ class Program {
     bool frame_exists(std::size_t frame_index);
 
 
-    // nlohmann::json m_control = nlohmann::json::array();
-
     void play();
     std::thread m_play_thread;
 
@@ -105,6 +106,8 @@ class Program {
 
     bool m_reset{false};
 
+    Control m_control;
+
   public:
     Program();
 
@@ -114,8 +117,8 @@ class Program {
       // thread_synthesis
 
 
-    // nlohmann::json init_controls();
-    // data_controls
+    nlohmann::json init_control();
+    nlohmann::json data_control(nlohmann::json data);
 
       // thread_play
       // thread_save

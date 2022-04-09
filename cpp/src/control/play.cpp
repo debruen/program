@@ -1,17 +1,33 @@
 
 #include "play.h"
 
-Play::Play(std::vector<frame>& buffer)
-    : m_buffer(buffer), m_play_thread{} {
+Play::Play(std::vector<frame>& buffer, std::mutex& mutex)
+    : m_buffer(buffer), m_buffer_mutex(mutex), m_play_thread{} {
 
   m_play_thread = std::thread{&Play::play, this};
 }
 
+frame Play::get_frame(std::size_t& index) {
+
+  frame frame;
+
+  m_buffer_mutex.lock();
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == index) {
+      frame = m_buffer[i];
+      break;
+    }
+  }
+  m_buffer_mutex.unlock();
+
+  return frame;
+}
+
 cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
 
-  m_frame = streamTime * 1000 / m_frame_time;
+  m_frame = streamTime * 1000 / m_time;
   // = audio height
-  int frame_ticks = m_frame_time / 1000 * 44100;
+  int frame_ticks = m_time / 1000 * 44100;
 
   int start_tick = round(streamTime * 44100 - m_frame * static_cast<double>(frame_ticks));
 
@@ -27,11 +43,12 @@ cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
   std::cout << "rest ticks: " << rest_ticks << '\n';
   std::cout << "frames needed: " << frames_needed << '\n';
 
-  int width = m_audio_channels, height = nFrames;
+  int width = m_channels, height = nFrames;
   cv::Mat buffer_data = cv::Mat::zeros(cv::Size(width, height), CV_64F);
   double* audio_pointer,* buffer_pointer;
 
-  int f(m_frame), ticks{start_tick};
+  std::size_t f{m_frame};
+  int ticks{start_tick};
   unsigned int g{0};
 
   for (int i = 0; i < frames_needed; i++) {
@@ -45,7 +62,7 @@ cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
       audio_pointer = frame.audio.ptr<double>(j);
       buffer_pointer = buffer_data.ptr<double>(g);
 
-      for (int k = 0; k < m_audio_channels; k++) {
+      for (int k = 0; k < m_channels; k++) {
         buffer_pointer[k] = audio_pointer[k];
       }
 
@@ -63,7 +80,7 @@ int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames
   return static_cast<Play*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
 }
 
-int Program::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
+int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
 
   cv::Mat buffer_data = get_audio(nFrames, streamTime);
 
@@ -104,11 +121,11 @@ void Play::play() {
 
   while(m_thread) {
 
-    if(m_play)
+    if(m_play) {
       if(!m_rtaudio.isStreamRunning()) m_rtaudio.startStream();
-
-    else
+    } else {
       if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+    }
 
     if(m_reset) {
       if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
@@ -120,25 +137,31 @@ void Play::play() {
   }
 }
 
-bool Play::start() {
+bool Play::start(int& channels, int& time) {
+  m_channels = channels;
+  m_time = time;
 
   m_play = true;
 
   return m_play;
 }
 
-bool Play::pause() {
+bool Play::pause(int& channels, int& time) {
+  m_channels = channels;
+  m_time = time;
 
   m_play = false;
 
   return m_play;
 }
 
-bool Play::reset() {
+bool Play::reset(int& channels, int& time) {
+  m_channels = channels;
+  m_time = time;
 
   m_reset = true;
 
-  std::size_t c;
+  std::size_t c{0};
   while(m_reset) {
     if(c == 0) std::cout << "waiting to reset play ..." << '\n';
     c++;
