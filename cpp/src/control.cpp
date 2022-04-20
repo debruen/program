@@ -16,8 +16,8 @@ nlohmann::json Control::init() {
 
 nlohmann::json Control::data(nlohmann::json data) {
 
-  m_player.init(data);
-  m_recorder.init(data);
+  m_player.data(data);
+  // m_recorder.data(data);
 
   m_data = data;
 
@@ -30,8 +30,13 @@ bool Control::new_frame() {
 
 void Control::display(cv::Mat& image) {
   m_player.display(image);
+  std::cout << "Display" << '\n';
 }
 
-bool Control::quit() {
-  return m_recorder.quit();
+bool Control::record() {
+  return m_recorder.record();
 }
+
+// bool Control::quit() {
+//   return m_recorder.quit();
+// }

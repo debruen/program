@@ -403,7 +403,7 @@ unsigned char Blend::exclusion(unsigned char& aChar, unsigned char& bChar, doubl
     return round(c * 255);
 }
 
-void Blend::frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) {
+void Blend::frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index, std::string type) {
   std::size_t width = image.cols, height = image.rows;
   cv::Size size(width, height);
 
@@ -416,9 +416,9 @@ void Blend::frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) {
 
   for (std::size_t i = m_masks.size(); i --> 0; ) {
     if (i == m_masks.size()) {
-      mask = m_masks[i]->frame(mask, frame_index);
+      mask = m_masks[i]->frame(mask, frame_index, type);
     } else {
-      m_masks[i]->process(mask, frame_index);
+      m_masks[i]->process(mask, frame_index, type);
     }
   }
 
@@ -494,7 +494,7 @@ nlohmann::json Blend::update(nlohmann::json data) {
   return m_data;
 }
 
-void Blend::image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) {
+void Blend::image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index, std::string type) {
 
   std::size_t width = image.cols, height = image.rows;
   cv::Size size(width, height);
@@ -508,9 +508,9 @@ void Blend::image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) 
 
   for (std::size_t i = m_masks.size(); i --> 0; ) {
     if (i == m_masks.size()) {
-      mask = m_masks[i]->frame(mask, frame_index);
+      mask = m_masks[i]->frame(mask, frame_index, type);
     } else {
-      m_masks[i]->process(mask, frame_index);
+      m_masks[i]->process(mask, frame_index, type);
     }
   }
 
@@ -531,7 +531,7 @@ void Blend::image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index) 
 
 }
 
-void Blend::audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index) {
+void Blend::audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index, std::string type) {
 
   std::size_t width = audio.cols, height = audio.rows;
   cv::Size size(width, height);
@@ -540,9 +540,9 @@ void Blend::audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index) 
 
   for (std::size_t i = m_masks.size(); i --> 0; ) {
     if (i == m_masks.size()) {
-      mask = m_masks[i]->frame(mask, frame_index);
+      mask = m_masks[i]->frame(mask, frame_index, type);
     } else {
-      m_masks[i]->process(mask, frame_index);
+      m_masks[i]->process(mask, frame_index, type);
     }
   }
 

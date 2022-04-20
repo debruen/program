@@ -19,9 +19,9 @@ class Filter {
 
     nlohmann::json update(nlohmann::json data);
 
-    void image_frame(cv::Mat& image, std::size_t frame_index);
+    void image_frame(cv::Mat& image, std::size_t frame_index, std::string type);
 
-    void audio_frame(cv::Mat& audio, std::size_t frame_index);
+    void audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type);
 
 };
 

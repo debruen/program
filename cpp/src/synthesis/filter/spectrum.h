@@ -6,7 +6,7 @@
 
 #include "coat.h"
 
-#include "audiosine.h"
+#include "sine.h"
 
 class Spectrum : public Coat {
 
@@ -22,7 +22,7 @@ class Spectrum : public Coat {
     double m_frequency{0.5}, m_amplitude{0.5}, m_phase{0}, m_tilt{0};
     std::string m_shape{"sine"};
 
-    void set_audio_frequency(const std::size_t& height, double& frequency);
+    void set_audio_frequency(int& height, double& frequency);
 
   public:
     Spectrum();
@@ -31,9 +31,9 @@ class Spectrum : public Coat {
 
     virtual nlohmann::json update(nlohmann::json data);
 
-    virtual cv::Mat image_frame(cv::Mat& image, std::size_t frame_index);
+    virtual cv::Mat image_frame(cv::Mat& image, std::size_t frame_index, std::string type);
 
-    virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index);
+    virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type);
 
 };
 

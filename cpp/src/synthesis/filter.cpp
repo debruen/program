@@ -37,18 +37,18 @@ nlohmann::json Filter::update(nlohmann::json data) {
   return m_data;
 }
 
-void Filter::image_frame(cv::Mat& image, std::size_t frame_index) {
+void Filter::image_frame(cv::Mat& image, std::size_t frame_index, std::string type) {
 
   for (std::size_t i = 0; i < m_layer.size(); i++) {
-    m_layer[i]->image_frame(image, frame_index);
+    m_layer[i]->image_frame(image, frame_index, type);
   }
 
 }
 
-void Filter::audio_frame(cv::Mat& audio, std::size_t frame_index) {
+void Filter::audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) {
 
   for (std::size_t i = 0; i < m_layer.size(); i++) {
-    m_layer[i]->audio_frame(audio, frame_index);
+    m_layer[i]->audio_frame(audio, frame_index, type);
   }
 
 }

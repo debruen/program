@@ -16,7 +16,10 @@ Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info&
   m_info.time = m_time;
   m_info.frames = m_frames;
   m_info.update = m_update;
+  m_info.start = m_start;
   m_info_mutex.unlock();
+
+  m_thread = std::thread{&Synthesis::thread, this};
 }
 
 void Synthesis::clear_buffer() {
@@ -84,6 +87,8 @@ std::size_t Synthesis::last_index() {
 
 void Synthesis::create_frame(std::size_t frame_index) {
 
+  std::cout << "frame index created: " << frame_index << '\n';
+
   std::string type = data::get_str(m_data["settings"], "type");
 
   m_mutex.lock();
@@ -93,13 +98,11 @@ void Synthesis::create_frame(std::size_t frame_index) {
 
   // filter
   if(type == "audio") {
-    std::cout << "audio type: " << type << '\n';
-    m_filter.audio_frame(audio, frame_index);
+    m_filter.audio_frame(audio, frame_index, type);
     // m_output.audio_frame(image, audio, frame_index);
 
   } else {
-    std::cout << "image type: " << type << '\n';
-    m_filter.image_frame(image, frame_index);
+    m_filter.image_frame(image, frame_index, type);
 
     // m_output.image_frame(image, audio, frame_index);
   }
@@ -116,7 +119,7 @@ void Synthesis::create_frame(std::size_t frame_index) {
 
 }
 
-void Synthesis::buffer() {
+void Synthesis::thread() {
 
   while(!m_quit) {
 
@@ -129,7 +132,6 @@ void Synthesis::buffer() {
 }
 
 nlohmann::json Synthesis::init() {
-
   return m_data;
 }
 
@@ -143,6 +145,7 @@ nlohmann::json Synthesis::data(nlohmann::json data) {
   m_data["output"]   = m_output.update(data["output"], type);
 
   m_frames = data::get_int(m_data["settings"], "frames");
+  m_start = data::get_int(m_data["settings"], "start");
   m_time = data::get_int(m_data["settings"], "frame time");
 
   m_mutex.unlock();
@@ -151,6 +154,7 @@ nlohmann::json Synthesis::data(nlohmann::json data) {
 
   m_info_mutex.lock();
   m_info.frames = m_frames;
+  m_info.start = m_start;
   m_info.time = m_time;
   m_info.update = m_update;
   m_info_mutex.unlock();
@@ -161,7 +165,7 @@ nlohmann::json Synthesis::data(nlohmann::json data) {
 bool Synthesis::quit() {
 
   m_quit = true;
-  m_buffer_thread.join();
+  m_thread.join();
 
   return true;
 }

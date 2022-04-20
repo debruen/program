@@ -11,7 +11,7 @@ namespace math {
 
   double normalize(double& min, double& max, double value);
 
-  double project(const double& min, const double& max, const double& value);
+  double project(double& min, double& max, double& value);
 
   double circle(const double& min, const double& max, double& value);
 

@@ -46,18 +46,18 @@ class Layer {
     };
 
 
-    void image_frame(cv::Mat& image, std::size_t frame_index) {
+    void image_frame(cv::Mat& image, std::size_t frame_index, std::string type) {
 
-      cv::Mat film = m_film->image_frame(image, frame_index);
-      m_blend->image_frame(image, film, frame_index);
+      cv::Mat film = m_film->image_frame(image, frame_index, type);
+      m_blend->image_frame(image, film, frame_index, type);
 
       // m_blend->process(image, film);
     };
 
-    void audio_frame(cv::Mat& audio, std::size_t frame_index) {
+    void audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) {
 
-      cv::Mat film = m_film->audio_frame(audio, frame_index);
-      m_blend->audio_frame(audio, film, frame_index);
+      cv::Mat film = m_film->audio_frame(audio, frame_index, type);
+      m_blend->audio_frame(audio, film, frame_index, type);
     };
 
 };

@@ -28,19 +28,20 @@ class Synthesis {
     nlohmann::json m_data;
     std::mutex m_mutex;
 
-    std::size_t m_frames{1};
+    std::size_t m_frames{1}, m_start{0};
     int m_time{0};
     std::string m_type;
 
-    bool m_full{false}, m_update{false}, m_quit{false};
+    bool m_full{false}, m_update{false};
 
     void clear_buffer();
     void create_buffer();
     std::size_t last_index();
     void create_frame(std::size_t index);
 
-    void buffer();
-    std::thread m_buffer_thread;
+    bool m_quit{false};
+    void thread();
+    std::thread m_thread;
 
   public:
     Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);

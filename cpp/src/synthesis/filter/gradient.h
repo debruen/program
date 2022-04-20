@@ -4,8 +4,7 @@
 
 #include "mask.h"
 
-#include "areasine.h"
-#include "audiosine.h"
+#include "sine.h"
 
 class Gradient : public Mask{
 
@@ -30,9 +29,9 @@ class Gradient : public Mask{
 
     virtual nlohmann::json update(nlohmann::json data);
 
-    virtual cv::Mat frame(cv::Mat& mask, std::size_t frame_index);
+    virtual cv::Mat frame(cv::Mat& mask, std::size_t frame_index, std::string type);
 
-    virtual void process(cv::Mat& mask, std::size_t frame_index);
+    virtual void process(cv::Mat& mask, std::size_t frame_index, std::string type);
 };
 
 #endif // gradient_h END

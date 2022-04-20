@@ -2,13 +2,13 @@
 #include "record.h"
 
 Record::Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
-    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex), m_thread{} {
+    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex) {
 
   m_path = getenv("HOME");
   m_path = m_path + "/Desktop/output/";
   m_name = "output_";
 
-  m_thread = std::thread{&Record::thread, this};
+  // m_thread = std::thread{&Record::thread, this};
 }
 
 bool Record::exists(const std::string& file) {
@@ -53,11 +53,31 @@ std::string Record::file(std::string& filename, std::string& path, std::string t
   return file;
 }
 
+bool Record::frame_exists(std::size_t& frame_index) {
+  bool check = false;
+
+  m_buffer_mutex.lock();
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == frame_index) {
+      check = true;
+      break;
+    }
+  }
+  m_buffer_mutex.unlock();
+
+  return check;
+}
+
 void Record::start() {
 
-  m_info_mutex.lock();
-  m_frames = m_info.frames - m_info.start;
-  m_info_mutex.unlock();
+  // m_info_mutex.lock();
+  m_frames = m_info.frames;
+  while (!m_info.full) {
+    /* code */
+  }
+  // m_info_mutex.unlock();
+
+  std::cout << "Record m_frames: " << m_frames << '\n';
 
   m_image = file(m_name, m_path, "none");
   m_audio = file(m_name, m_path, "audio");
@@ -77,38 +97,36 @@ bool Record::stop() {
 }
 
 void Record::save(std::size_t frame_index) {
-  if (m_prev != frame_index || m_count == 0) {
-
-    cv::Mat image, audio;
-
-    m_buffer_mutex.lock();
-    for (std::size_t i = 0; i < m_buffer.size(); i++) {
-      if (m_buffer[i].index == frame_index) {
-        image = m_buffer[i].image;
-        audio = m_buffer[i].audio;
-        break;
-      }
-    }
-    m_buffer_mutex.unlock();
-
-    save_image(image, frame_index);
-
-    save_audio(audio);
-
-    m_prev = frame_index;
-    std::cout << "save recording" << '\n';
-
+  while (!frame_exists(frame_index)) {
+    // std::cout << "waiting" << '\n';
   }
-  m_count++;
+  cv::Mat image, audio;
+
+  m_buffer_mutex.lock();
+  while (m_buffer.size() < m_frames) {
+    /* code */
+  }
+  std::cout << "m_buffer.size(): " << m_buffer.size() << '\n';
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == frame_index) {
+      image = m_buffer[i].image;
+      audio = m_buffer[i].audio;
+      break;
+    }
+  }
+  m_buffer_mutex.unlock();
+
+  save_image(image, frame_index);
+
+  save_audio(audio);
+
+  std::cout << "save recording" << '\n';
 }
 
 void Record::save_image(cv::Mat& image, std::size_t frame_index) {
-
   std::string file_path = m_image + " - " + std::to_string(frame_index + 1) + ".tiff";
-
   cv::imwrite(file_path, image);
-
-} // save_image
+}
 
 void Record::save_audio(cv::Mat& audio) {
 
@@ -129,44 +147,15 @@ void Record::save_audio(cv::Mat& audio) {
   audio_out.tick(output);
 }
 
-void Record::thread() {
-
-  while(!m_quit) {
-
-    if(m_recording){
-
-      start();
-      for(std::size_t i = 0; i < m_frames; i++) {
-        save(i);
-      }
-      m_recording = stop();
-
-    }
-    m_saved = true;
-  }
-
-}
-
 void Record::init(nlohmann::json& data) {
   data["record"] = false;
 }
 
-void Record::data(nlohmann::json& data) {
-
-  //// check check
-  //// m_count ist auch eine möglichkeit
-
-  if (data["record"] && !m_saved) {
-    m_recording = data["record"];
-  } else {
-    data["record"] = m_recording;
-    m_saved = false;
+bool Record::record() {
+  std::cout << "record *** " << '\n';
+  start();
+  for(std::size_t i = 0; i < m_frames; i++) {
+    save(i);
   }
-
-}
-
-bool Record::quit() {
-  m_quit = true;
-  m_thread.join();
-  return m_quit;
+  return stop();
 }

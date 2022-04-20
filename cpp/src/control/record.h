@@ -24,23 +24,25 @@ class Record {
 
     std::string m_path, m_name, m_image, m_audio;
 
-    bool m_quit = false;
+    // bool m_quit = false;
+    //
+    // void thread();
+    // std::thread m_thread;
 
-    void thread();
-    std::thread m_thread;
-
-    bool m_recording{false}, m_saved{false};
+    // bool m_recording{false}, m_saved{false};
 
     std::size_t m_frames{1};
 
     stk::FileWvOut audio_out;
 
-    std::size_t m_prev{0};
-
-    std::size_t m_count{0};
+    // std::size_t m_prev{0};
+    //
+    // std::size_t m_count{0};
 
     bool exists(const std::string& file);
     std::string file(std::string& filename, std::string& path, std::string type);
+
+    bool frame_exists(std::size_t& frame_index);
 
     void save_image(cv::Mat& image, std::size_t frame_index);
     void save_audio(cv::Mat& audio);
@@ -56,9 +58,11 @@ class Record {
 
     void init(nlohmann::json& data);
 
-    void data(nlohmann::json& data);
+    // void data(nlohmann::json& data);
 
-    bool quit();
+    bool record();
+
+    // bool quit();
 };
 
 #endif /* record_h */

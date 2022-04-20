@@ -52,14 +52,14 @@ class Film {
       return m_data;
     };
 
-    cv::Mat image_frame(cv::Mat& image, std::size_t frame_index) {
+    cv::Mat image_frame(cv::Mat& image, std::size_t frame_index, std::string type) {
 
-      return m_coat->image_frame(image, frame_index);
+      return m_coat->image_frame(image, frame_index, type);
     };
 
-    cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index) {
+    cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) {
 
-      return m_coat->audio_frame(audio, frame_index);
+      return m_coat->audio_frame(audio, frame_index, type);
     };
 
 };

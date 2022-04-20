@@ -29,6 +29,7 @@ class Program {
 
     bool new_frame();
     void display(cv::Mat& image);
+    bool record();
 
     bool quit();
 };

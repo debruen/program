@@ -62,10 +62,13 @@ frame Player::get_frame(std::size_t& frame_index) {
 
 cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
 
+  std::size_t old_frame = m_current_frame;
+
   m_current_frame = streamTime * 1000 / m_frame_time;
+  if(old_frame != m_current_frame) m_new = true;
+
   int cf = m_current_frame;
   if (m_frame_count < cf) {
-    m_new = true;
     m_frame_count = cf;
   }
   // = audio height
@@ -79,11 +82,11 @@ cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
 
   if(rest_ticks < nFrames) frames_needed++;
 
-  std::cout << "current frame: " << m_current_frame << '\n';
-  std::cout << "frame ticks: " << frame_ticks << '\n';
-  std::cout << "start ticks: " << start_tick << '\n';
-  std::cout << "rest ticks: " << rest_ticks << '\n';
-  std::cout << "frames needed: " << frames_needed << '\n';
+  // std::cout << "current frame: " << m_current_frame << '\n';
+  // std::cout << "frame ticks: " << frame_ticks << '\n';
+  // std::cout << "start ticks: " << start_tick << '\n';
+  // std::cout << "rest ticks: " << rest_ticks << '\n';
+  // std::cout << "frames needed: " << frames_needed << '\n';
 
   int width = m_channels, height = nFrames;
   cv::Mat buffer_data = cv::Mat::zeros(cv::Size(width, height), CV_64F);
@@ -149,7 +152,8 @@ void Player::init(nlohmann::json& data) {
 void Player::data(nlohmann::json& data) {
 
   if (data["reset"]) {
-    // if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+    if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+    m_rtaudio.setStreamTime(0.0);
     if(m_rtaudio.isStreamOpen()) m_rtaudio.closeStream();
     // set();
     data["play"] = false;
@@ -166,18 +170,20 @@ void Player::data(nlohmann::json& data) {
 }
 
 bool Player::new_frame() {
-  return m_new;
+  bool value = m_new;
+  m_new = false;
+  return value;
 }
 
 void Player::display(cv::Mat& image) {
 
-  if(m_new) {
+  // if(m_new) {
     while (!frame_exists(m_current_frame)) {
       // std::cout << "waiting" << '\n';
     }
 
     frame frame = get_frame(m_current_frame);
     cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
-  }
+  // }
 
 }

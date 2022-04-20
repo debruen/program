@@ -27,6 +27,9 @@ Settings::Settings() {
   /// frames
   m_data.push_back(data::init_int("frames", 1, 100, 1));
 
+  /// frames
+  m_data.push_back(data::init_int("start", 0, 100, 0));
+
   compute();
 }
 

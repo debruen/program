@@ -33,11 +33,14 @@ void Program::display(cv::Mat& image) {
   m_control.display(image);
 }
 
+bool Program::record() {
+  return m_control.record();
+}
 
 bool Program::quit() {
   bool quit{false};
 
-  if (m_synthesis.quit() && m_control.quit())
+  if (m_synthesis.quit())
     quit = true;
 
   return quit;

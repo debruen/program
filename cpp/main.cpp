@@ -84,6 +84,18 @@ Napi::Value program_display(const Napi::CallbackInfo& info) {
 };
 
 
+// -- -- -- -- -- record
+Napi::Value program_record(const Napi::CallbackInfo& info) {
+  std::cout << "main cpp record" << '\n';
+  Napi::Function callback = info[0].As<Napi::Function>();
+
+  AsyncRecord* record = new AsyncRecord(callback, program);
+  record->Queue();
+
+  std::string msg = "program: record in progress";
+  return Napi::String::New(info.Env(),msg.c_str());
+};
+
 // -- -- -- -- -- quit
 Napi::Value program_quit(const Napi::CallbackInfo& info) {
   Napi::Function callback = info[0].As<Napi::Function>();
@@ -92,7 +104,6 @@ Napi::Value program_quit(const Napi::CallbackInfo& info) {
   quit->Queue();
 
   std::string msg = "program: quit in progress";
-  // std::cout << msg << '\n';
   return Napi::String::New(info.Env(),msg.c_str());
 };
 
@@ -106,6 +117,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
 
   exports["program_new_frame"] = Napi::Function::New(env, program_new_frame, std::string("program_new_frame"));
   exports["program_display"] = Napi::Function::New(env, program_display, std::string("program_display"));
+  exports["program_record"] = Napi::Function::New(env, program_record, std::string("program_record"));
 
   exports["program_quit"] = Napi::Function::New(env, program_quit, std::string("program_quit"));
 

@@ -8,6 +8,7 @@ const {
 
   program_new_frame,
   program_display,
+  program_record,
 
   program_quit } = require('./build/Release/emit_from_cpp.node')
 
@@ -57,6 +58,16 @@ class Program{
       })
     })
   }
+
+  record() {
+    console.log('index record')
+    return new Promise((resolve) => {
+      program_record((err, result) => {
+        resolve(result)
+      })
+    })
+  }
+
   display(data, image) {
     const string = JSON.stringify(data)
     return new Promise((resolve) => {
@@ -64,7 +75,6 @@ class Program{
         resolve(result)
       })
     })
-
   }
 
   quit() {

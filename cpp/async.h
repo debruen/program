@@ -26,6 +26,7 @@ class AsyncInitSynthesis : public Napi::AsyncWorker {
       m_data = program.init_synthesis();
     };
     void OnOK() {
+      std::cout << "init ok" << '\n';
       std::string string = m_data.dump();
       Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
@@ -72,6 +73,7 @@ class AsyncInitControl : public Napi::AsyncWorker {
     };
     void OnOK() {
       std::string string = m_data.dump();
+
       Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
 };
@@ -90,9 +92,11 @@ class AsyncDataControl : public Napi::AsyncWorker {
     virtual ~AsyncDataControl() {};
 
     void Execute() {
+      std::cout << "control B" << '\n';
       m_data = program.data_control(m_data);
     };
     void OnOK() {
+      std::cout << "control ready" << '\n';
       std::string string = m_data.dump();
       Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
@@ -171,6 +175,29 @@ class AsyncDisplay : public Napi::AsyncWorker {
     };
 };
 
+
+// -- -- -- -- -- record
+class AsyncRecord : public Napi::AsyncWorker {
+
+  private:
+    Program& program;
+    bool m_record = false;
+
+  public:
+    AsyncRecord(Napi::Function& callback, Program& program)
+      : AsyncWorker(callback), program(program) {
+    };
+    virtual ~AsyncRecord() {};
+
+    void Execute() {
+      std::cout << "Async record Execute" << '\n';
+      m_record = program.record();
+    };
+    void OnOK() {
+      std::cout << "Async record OK" << '\n';
+      Callback().Call({Env().Null(), Napi::Boolean::New(Env(), m_record)});
+    };
+};
 
 // -- -- -- -- -- quit
 class AsyncQuit : public Napi::AsyncWorker {

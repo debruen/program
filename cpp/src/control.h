@@ -24,7 +24,9 @@ class Control {
     bool new_frame();
     void display(cv::Mat& image);
 
-    bool quit();
+    bool record();
+
+    // bool quit();
 
 };
 
