@@ -26,7 +26,6 @@ class AsyncInitSynthesis : public Napi::AsyncWorker {
       m_data = program.init_synthesis();
     };
     void OnOK() {
-      std::cout << "init ok" << '\n';
       std::string string = m_data.dump();
       Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
@@ -92,11 +91,9 @@ class AsyncDataControl : public Napi::AsyncWorker {
     virtual ~AsyncDataControl() {};
 
     void Execute() {
-      std::cout << "control B" << '\n';
       m_data = program.data_control(m_data);
     };
     void OnOK() {
-      std::cout << "control ready" << '\n';
       std::string string = m_data.dump();
       Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
@@ -108,7 +105,7 @@ class AsyncNewFrame : public Napi::AsyncWorker {
 
   private:
     Program& program;
-    bool m_new = false;
+    nlohmann::json m_data;
 
   public:
     AsyncNewFrame(Napi::Function& callback, Program& program)
@@ -117,10 +114,11 @@ class AsyncNewFrame : public Napi::AsyncWorker {
     virtual ~AsyncNewFrame() {};
 
     void Execute() {
-      m_new = program.new_frame();
+      m_data = program.new_frame();
     };
     void OnOK() {
-      Callback().Call({Env().Null(), Napi::Boolean::New(Env(), m_new)});
+      std::string string = m_data.dump();
+      Callback().Call({Env().Null(), Napi::String::New(Env(), string)});
     };
 };
 
@@ -190,11 +188,9 @@ class AsyncRecord : public Napi::AsyncWorker {
     virtual ~AsyncRecord() {};
 
     void Execute() {
-      std::cout << "Async record Execute" << '\n';
       m_record = program.record();
     };
     void OnOK() {
-      std::cout << "Async record OK" << '\n';
       Callback().Call({Env().Null(), Napi::Boolean::New(Env(), m_record)});
     };
 };

@@ -10,37 +10,23 @@ Sine::Sine(int& width, int& height, std::size_t& index, const std::string& shape
 
 void Sine::adjust_phase() {
 
-  std::cout << "SINE freq: " << m_proto_frequency << '\n';
-
   m_frequency = m_proto_frequency * 360.0;
 
   double multiplier{1}, phase = m_proto_phase, tilt = 1 - m_tilt;
 
   if(tilt <= 0.25) {
-    std::cout << "A" << '\n';
     multiplier = 1 - tilt * 4;
   } else if (tilt <= 0.5) {
-    std::cout << "B" << '\n';
     multiplier = (tilt - 0.25) * (-4);
   } else if (tilt <= 0.75) {
-    std::cout << "C" << '\n';
     multiplier = 1 - (tilt - 0.5) * 4;
   } else {
-    std::cout << "D" << '\n';
     multiplier = (tilt - 0.75) * (-4);
   }
 
   for (std::size_t i = 0; i < m_index; i++) {
     phase += m_frequency * multiplier;
   }
-
-  std::cout.precision(17);
-  std::cout << "sine index: " << m_index << '\n';
-  std::cout << "sine tilt: " << tilt << '\n';
-  std::cout << "sine frequency AP B: " << m_frequency << '\n';
-  std::cout << "sine multiplier: " << multiplier << '\n';
-  std::cout << "sine proto phase: " << m_proto_phase << '\n';
-  std::cout << "sine phase: " << phase << '\n';
 
   if (m_type == "audio") {
     m_phase = phase * -1;
@@ -51,8 +37,6 @@ void Sine::adjust_phase() {
 }
 
 void Sine::adjust_member() {
-
-  std::cout << "sine frequency AM A: " << m_frequency << '\n';
 
   m_sine_width = static_cast<double>(m_width - 1);
   m_sine_height = static_cast<double>(m_height - 1);
@@ -121,8 +105,6 @@ double Sine::point(int& y, int& x) {
   xv = (x_frame / m_sine_width * m_x_multi);
 
   degrees = ((xv + yv) * m_frequency) + m_phase + m_tilt_add_angle;
-
-  // std::cout << "degrees" << degrees << '\n';
 
   sinus = sin(math::radian(degrees));
 

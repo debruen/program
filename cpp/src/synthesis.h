@@ -34,10 +34,10 @@ class Synthesis {
 
     bool m_full{false}, m_update{false};
 
-    void clear_buffer();
+    void create_frame(std::size_t index);
     void create_buffer();
     std::size_t last_index();
-    void create_frame(std::size_t index);
+    void clear_buffer();
 
     bool m_quit{false};
     void thread();

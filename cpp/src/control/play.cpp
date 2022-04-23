@@ -1,17 +1,21 @@
 
-#include "player.h"
+#include "play.h"
 
-Player::Player(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
+Play::Play(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
     : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex) {
 
+  // m_thread = std::thread{&Play::thread, this};
 }
 
-void Player::set() {
+void Play::set() {
 
-  m_info_mutex.lock();
+  // m_info_mutex.lock();
   m_channels = m_info.channels;
   m_frame_time = m_info.time;
-  m_info_mutex.unlock();
+  m_frames = m_info.frames;
+  m_start = m_info.start;
+
+  // m_info_mutex.unlock();
 
   if(m_rtaudio.getDeviceCount() < 1)
     std::cout << "No audio devices found!"  << '\n';
@@ -30,7 +34,7 @@ void Player::set() {
   }
 }
 
-bool Player::frame_exists(std::size_t& frame_index) {
+bool Play::frame_exists(std::size_t& frame_index) {
   bool check = false;
 
   m_buffer_mutex.lock();
@@ -44,7 +48,7 @@ bool Player::frame_exists(std::size_t& frame_index) {
 
   return check;
 }
-frame Player::get_frame(std::size_t& frame_index) {
+frame Play::get_frame(std::size_t& frame_index) {
 
   frame frame;
 
@@ -60,9 +64,17 @@ frame Player::get_frame(std::size_t& frame_index) {
   return frame;
 }
 
-cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
+cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
 
   std::size_t old_frame = m_current_frame;
+
+  double total_time = m_frame_time * m_frames;
+  double time = streamTime * 1000;
+
+  if (time >= total_time - 1) {
+    m_rtaudio.stopStream();
+    m_done = true;
+  }
 
   m_current_frame = streamTime * 1000 / m_frame_time;
   if(old_frame != m_current_frame) m_new = true;
@@ -81,12 +93,6 @@ cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
   int frames_needed = nFrames / frame_ticks + 1;
 
   if(rest_ticks < nFrames) frames_needed++;
-
-  // std::cout << "current frame: " << m_current_frame << '\n';
-  // std::cout << "frame ticks: " << frame_ticks << '\n';
-  // std::cout << "start ticks: " << start_tick << '\n';
-  // std::cout << "rest ticks: " << rest_ticks << '\n';
-  // std::cout << "frames needed: " << frames_needed << '\n';
 
   int width = m_channels, height = nFrames;
   cv::Mat buffer_data = cv::Mat::zeros(cv::Size(width, height), CV_64F);
@@ -119,10 +125,10 @@ cv::Mat Player::get_audio(unsigned int nFrames, double streamTime) {
 
   return buffer_data;
 }
-int Player::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
-  return static_cast<Player*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
+int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData) {
+  return static_cast<Play*>(userData)->oscillator(outputBuffer, inputBuffer, nFrames, streamTime, status);
 }
-int Player::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
+int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
 
   cv::Mat buffer_data = get_audio(nFrames, streamTime);
 
@@ -143,18 +149,22 @@ int Player::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFram
   return 0;
 }
 
+void Play::reset() {
+  if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
+  m_rtaudio.setStreamTime(0.0);
+  if(m_rtaudio.isStreamOpen()) m_rtaudio.closeStream();
 
-void Player::init(nlohmann::json& data) {
+}
+
+void Play::init(nlohmann::json& data) {
   data["play"] = false;
   data["reset"] = false;
 }
 
-void Player::data(nlohmann::json& data) {
+void Play::data(nlohmann::json& data) {
 
   if (data["reset"]) {
-    if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
-    m_rtaudio.setStreamTime(0.0);
-    if(m_rtaudio.isStreamOpen()) m_rtaudio.closeStream();
+    reset();
     // set();
     data["play"] = false;
     data["reset"] = false;
@@ -169,17 +179,27 @@ void Player::data(nlohmann::json& data) {
 
 }
 
-bool Player::new_frame() {
-  bool value = m_new;
+nlohmann::json Play::new_frame() {
+  nlohmann::json data;
+
+  data["done"] = false;
+
+  if (m_done) {
+    data["done"] = m_done;
+    m_done = false;
+  }
+
+  data["new"] = m_new;
+
   m_new = false;
-  return value;
+
+  return data;
 }
 
-void Player::display(cv::Mat& image) {
+void Play::display(cv::Mat& image) {
 
   // if(m_new) {
     while (!frame_exists(m_current_frame)) {
-      // std::cout << "waiting" << '\n';
     }
 
     frame frame = get_frame(m_current_frame);
@@ -187,3 +207,11 @@ void Player::display(cv::Mat& image) {
   // }
 
 }
+
+// bool Play::quit() {
+//
+//   m_quit = true;
+//   m_thread.join();
+//
+//   return true;
+// }

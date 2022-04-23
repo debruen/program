@@ -1,6 +1,6 @@
 
-#ifndef player_h
-#define player_h
+#ifndef play_h
+#define play_h
 
 #include <thread>
 #include <mutex>
@@ -9,7 +9,7 @@
 
 #include "../functionality/data.h"
 
-class Player {
+class Play {
 
   private:
 
@@ -22,8 +22,8 @@ class Player {
 
     // int channels
     // int frame_time
-    // std::size_t start_frame
-    // std::size_t total_frames
+    // std::size_t start
+    // std::size_t frames
     info& m_info;
     std::mutex& m_info_mutex;
 
@@ -32,8 +32,8 @@ class Player {
     nlohmann::json m_data;
 
     int m_sample_rate{44100}, m_channels{}, m_frame_time{}, m_frame_count{-1};
-    bool m_new{true};
-    std::size_t m_current_frame{0};
+    bool m_new{true}, m_done{false};
+    std::size_t m_current_frame{0}, m_frames{0}, m_start{0};
 
     RtAudio m_rtaudio;
 
@@ -46,16 +46,20 @@ class Player {
     static int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status, void *userData);
     int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
 
+    void reset();
+
   public:
-    Player(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);
+    Play(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);
 
     void init(nlohmann::json& data);
 
     void data(nlohmann::json& data);
 
-    bool new_frame();
+    nlohmann::json new_frame();
 
     void display(cv::Mat& image);
+
+    // bool quit();
 };
 
-#endif /* player_h */
+#endif /* play_h */

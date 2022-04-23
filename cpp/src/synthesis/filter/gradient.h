@@ -9,7 +9,6 @@
 class Gradient : public Mask{
 
   private:
-
     nlohmann::json m_data;
 
     const double m_freq_min{0}, m_freq_max{1000}, m_phase_min{0}, m_phase_max{1}, m_frq_gamma{6};

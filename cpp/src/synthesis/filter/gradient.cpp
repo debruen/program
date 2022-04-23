@@ -21,7 +21,6 @@ Gradient::Gradient() {
 
   std::vector<std::string> filter_options{"none", "amplitude"};
   m_data.push_back(data::init_str("filter", filter_options, m_filter));
-
 }
 
 nlohmann::json Gradient::init() {
@@ -47,7 +46,7 @@ nlohmann::json Gradient::update(nlohmann::json data) {
 void Gradient::set_area_frequency(double& frequency) {
   frequency = pow(m_frequency, m_frq_gamma);
   frequency = frequency * (m_freq_max - m_freq_min) + m_freq_min;
-  // frequency = math::project(m_freq_min, m_freq_max, frequency);
+  frequency = frequency * 2;
 }
 
 cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index, std::string type) {
@@ -67,35 +66,6 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index, std::string type
   });
 
   return mask;
-
-  // const int& width(mask.cols),& height(mask.rows);
-  //
-  // AreaSine sine(width, height, frame_index, m_shape);
-  //
-  // double frequency, amplitude, phase, tilt;
-  //
-  // set_area_frequency(frequency);
-  //
-  // amplitude = m_amplitude;
-  // phase     = m_phase;
-  // tilt      = m_tilt;
-  //
-  // double* ptr;
-  // for (int y = 0; y < height; y++) {
-  //
-  //   ptr = mask.ptr<double>(y);
-  //   for (int x = 0; x < width; x++) {
-  //
-  //     if (frequency == 0) {
-  //       ptr[x] = 1 * amplitude;
-  //     } else {
-  //       ptr[x] = math::normalize(-1, 1, sine.point(y, x, frequency, phase, tilt) * amplitude);
-  //     }
-  //
-  //   }
-  // }
-  //
-  // return mask;
 }
 
 void Gradient::process(cv::Mat& mask, std::size_t frame_index, std::string type) {

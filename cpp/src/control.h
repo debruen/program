@@ -2,15 +2,15 @@
 #ifndef control_h
 #define control_h
 
-#include "control/player.h"
+#include "control/play.h"
 #include "control/record.h"
 
 class Control {
 
   private:
 
-    Player   m_player;
-    Record m_recorder;
+    Play   m_play;
+    Record m_record;
 
     nlohmann::json m_data;
 
@@ -21,7 +21,7 @@ class Control {
 
     nlohmann::json data(nlohmann::json data);
 
-    bool new_frame();
+    nlohmann::json new_frame();
     void display(cv::Mat& image);
 
     bool record();

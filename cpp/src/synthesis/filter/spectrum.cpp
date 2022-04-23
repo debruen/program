@@ -76,14 +76,10 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
 }
 
 void Spectrum::set_audio_frequency(int& height, double& frequency) {
-  std::cout << "spectrum frequency A: " << m_frequency << '\n';
   frequency = pow(m_frequency, m_audio_gamma);
-  std::cout << "spectrum frequency B: " << frequency << '\n';
   frequency = frequency * (m_audio_max - m_audio_min) + m_audio_min;
-  std::cout << "spectrum frequency C: " << frequency << '\n';
   // frequency = math::project(m_audio_min, m_audio_max, frequency);
   frequency = frequency * ( static_cast<double>(height) / 44100.0);
-  std::cout << "spectrum frequency D: " << frequency << '\n';
 
 }
 
@@ -113,8 +109,6 @@ cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index, std::stri
   double frequency;
 
   set_audio_frequency(audio.rows, frequency);
-
-  std::cout << "spectrum frequency E: " << frequency << '\n';
 
   Sine sine(audio.cols, audio.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 

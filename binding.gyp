@@ -34,7 +34,7 @@
                     "cpp/src/synthesis/output/hsl.cpp",
 
             "cpp/src/control.cpp",
-                "cpp/src/control/player.cpp",
+                "cpp/src/control/play.cpp",
                 "cpp/src/control/record.cpp"
 
         ],

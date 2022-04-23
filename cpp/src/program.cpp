@@ -25,7 +25,7 @@ nlohmann::json Program::data_control(nlohmann::json data) {
 }
 
 
-bool Program::new_frame() {
+nlohmann::json Program::new_frame() {
   return m_control.new_frame();
 }
 
@@ -40,8 +40,7 @@ bool Program::record() {
 bool Program::quit() {
   bool quit{false};
 
-  if (m_synthesis.quit())
-    quit = true;
+  if (m_synthesis.quit()) quit = true;
 
   return quit;
 }

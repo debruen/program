@@ -86,7 +86,6 @@ Napi::Value program_display(const Napi::CallbackInfo& info) {
 
 // -- -- -- -- -- record
 Napi::Value program_record(const Napi::CallbackInfo& info) {
-  std::cout << "main cpp record" << '\n';
   Napi::Function callback = info[0].As<Napi::Function>();
 
   AsyncRecord* record = new AsyncRecord(callback, program);

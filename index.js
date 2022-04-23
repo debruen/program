@@ -54,13 +54,13 @@ class Program{
   newFrame() {
     return new Promise((resolve) => {
       program_new_frame((err, result) => {
-        resolve(result)
+        const json = JSON.parse(result)
+        resolve(json)
       })
     })
   }
 
   record() {
-    console.log('index record')
     return new Promise((resolve) => {
       program_record((err, result) => {
         resolve(result)

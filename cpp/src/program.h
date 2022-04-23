@@ -27,7 +27,7 @@ class Program {
     nlohmann::json init_control();
     nlohmann::json data_control(nlohmann::json data);
 
-    bool new_frame();
+    nlohmann::json new_frame();
     void display(cv::Mat& image);
     bool record();
 

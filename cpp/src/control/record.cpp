@@ -77,8 +77,6 @@ void Record::start() {
   }
   // m_info_mutex.unlock();
 
-  std::cout << "Record m_frames: " << m_frames << '\n';
-
   m_image = file(m_name, m_path, "none");
   m_audio = file(m_name, m_path, "audio");
 
@@ -98,7 +96,6 @@ bool Record::stop() {
 
 void Record::save(std::size_t frame_index) {
   while (!frame_exists(frame_index)) {
-    // std::cout << "waiting" << '\n';
   }
   cv::Mat image, audio;
 
@@ -106,7 +103,6 @@ void Record::save(std::size_t frame_index) {
   while (m_buffer.size() < m_frames) {
     /* code */
   }
-  std::cout << "m_buffer.size(): " << m_buffer.size() << '\n';
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
     if (m_buffer[i].index == frame_index) {
       image = m_buffer[i].image;
@@ -120,7 +116,6 @@ void Record::save(std::size_t frame_index) {
 
   save_audio(audio);
 
-  std::cout << "save recording" << '\n';
 }
 
 void Record::save_image(cv::Mat& image, std::size_t frame_index) {
@@ -131,7 +126,6 @@ void Record::save_image(cv::Mat& image, std::size_t frame_index) {
 void Record::save_audio(cv::Mat& audio) {
 
   stk::StkFrames left(audio.rows, 1), right(audio.rows, 1), output(audio.rows, 2);
-  std::cout << "A" << '\n';
   for (int i = 0; i < audio.rows; i++) {
 
     // double* ptr = audio.ptr<double>(i);
@@ -140,7 +134,6 @@ void Record::save_audio(cv::Mat& audio) {
     right[i] = audio.ptr<double>(i)[1];
 
   }
-  std::cout << "B" << '\n';
   output.setChannel(0, left, 0);
   output.setChannel(1, right, 0);
 
@@ -152,7 +145,6 @@ void Record::init(nlohmann::json& data) {
 }
 
 bool Record::record() {
-  std::cout << "record *** " << '\n';
   start();
   for(std::size_t i = 0; i < m_frames; i++) {
     save(i);
