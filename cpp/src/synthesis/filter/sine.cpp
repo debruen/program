@@ -76,6 +76,7 @@ void Sine::set_phase(double phase) {
 }
 
 void Sine::set_tilt(double tilt) {
+  m_proto_tilt = tilt;
   adjust_basics();
   adjust_tilt();
 }

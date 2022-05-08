@@ -57,7 +57,8 @@ void Settings::compute() {
   m_height = round(sqrt(base_area / ratio));
   m_width = round(m_height * ratio);
 
-  m_time = data::get_int(m_data, "frame time") / 1000.0 * 44100.0;
+
+  m_time = round((data::get_int(m_data, "frame time") / 1000.0 )* 44100.0);
 }
 
 nlohmann::json Settings::data() {

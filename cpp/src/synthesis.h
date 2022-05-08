@@ -14,7 +14,6 @@
 class Synthesis {
 
   private:
-
     std::vector<frame>& m_buffer;
     std::mutex& m_buffer_mutex;
 

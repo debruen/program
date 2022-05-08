@@ -31,7 +31,9 @@ class Play {
     nlohmann::json m_data;
 
     int m_sample_rate{44100}, m_channels{}, m_frame_time{}, m_frame_count{-1};
+
     bool m_new{true};
+
     std::size_t m_current_frame{0}, m_frames{0}, m_start{0};
 
     double m_total_time{0}, m_stream_time{0};
@@ -48,6 +50,8 @@ class Play {
     int oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
 
     void reset();
+
+    void audio_display(cv::Mat& audio, cv::Mat& left, cv::Mat& right);
 
   public:
     Play(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info);

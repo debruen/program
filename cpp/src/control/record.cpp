@@ -143,6 +143,7 @@ void Record::init(nlohmann::json& data) {
 
 bool Record::record() {
   start();
+  std::cout << "m_frames:" << m_frames << '\n';
   for(std::size_t i = 0; i < m_frames; i++) {
     save(i);
   }

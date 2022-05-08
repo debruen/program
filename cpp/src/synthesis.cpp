@@ -24,9 +24,8 @@ Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info&
 
 void Synthesis::create_frame(std::size_t frame_index) {
 
-  std::string type = data::get_str(m_data["settings"], "type");
-
   m_mutex.lock();
+  std::string type = data::get_str(m_data["settings"], "type");
 
   cv::Mat image = m_settings.image();
   cv::Mat audio = m_settings.audio();

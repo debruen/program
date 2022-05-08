@@ -17,7 +17,7 @@ nlohmann::json Program::data_synthesis(nlohmann::json data) {
 
 
 nlohmann::json Program::init_control() {
-  return m_control.init();
+return m_control.init();
 }
 
 nlohmann::json Program::data_control(nlohmann::json data) {

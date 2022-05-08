@@ -85,21 +85,6 @@ void Gradient::process(cv::Mat& mask, std::size_t frame_index, std::string type)
 
   set_area_frequency(frequency);
 
-  double phase, pm;
-
-  // for (int i = 0; i < page; i++) {
-  //   if(m_tilt <= 0.25) {
-  //     pm = 1 - m_tilt * 4;
-  //   } else if (m_tilt <= 0.5) {
-  //     pm = (m_tilt - 0.25) * (-4);
-  //   } else if (m_tilt <= 0.75) {
-  //     pm = 1 - (m_tilt - 0.5) * 4;
-  //   } else {
-  //     pm = (m_tilt - 0.75) * (-4);
-  //   }
-  //   m_temp_phase += frequency * pm;
-  // }
-
   Sine sine(mask.cols, mask.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 
   // cv::parallel_for_(cv::Range(0, mask.rows), [&](const cv::Range &range) {

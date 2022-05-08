@@ -13,6 +13,8 @@ void Play::set() {
   m_frames = m_info.frames;
   m_start = m_info.start;
 
+  m_current_frame = m_start;
+
   m_total_time = m_frame_time * m_frames;
 
   if(m_rtaudio.getDeviceCount() < 1)
@@ -54,7 +56,9 @@ frame Play::get_frame(std::size_t& frame_index) {
   m_buffer_mutex.lock();
   for (std::size_t i = 0; i < m_buffer.size(); i++) {
     if (m_buffer[i].index == frame_index) {
-      frame = m_buffer[i];
+      frame.index = m_buffer[i].index;
+      frame.image = m_buffer[i].image.clone();
+      frame.audio = m_buffer[i].audio.clone();
       break;
     }
   }
@@ -74,7 +78,7 @@ cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
   if (m_frame_count < cf) {
     m_frame_count = cf;
   }
-  // = audio height
+
   int frame_ticks = m_frame_time / 1000 * 44100;
 
   int start_tick = round(streamTime * 44100 - m_current_frame * static_cast<double>(frame_ticks));
@@ -185,7 +189,9 @@ nlohmann::json Play::new_frame() {
   data["done"] = false;
 
   if (m_stream_time > m_total_time) {
-    // reset();
+    m_current_frame = m_start;
+    m_stream_time = 0;
+    m_new = true;
     data["done"] = true;
   }
 
@@ -196,81 +202,92 @@ nlohmann::json Play::new_frame() {
   return data;
 }
 
+void Play::audio_display(cv::Mat& audio, cv::Mat& left, cv::Mat& right) {
+
+  // bool audio_rotate{false};
+  // if (left.cols > left.rows) {
+  //   cv::rotate(left, left, cv::ROTATE_90_CLOCKWISE);
+  //   cv::rotate(right, right, cv::ROTATE_90_CLOCKWISE);
+  //   audio_rotate = true;
+  // }
+
+  cv::Mat gray_left(left.rows, left.cols, CV_8UC1, 255);
+  cv::Mat gray_right(right.rows, right.cols, CV_8UC1, 255);
+
+  // gray_left = 255;
+  // gray_right = 255;
+
+  int width, height;
+
+  width = round(audio.rows / static_cast<double>(gray_left.rows));
+  height = gray_left.rows;
+
+  std::cout << "out width: " << left.cols << '\n';
+  std::cout << "out height: " << left.rows << '\n';
+
+  std::cout << "width: " << width << '\n';
+  std::cout << "height: " << height << '\n';
+
+  std::cout << "audio width: " << audio.cols << '\n';
+  std::cout << "audio height: " << audio.rows << '\n';
+
+  std::cout << "calc height: " << floor(width * static_cast<double>(height)) << '\n';
+
+  // double* audio_ptr;
+  uchar* left_ptr,* right_ptr;
+
+  // int h = height - 1;
+
+  int c{0}, xL, xR, y, h = height - 1, w = gray_left.cols / 4;
+
+  for (int i = 0; i <  height; i++) {
+
+    for (int j = 0; j < width; j++) {
+
+      y = (h - i) / 2;
+      // y = i / 2;
+
+      // audio_ptr = audio.ptr<double>(c);
+
+      xL = round( audio.ptr<double>(c)[0] * w + w);
+
+      left_ptr = gray_left.ptr<uchar>(y);
+
+      left_ptr[xL] = left_ptr[xL] * 0.95;
+
+      xR = round( audio.ptr<double>(c)[1] * w + w);
+
+      right_ptr = gray_right.ptr<uchar>(y);
+
+      right_ptr[xR] = right_ptr[xR] * 0.95;
+
+      c++;
+      if(c >= audio.rows) break;
+    }
+  }
+
+  std::cout << "c: " << c << '\n';
+
+  cv::cvtColor(gray_left, left, cv::COLOR_GRAY2RGB);
+  cv::cvtColor(gray_right, right, cv::COLOR_GRAY2RGB);
+
+
+  // if (audio_rotate) {
+  //   cv::rotate(left, left, cv::ROTATE_90_COUNTERCLOCKWISE);
+  //   cv::rotate(right, right, cv::ROTATE_90_COUNTERCLOCKWISE);
+  // }
+}
+
+
 void Play::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
 
   while (!frame_exists(m_current_frame)) {}
+
   frame frame = get_frame(m_current_frame);
 
   // fill image buffer
   cv::resize(frame.image, image, cv::Size(image.cols, image.rows), 0, 0, cv::INTER_CUBIC);
 
-  // fill audio buffer
-  bool audio_rotate{false};
-  if (left.cols > left.rows) {
-    cv::rotate(left, left, cv::ROTATE_90_CLOCKWISE);
-    cv::rotate(right, right, cv::ROTATE_90_CLOCKWISE);
-    audio_rotate = true;
-  }
-
-  left = cv::Scalar(255,255,255);
-  right = cv::Scalar(255,255,255);
-
-  int width, height, c = 0, xL, xR, y;
-
-  width = frame.audio.rows / left.rows + 1;
-  height = left.rows;
-
-  // std::cout << "out width: " << left.cols << '\n';
-  // std::cout << "out height: " << left.rows << '\n';
-
-  // std::cout << "audio height: " << frame.audio.rows << '\n';
-  // std::cout << "calc height: " << width * height << '\n';
-
-  double* audio_ptr;
-  uchar* left_ptr,* right_ptr;
-
-  double pix_wa = (left.cols - 1);
-  double pix_wb = pix_wa;
-
-  int h = height - 1;
-
-  for (int j = 0; j < height; j++)  {
-    for (int i = 0; i < width; i++) {
-
-      audio_ptr = frame.audio.ptr<double>(c);
-
-      xL = round( (audio_ptr[0] + 1) / 4 * pix_wa - pix_wb) * 3;
-
-      y = h - j;
-
-      left_ptr = left.ptr<uchar>(y);
-
-      // if (c < 100){
-      //   std::cout << "audio: " << audio_ptr[0] << '\n';
-      //   std::cout << "c: " << c << '\n';
-      //   std::cout << "x: " << xL << " y: " << y << '\n';
-      //   std::cout << "left: " << left_ptr[xL] - 12 << '\n';
-      // }
-
-      left_ptr[xL] = left_ptr[xL] * 0.95;
-      left_ptr[xL + 1] = left_ptr[xL + 1] * 0.95;
-      left_ptr[xL + 2] = left_ptr[xL + 2] * 0.95;
-
-      xR = round( (audio_ptr[1] + 1) / 4 * pix_wa - pix_wb) * 3;
-
-      right_ptr = right.ptr<uchar>(y);
-
-      right_ptr[xR] = right_ptr[xR] * 0.95;
-      right_ptr[xR + 1] = right_ptr[xR + 1] * 0.95;
-      right_ptr[xR + 2] = right_ptr[xR + 2] * 0.95;
-
-      c++;
-    }
-  }
-
-  if (audio_rotate) {
-    cv::rotate(left, left, cv::ROTATE_90_COUNTERCLOCKWISE);
-    cv::rotate(right, right, cv::ROTATE_90_COUNTERCLOCKWISE);
-  }
+  audio_display(frame.audio, left, right);
 
 }
