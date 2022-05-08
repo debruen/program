@@ -72,11 +72,13 @@ Napi::Value program_display(const Napi::CallbackInfo& info) {
 
   std::string string = info[0].As<Napi::String>().Utf8Value();
   Napi::Uint8Array image_buffer = info[1].As<Napi::Uint8Array>();
-  Napi::Function callback = info[2].As<Napi::Function>();
+  Napi::Uint8Array left_buffer = info[2].As<Napi::Uint8Array>();
+  Napi::Uint8Array right_buffer = info[3].As<Napi::Uint8Array>();
+  Napi::Function callback = info[4].As<Napi::Function>();
 
   nlohmann::json json = nlohmann::json::parse(string);
 
-  AsyncDisplay* display = new AsyncDisplay(callback, program, json, image_buffer);
+  AsyncDisplay* display = new AsyncDisplay(callback, program, json, image_buffer, left_buffer, right_buffer);
   display->Queue();
 
   std::string msg = "display";

@@ -30,12 +30,10 @@ protected:
 public:
 
   virtual nlohmann::json data() = 0;
-
   virtual nlohmann::json update(nlohmann::json data) = 0;
 
-  virtual cv::Mat image_frame(cv::Mat& image, std::size_t frame_index, std::string type) = 0;
-
-  virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) = 0;
+  virtual cv::Mat image(cv::Mat& image, std::size_t index) = 0;
+  virtual cv::Mat audio(cv::Mat& audio, std::size_t index) = 0;
 
 };
 

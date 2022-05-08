@@ -27,11 +27,9 @@ class Mask {
   public:
 
     virtual nlohmann::json init() = 0;
-
     virtual nlohmann::json update(nlohmann::json data) = 0;
 
     virtual cv::Mat frame(cv::Mat& mask, std::size_t index, std::string type) = 0;
-
     virtual void process(cv::Mat& mask, std::size_t index, std::string type) = 0;
 
 };

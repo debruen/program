@@ -16,12 +16,10 @@ class Filter {
     Filter();
 
     nlohmann::json data();
-
     nlohmann::json update(nlohmann::json data);
 
-    void image_frame(cv::Mat& image, std::size_t frame_index, std::string type);
-
-    void audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type);
+    void image(cv::Mat& image, std::size_t index);
+    void audio(cv::Mat& audio, std::size_t index);
 
 };
 

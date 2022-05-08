@@ -95,12 +95,10 @@ class Blend {
     Blend();
 
     nlohmann::json data();
-
     nlohmann::json update(nlohmann::json data);
 
-    void image_frame(cv::Mat& image, cv::Mat& film, std::size_t frame_index, std::string type);
-
-    void audio_frame(cv::Mat& audio, cv::Mat& film, std::size_t frame_index, std::string type);
+    void image(cv::Mat& image, cv::Mat& film, std::size_t index);
+    void audio(cv::Mat& audio, cv::Mat& film, std::size_t index);
 
 };
 

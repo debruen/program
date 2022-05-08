@@ -1,22 +1,21 @@
 
 #include "record.h"
 
-Record::Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
-    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex) {
+Record::Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
+    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info) {
 
   m_path = getenv("HOME");
   m_path = m_path + "/Desktop/output/";
   m_name = "output_";
 
-  // m_thread = std::thread{&Record::thread, this};
 }
 
-bool Record::exists(const std::string& file) {
+bool Record::file_exist(const std::string& file) {
   struct stat buffer;
   return (stat(file.c_str(), &buffer) == 0);
 }
 
-std::string Record::file(std::string& filename, std::string& path, std::string type) {
+std::string Record::file(std::string type) {
 
   std::string index, imageTest, audioTest, textTest, file;
 
@@ -31,11 +30,11 @@ std::string Record::file(std::string& filename, std::string& path, std::string t
       index = std::to_string(i + 1);
     }
 
-    imageTest = path + filename + index + ".tiff";
-    audioTest = path + filename + index + ".aiff";
-    textTest = path + filename + index + ".txt";
+    imageTest = m_path + m_name + index + ".tiff";
+    audioTest = m_path + m_name + index + ".aiff";
+    textTest = m_path + m_name + index + ".txt";
 
-    if(!exists(imageTest) && !exists(audioTest)) {
+    if(!file_exist(imageTest) && !file_exist(audioTest)) {
       break;
     }
   }
@@ -47,7 +46,7 @@ std::string Record::file(std::string& filename, std::string& path, std::string t
   } else if(type == "text") {
     file = textTest;
   } else {
-    file = path + filename + index;
+    file = m_path + m_name + index;
   }
 
   return file;
@@ -68,17 +67,31 @@ bool Record::frame_exists(std::size_t& frame_index) {
   return check;
 }
 
+frame Record::get_frame(std::size_t& frame_index) {
+
+  frame frame;
+
+  m_buffer_mutex.lock();
+  for (std::size_t i = 0; i < m_buffer.size(); i++) {
+    if (m_buffer[i].index == frame_index) {
+      frame = m_buffer[i];
+      break;
+    }
+  }
+  m_buffer_mutex.unlock();
+
+  return frame;
+}
+
 void Record::start() {
 
-  // m_info_mutex.lock();
   m_frames = m_info.frames;
   while (!m_info.full) {
     /* code */
   }
-  // m_info_mutex.unlock();
 
-  m_image = file(m_name, m_path, "none");
-  m_audio = file(m_name, m_path, "audio");
+  m_image = file("none");
+  m_audio = file("audio");
 
   try {
     audio_out.openFile(m_audio, 2, stk::FileWrite::FILE_AIF, stk::Stk::STK_FLOAT32);
@@ -88,37 +101,17 @@ void Record::start() {
 
 }
 
-bool Record::stop() {
-  audio_out.closeFile();
+void Record::save(std::size_t& frame_index) {
 
-  return false;
-}
+  while (!frame_exists(frame_index)) {}
+  frame frame = get_frame(frame_index);
 
-void Record::save(std::size_t frame_index) {
-  while (!frame_exists(frame_index)) {
-  }
-  cv::Mat image, audio;
-
-  m_buffer_mutex.lock();
-  while (m_buffer.size() < m_frames) {
-    /* code */
-  }
-  for (std::size_t i = 0; i < m_buffer.size(); i++) {
-    if (m_buffer[i].index == frame_index) {
-      image = m_buffer[i].image;
-      audio = m_buffer[i].audio;
-      break;
-    }
-  }
-  m_buffer_mutex.unlock();
-
-  save_image(image, frame_index);
-
-  save_audio(audio);
+  save_image(frame.image, frame_index);
+  save_audio(frame.audio);
 
 }
 
-void Record::save_image(cv::Mat& image, std::size_t frame_index) {
+void Record::save_image(cv::Mat& image, std::size_t& frame_index) {
   std::string file_path = m_image + " - " + std::to_string(frame_index + 1) + ".tiff";
   cv::imwrite(file_path, image);
 }
@@ -128,8 +121,6 @@ void Record::save_audio(cv::Mat& audio) {
   stk::StkFrames left(audio.rows, 1), right(audio.rows, 1), output(audio.rows, 2);
   for (int i = 0; i < audio.rows; i++) {
 
-    // double* ptr = audio.ptr<double>(i);
-
     left[i]  = audio.ptr<double>(i)[0];
     right[i] = audio.ptr<double>(i)[1];
 
@@ -138,6 +129,12 @@ void Record::save_audio(cv::Mat& audio) {
   output.setChannel(1, right, 0);
 
   audio_out.tick(output);
+}
+
+bool Record::stop() {
+  audio_out.closeFile();
+
+  return false;
 }
 
 void Record::init(nlohmann::json& data) {

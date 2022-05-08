@@ -1,8 +1,8 @@
 
 #include "control.h"
 
-Control::Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
-    : m_play(buffer, buffer_mutex, info, info_mutex), m_record(buffer, buffer_mutex, info, info_mutex) {
+Control::Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
+    : m_play(buffer, buffer_mutex, info), m_record(buffer, buffer_mutex, info) {
 
 }
 
@@ -28,8 +28,8 @@ nlohmann::json Control::new_frame() {
   return m_play.new_frame();
 }
 
-void Control::display(cv::Mat& image) {
-  m_play.display(image);
+void Control::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
+  m_play.display(image, left, right);
 }
 
 bool Control::record() {

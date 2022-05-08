@@ -1,8 +1,8 @@
 
 #include "synthesis.h"
 
-Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
-    : m_buffer{buffer}, m_buffer_mutex{buffer_mutex}, m_info{info}, m_info_mutex{info_mutex} {
+Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
+    : m_buffer{buffer}, m_buffer_mutex{buffer_mutex}, m_info{info} {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -33,11 +33,11 @@ void Synthesis::create_frame(std::size_t frame_index) {
 
   // filter
   if(type == "audio") {
-    m_filter.audio_frame(audio, frame_index, type);
+    m_filter.audio(audio, frame_index);
     // m_output.audio_frame(image, audio, frame_index);
 
   } else {
-    m_filter.image_frame(image, frame_index, type);
+    m_filter.image(image, frame_index);
 
     // m_output.image_frame(image, audio, frame_index);
   }

@@ -2,7 +2,7 @@
 #include "program.h"
 
 Program::Program()
-    : m_synthesis(m_buffer, m_buffer_mutex, m_info, m_info_mutex), m_control(m_buffer, m_buffer_mutex, m_info, m_info_mutex) {
+    : m_synthesis(m_buffer, m_buffer_mutex, m_info), m_control(m_buffer, m_buffer_mutex, m_info) {
 
 }
 
@@ -29,8 +29,8 @@ nlohmann::json Program::new_frame() {
   return m_control.new_frame();
 }
 
-void Program::display(cv::Mat& image) {
-  m_control.display(image);
+void Program::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
+  m_control.display(image, left, right);
 }
 
 bool Program::record() {

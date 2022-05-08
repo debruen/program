@@ -128,43 +128,68 @@ class AsyncDisplay : public Napi::AsyncWorker {
   private:
     Program& program;
     nlohmann::json m_data;
-    Napi::Uint8Array p_image;
-    int m_width, m_height;
-    cv::Mat m_image;
+    Napi::Uint8Array m_image_array, m_left_array, m_right_array;
+    int m_image_width, m_image_height, m_audio_width, m_audio_height;
+    cv::Mat m_image, m_left, m_right;
 
   public:
-    AsyncDisplay(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image)
-      : AsyncWorker(callback), program(program), m_data(data), p_image(image) {
+    AsyncDisplay(Napi::Function& callback, Program& program, nlohmann::json data, Napi::Uint8Array image, Napi::Uint8Array left, Napi::Uint8Array right)
+      : AsyncWorker(callback), program(program), m_data(data), m_image_array(image), m_left_array(left), m_right_array(right) {
 
-      m_width  = m_data["width"];
-      m_height = m_data["height"];
+      m_image_width  = m_data["imageWidth"];
+      m_image_height = m_data["imageHeight"];
+      m_audio_width  = m_data["audioWidth"];
+      m_audio_height = m_data["audioHeight"];
 
-      cv::Size size(m_width, m_height);
-
-      m_image = cv::Mat::zeros(cv::Size(m_width, m_height), CV_8UC3);
+      m_image = cv::Mat::zeros(cv::Size(m_image_width, m_image_height), CV_8UC3);
+      m_left  = cv::Mat::zeros(cv::Size(m_audio_width, m_audio_height), CV_8UC3);
+      m_right = cv::Mat::zeros(cv::Size(m_audio_width, m_audio_height), CV_8UC3);
     };
     virtual ~AsyncDisplay() {};
 
     void Execute() {
-      program.display(m_image);
+      program.display(m_image, m_left, m_right);
     };
     void OnOK() {
 
       // writing result to image_buffer
-      int c, z;
+      int z_image, c_image;
       uchar* image_ptr;
-
-      for (int y = 0; y < m_height; y++) {
+      for (int y = 0; y < m_image_height; y++) {
 
         image_ptr = m_image.ptr<uchar>(y);
-        for (int x = 0; x < m_width; x++) {
-          z = (y * m_width + x) * 4;
-          c = x * 3;
+        for (int x = 0; x < m_image_width; x++) {
+          z_image = (y * m_image_width + x) * 4;
+          c_image = x * 3;
 
-          p_image[z]   = image_ptr[c+2]; // red
-          p_image[z+1] = image_ptr[c+1]; // green
-          p_image[z+2] = image_ptr[c];   // blue
-          p_image[z+3] = 255;      // alpha channel
+          m_image_array[z_image]   = image_ptr[c_image+2]; // red
+          m_image_array[z_image+1] = image_ptr[c_image+1]; // green
+          m_image_array[z_image+2] = image_ptr[c_image];   // blue
+          m_image_array[z_image+3] = 255;      // alpha channel
+        }
+      }
+
+      // writing result to audio_buffer
+      int z_audio, c_audio;
+      uchar* left_ptr;
+      uchar* right_ptr;
+      for (int y = 0; y < m_audio_height; y++) {
+
+        left_ptr = m_left.ptr<uchar>(y);
+        right_ptr = m_right.ptr<uchar>(y);
+        for (int x = 0; x < m_audio_width; x++) {
+          z_audio = (y * m_audio_width + x) * 4;
+          c_audio = x * 3;
+
+          m_left_array[z_audio]   = left_ptr[c_audio+2]; // red
+          m_left_array[z_audio+1] = left_ptr[c_audio+1]; // green
+          m_left_array[z_audio+2] = left_ptr[c_audio];   // blue
+          m_left_array[z_audio+3] = 255;      // alpha channel
+
+          m_right_array[z_audio]   = right_ptr[c_audio+2]; // red
+          m_right_array[z_audio+1] = right_ptr[c_audio+1]; // green
+          m_right_array[z_audio+2] = right_ptr[c_audio];   // blue
+          m_right_array[z_audio+3] = 255;      // alpha channel
         }
       }
 

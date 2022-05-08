@@ -68,10 +68,10 @@ class Program{
     })
   }
 
-  display(data, image) {
+  display(data, image, left, right) {
     const string = JSON.stringify(data)
     return new Promise((resolve) => {
-      program_display(string, image, (err, result) => {
+      program_display(string, image, left, right, (err, result) => {
         resolve(result)
       })
     })

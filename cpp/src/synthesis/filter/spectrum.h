@@ -28,12 +28,10 @@ class Spectrum : public Coat {
     Spectrum();
 
     virtual nlohmann::json data();
-
     virtual nlohmann::json update(nlohmann::json data);
 
-    virtual cv::Mat image_frame(cv::Mat& image, std::size_t frame_index, std::string type);
-
-    virtual cv::Mat audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type);
+    virtual cv::Mat image(cv::Mat& image, std::size_t index);
+    virtual cv::Mat audio(cv::Mat& audio, std::size_t index);
 
 };
 

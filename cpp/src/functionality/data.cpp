@@ -25,6 +25,18 @@ nlohmann::json data::init_str(std::string name, std::vector<std::string> options
   return data;
 }
 
+nlohmann::json data::init_str(std::string name, std::string value) {
+
+  nlohmann::json data;
+
+  data["name"] = name;
+  data["form"] = "value";
+  data["type"] = "string";
+  data["value"] = value;
+
+  return data;
+}
+
 std::string data::get_str(nlohmann::json& data, std::string name) {
 
   std::size_t index = 0, size = array_size(data);

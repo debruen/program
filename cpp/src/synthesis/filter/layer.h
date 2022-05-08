@@ -2,8 +2,8 @@
 #ifndef layer_h
 #define layer_h
 
-#include "blend.h"
 #include "film.h"
+#include "blend.h"
 
 class Layer {
 
@@ -46,18 +46,16 @@ class Layer {
     };
 
 
-    void image_frame(cv::Mat& image, std::size_t frame_index, std::string type) {
-
-      cv::Mat film = m_film->image_frame(image, frame_index, type);
-      m_blend->image_frame(image, film, frame_index, type);
+    void image(cv::Mat& image, std::size_t index) {
+      cv::Mat film = m_film->image(image, index);
+      m_blend->image(image, film, index);
 
       // m_blend->process(image, film);
     };
 
-    void audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) {
-
-      cv::Mat film = m_film->audio_frame(audio, frame_index, type);
-      m_blend->audio_frame(audio, film, frame_index, type);
+    void audio(cv::Mat& audio, std::size_t index) {
+      cv::Mat film = m_film->audio(audio, index);
+      m_blend->audio(audio, film, index);
     };
 
 };

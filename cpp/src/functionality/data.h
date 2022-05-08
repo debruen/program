@@ -39,6 +39,7 @@ namespace data {
 
   // string functions
   nlohmann::json init_str(std::string name, std::vector<std::string> options, std::string value);
+  nlohmann::json init_str(std::string name, std::string value);
   std::string get_str(nlohmann::json& data, std::string name);
 
   // int functions

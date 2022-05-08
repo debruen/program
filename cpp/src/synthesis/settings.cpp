@@ -2,9 +2,16 @@
 #include "settings.h"
 
 Settings::Settings() {
-  /// type (image or audio)
+
+  /// name (dimensions)
+  m_data.push_back(data::init_str("name", "dimensions"));
+
+  /// type (image, audio)
   std::vector<std::string> type_options{"image", "audio"};
   m_data.push_back(data::init_str("type", type_options, type_options[0]));
+
+  /// display (true)
+  m_data.push_back(data::init_bool("display", true));
 
   /// ratio (2:1 - 1:2)
   m_data.push_back(data::init_float("ratio", 0.5, 2, 1.0/M_SQRT2));

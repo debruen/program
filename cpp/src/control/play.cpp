@@ -1,21 +1,19 @@
 
 #include "play.h"
 
-Play::Play(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
-    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex) {
+Play::Play(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
+    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info) {
 
-  // m_thread = std::thread{&Play::thread, this};
 }
 
 void Play::set() {
 
-  // m_info_mutex.lock();
   m_channels = m_info.channels;
   m_frame_time = m_info.time;
   m_frames = m_info.frames;
   m_start = m_info.start;
 
-  // m_info_mutex.unlock();
+  m_total_time = m_frame_time * m_frames;
 
   if(m_rtaudio.getDeviceCount() < 1)
     std::cout << "No audio devices found!"  << '\n';
@@ -32,6 +30,7 @@ void Play::set() {
   } catch(RtAudioError& e) {
     e.printMessage();
   }
+
 }
 
 bool Play::frame_exists(std::size_t& frame_index) {
@@ -67,14 +66,6 @@ frame Play::get_frame(std::size_t& frame_index) {
 cv::Mat Play::get_audio(unsigned int nFrames, double streamTime) {
 
   std::size_t old_frame = m_current_frame;
-
-  double total_time = m_frame_time * m_frames;
-  double time = streamTime * 1000;
-
-  if (time >= total_time - 1) {
-    m_rtaudio.stopStream();
-    m_done = true;
-  }
 
   m_current_frame = streamTime * 1000 / m_frame_time;
   if(old_frame != m_current_frame) m_new = true;
@@ -130,6 +121,12 @@ int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames
 }
 int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status) {
 
+  m_stream_time = streamTime * 1000;
+
+  if (m_stream_time >= m_total_time) {
+    m_rtaudio.closeStream();
+  }
+
   cv::Mat buffer_data = get_audio(nFrames, streamTime);
 
   double* buffer_pointer,* buffer = (double*) outputBuffer;
@@ -150,10 +147,13 @@ int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames
 }
 
 void Play::reset() {
+  std::cout << "A" << '\n';
   if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
-  m_rtaudio.setStreamTime(0.0);
+  std::cout << "B" << '\n';
+  // m_rtaudio.setStreamTime(0.0);
+  // std::cout << "C" << '\n';
   if(m_rtaudio.isStreamOpen()) m_rtaudio.closeStream();
-
+  std::cout << "D" << '\n';
 }
 
 void Play::init(nlohmann::json& data) {
@@ -184,9 +184,9 @@ nlohmann::json Play::new_frame() {
 
   data["done"] = false;
 
-  if (m_done) {
-    data["done"] = m_done;
-    m_done = false;
+  if (m_stream_time > m_total_time) {
+    // reset();
+    data["done"] = true;
   }
 
   data["new"] = m_new;
@@ -196,22 +196,81 @@ nlohmann::json Play::new_frame() {
   return data;
 }
 
-void Play::display(cv::Mat& image) {
+void Play::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
 
-  // if(m_new) {
-    while (!frame_exists(m_current_frame)) {
+  while (!frame_exists(m_current_frame)) {}
+  frame frame = get_frame(m_current_frame);
+
+  // fill image buffer
+  cv::resize(frame.image, image, cv::Size(image.cols, image.rows), 0, 0, cv::INTER_CUBIC);
+
+  // fill audio buffer
+  bool audio_rotate{false};
+  if (left.cols > left.rows) {
+    cv::rotate(left, left, cv::ROTATE_90_CLOCKWISE);
+    cv::rotate(right, right, cv::ROTATE_90_CLOCKWISE);
+    audio_rotate = true;
+  }
+
+  left = cv::Scalar(255,255,255);
+  right = cv::Scalar(255,255,255);
+
+  int width, height, c = 0, xL, xR, y;
+
+  width = frame.audio.rows / left.rows + 1;
+  height = left.rows;
+
+  // std::cout << "out width: " << left.cols << '\n';
+  // std::cout << "out height: " << left.rows << '\n';
+
+  // std::cout << "audio height: " << frame.audio.rows << '\n';
+  // std::cout << "calc height: " << width * height << '\n';
+
+  double* audio_ptr;
+  uchar* left_ptr,* right_ptr;
+
+  double pix_wa = (left.cols - 1);
+  double pix_wb = pix_wa;
+
+  int h = height - 1;
+
+  for (int j = 0; j < height; j++)  {
+    for (int i = 0; i < width; i++) {
+
+      audio_ptr = frame.audio.ptr<double>(c);
+
+      xL = round( (audio_ptr[0] + 1) / 4 * pix_wa - pix_wb) * 3;
+
+      y = h - j;
+
+      left_ptr = left.ptr<uchar>(y);
+
+      // if (c < 100){
+      //   std::cout << "audio: " << audio_ptr[0] << '\n';
+      //   std::cout << "c: " << c << '\n';
+      //   std::cout << "x: " << xL << " y: " << y << '\n';
+      //   std::cout << "left: " << left_ptr[xL] - 12 << '\n';
+      // }
+
+      left_ptr[xL] = left_ptr[xL] * 0.95;
+      left_ptr[xL + 1] = left_ptr[xL + 1] * 0.95;
+      left_ptr[xL + 2] = left_ptr[xL + 2] * 0.95;
+
+      xR = round( (audio_ptr[1] + 1) / 4 * pix_wa - pix_wb) * 3;
+
+      right_ptr = right.ptr<uchar>(y);
+
+      right_ptr[xR] = right_ptr[xR] * 0.95;
+      right_ptr[xR + 1] = right_ptr[xR + 1] * 0.95;
+      right_ptr[xR + 2] = right_ptr[xR + 2] * 0.95;
+
+      c++;
     }
+  }
 
-    frame frame = get_frame(m_current_frame);
-    cv::resize(frame.image, image, cv::Size(image.cols,image.rows), 0, 0, cv::INTER_CUBIC);
-  // }
+  if (audio_rotate) {
+    cv::rotate(left, left, cv::ROTATE_90_COUNTERCLOCKWISE);
+    cv::rotate(right, right, cv::ROTATE_90_COUNTERCLOCKWISE);
+  }
 
 }
-
-// bool Play::quit() {
-//
-//   m_quit = true;
-//   m_thread.join();
-//
-//   return true;
-// }

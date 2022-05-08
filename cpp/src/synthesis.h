@@ -19,7 +19,6 @@ class Synthesis {
     std::mutex& m_buffer_mutex;
 
     info& m_info;
-    std::mutex& m_info_mutex;
 
     Settings m_settings;
     Filter   m_filter;
@@ -44,7 +43,7 @@ class Synthesis {
     std::thread m_thread;
 
   public:
-    Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);
+    Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info);
 
     nlohmann::json init();
 

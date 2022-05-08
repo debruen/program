@@ -19,7 +19,7 @@ Gradient::Gradient() {
 
   m_data.push_back(data::init_float("tilt", 0, 1, m_tilt));
 
-  std::vector<std::string> filter_options{"none", "amplitude"};
+  std::vector<std::string> filter_options{"none", "frequency", "phase", "amplitude", "tilt"};
   m_data.push_back(data::init_str("filter", filter_options, m_filter));
 }
 
@@ -54,6 +54,9 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index, std::string type
   double frequency;
 
   set_area_frequency(frequency);
+  if (type == "image") {
+    frequency = frequency * 2;
+  }
 
   Sine sine(mask.cols, mask.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 
@@ -71,13 +74,31 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index, std::string type
 void Gradient::process(cv::Mat& mask, std::size_t frame_index, std::string type) {
 
   unsigned char filter_select = 0;
-  if (m_filter == "amplitude") filter_select = 1;
+  if (m_filter == "frequency") filter_select = 1;
+  if (m_filter == "phase") filter_select = 2;
+  if (m_filter == "amplitude") filter_select = 3;
+  if (m_filter == "tilt") filter_select = 4;
 
   double frequency, amplitude;
 
   amplitude = m_amplitude;
 
   set_area_frequency(frequency);
+
+  double phase, pm;
+
+  // for (int i = 0; i < page; i++) {
+  //   if(m_tilt <= 0.25) {
+  //     pm = 1 - m_tilt * 4;
+  //   } else if (m_tilt <= 0.5) {
+  //     pm = (m_tilt - 0.25) * (-4);
+  //   } else if (m_tilt <= 0.75) {
+  //     pm = 1 - (m_tilt - 0.5) * 4;
+  //   } else {
+  //     pm = (m_tilt - 0.75) * (-4);
+  //   }
+  //   m_temp_phase += frequency * pm;
+  // }
 
   Sine sine(mask.cols, mask.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 
@@ -86,7 +107,10 @@ void Gradient::process(cv::Mat& mask, std::size_t frame_index, std::string type)
     for (int y = 0; y < mask.rows; y++) {
       ptr = mask.ptr<double>(y);
       for (int x = 0; x < mask.cols; x++) {
-        if (filter_select == 1) amplitude = ptr[x];
+        if (filter_select == 1) sine.set_frequency(ptr[x]);
+        if (filter_select == 2) sine.set_phase(ptr[x]);
+        if (filter_select == 3) amplitude = ptr[x];
+        if (filter_select == 4) sine.set_tilt(ptr[x]);
         ptr[x] = (sine.point(y, x) * amplitude + 1) / 2;
         // ptr[x] = math::normalize(m_norm_low, m_norm_high, sine.point(y, x)) * amplitude;
       }

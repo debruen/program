@@ -75,15 +75,7 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   return m_data;
 }
 
-void Spectrum::set_audio_frequency(int& height, double& frequency) {
-  frequency = pow(m_frequency, m_audio_gamma);
-  frequency = frequency * (m_audio_max - m_audio_min) + m_audio_min;
-  // frequency = math::project(m_audio_min, m_audio_max, frequency);
-  frequency = frequency * ( static_cast<double>(height) / 44100.0);
-
-}
-
-cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index, std::string type) {
+cv::Mat Spectrum::image(cv::Mat& image, std::size_t index) {
 
   cv::Size size(image.cols, image.rows);
 
@@ -102,7 +94,15 @@ cv::Mat Spectrum::image_frame(cv::Mat& image, std::size_t frame_index, std::stri
   return film;
 }
 
-cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index, std::string type) {
+void Spectrum::set_audio_frequency(int& height, double& frequency) {
+  frequency = pow(m_frequency, m_audio_gamma);
+  frequency = frequency * (m_audio_max - m_audio_min) + m_audio_min;
+  // frequency = math::project(m_audio_min, m_audio_max, frequency);
+  frequency = frequency * ( static_cast<double>(height) / 44100.0);
+
+}
+
+cv::Mat Spectrum::audio(cv::Mat& audio, std::size_t index) {
 
   cv::Mat film = cv::Mat(cv::Size(audio.cols, audio.rows), CV_64F);
 
@@ -110,7 +110,7 @@ cv::Mat Spectrum::audio_frame(cv::Mat& audio, std::size_t frame_index, std::stri
 
   set_audio_frequency(audio.rows, frequency);
 
-  Sine sine(audio.cols, audio.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
+  Sine sine(audio.cols, audio.rows, index, m_shape, frequency, m_phase, m_tilt, "audio");
 
   cv::parallel_for_(cv::Range(0, audio.rows), [&](const cv::Range &range) {
     for (int y = range.start; y < range.end; y++) {
