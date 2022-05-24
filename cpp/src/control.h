@@ -15,7 +15,7 @@ class Control {
     nlohmann::json m_data;
 
   public:
-    Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info);
+    Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);
 
     nlohmann::json init();
     nlohmann::json data(nlohmann::json data);

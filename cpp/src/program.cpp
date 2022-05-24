@@ -2,7 +2,7 @@
 #include "program.h"
 
 Program::Program()
-    : m_synthesis(m_buffer, m_buffer_mutex, m_info), m_control(m_buffer, m_buffer_mutex, m_info) {
+    : m_synthesis(m_buffer, m_buffer_mutex, m_info, m_info_mutex), m_control(m_buffer, m_buffer_mutex, m_info, m_info_mutex) {
 
 }
 

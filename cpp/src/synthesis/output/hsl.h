@@ -2,13 +2,14 @@
 #ifndef hsl_h
 #define hsl_h
 
+#include "../filter/sine.h"
 #include "out.h"
 
 class Hsl : public Out {
 
   private:
 
-    nlohmann::json hsl_data;
+    nlohmann::json _data;
 
     double normDouble(double min, double max, double value); // returns 0.0 - 1.0 from value out of range min max
 
@@ -17,6 +18,8 @@ class Hsl : public Out {
     std::vector<double> fft(std::vector<double> input);
 
     void norm3dDouble(std::vector< std::vector< std::vector<double> > >& vector);
+
+    void set_audio_frequency(int& height, double& frequency);
 
   public:
     Hsl();
@@ -28,11 +31,6 @@ class Hsl : public Out {
     virtual void image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
 
     virtual void audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
-
-
-    virtual void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
-    virtual void process(stk::StkFrames& audio, std::vector<cv::Mat>& images);
 
 };
 

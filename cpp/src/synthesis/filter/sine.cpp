@@ -103,11 +103,6 @@ double Sine::point(int& y, int& x) {
 
   degrees = ((xv + yv) * m_frequency) + m_phase + m_tilt_add_angle;
 
-  // if(y == 0 && x == 0) {
-  //   std::cout << "phase 3: " << m_phase << '\n';
-  //   std::cout << "degrees: " << degrees << '\n';
-  // }
-
   sinus = sin(math::radian(degrees));
 
   if (m_shape == "square") {

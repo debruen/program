@@ -151,13 +151,8 @@ int Play::oscillator(void *outputBuffer, void *inputBuffer, unsigned int nFrames
 }
 
 void Play::reset() {
-  std::cout << "A" << '\n';
   if(m_rtaudio.isStreamRunning()) m_rtaudio.stopStream();
-  std::cout << "B" << '\n';
-  // m_rtaudio.setStreamTime(0.0);
-  // std::cout << "C" << '\n';
   if(m_rtaudio.isStreamOpen()) m_rtaudio.closeStream();
-  std::cout << "D" << '\n';
 }
 
 void Play::init(nlohmann::json& data) {
@@ -222,29 +217,18 @@ void Play::audio_display(cv::Mat& audio, cv::Mat& left, cv::Mat& right) {
   width = round(audio.rows / static_cast<double>(gray_left.rows));
   height = gray_left.rows;
 
-  std::cout << "out width: " << left.cols << '\n';
-  std::cout << "out height: " << left.rows << '\n';
-
-  std::cout << "width: " << width << '\n';
-  std::cout << "height: " << height << '\n';
-
-  std::cout << "audio width: " << audio.cols << '\n';
-  std::cout << "audio height: " << audio.rows << '\n';
-
-  std::cout << "calc height: " << floor(width * static_cast<double>(height)) << '\n';
-
   // double* audio_ptr;
   uchar* left_ptr,* right_ptr;
 
   // int h = height - 1;
 
-  int c{0}, xL, xR, y, h = height - 1, w = gray_left.cols / 4;
+  int c{0}, xL, xR, y, h = height - 1, w = gray_left.cols / 2;
 
   for (int i = 0; i <  height; i++) {
 
     for (int j = 0; j < width; j++) {
 
-      y = (h - i) / 2;
+      y = (h - i);
       // y = i / 2;
 
       // audio_ptr = audio.ptr<double>(c);
@@ -253,20 +237,18 @@ void Play::audio_display(cv::Mat& audio, cv::Mat& left, cv::Mat& right) {
 
       left_ptr = gray_left.ptr<uchar>(y);
 
-      left_ptr[xL] = left_ptr[xL] * 0.95;
+      left_ptr[xL] = left_ptr[xL] * 0.999;
 
       xR = round( audio.ptr<double>(c)[1] * w + w);
 
       right_ptr = gray_right.ptr<uchar>(y);
 
-      right_ptr[xR] = right_ptr[xR] * 0.95;
+      right_ptr[xR] = right_ptr[xR] * 0.999;
 
       c++;
       if(c >= audio.rows) break;
     }
   }
-
-  std::cout << "c: " << c << '\n';
 
   cv::cvtColor(gray_left, left, cv::COLOR_GRAY2RGB);
   cv::cvtColor(gray_right, right, cv::COLOR_GRAY2RGB);
@@ -285,8 +267,19 @@ void Play::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
 
   frame frame = get_frame(m_current_frame);
 
+  if (frame.image.cols == 0) {
+    while (!frame_exists(m_current_frame)) {}
+  }
+
   // fill image buffer
-  cv::resize(frame.image, image, cv::Size(image.cols, image.rows), 0, 0, cv::INTER_CUBIC);
+  std::cout << "image.cols: " << image.cols << '\n';
+  std::cout << "image.rows: " << image.rows << '\n';
+
+  // cv::Size size(image.cols, image.rows);
+  // cv::Mat a;
+  cv::resize(frame.image, image, image.size(), 0, 0, cv::INTER_CUBIC);
+
+  // image = a;
 
   audio_display(frame.audio, left, right);
 

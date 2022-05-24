@@ -3,6 +3,12 @@
 
 Output::Output() {
 
+  // /// name (dimensions)
+  // m_data.push_back(data::init_str("name", "output"));
+  //
+  // /// display (true)
+  // m_data.push_back(data::init_bool("display", true));
+
   m_base = new Hsl();
   m_data = m_base->data();
 }
@@ -46,16 +52,4 @@ void Output::image_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index
 
 void Output::audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index) {
   m_base->audio_frame(image, audio, frame_index);
-}
-
-
-
-void Output::process(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
-
-  if (m_type == "audio") {
-    m_base->process(audio, images);
-  } else {
-    m_base->process(images, audio);
-  }
-
 }

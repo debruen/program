@@ -69,6 +69,7 @@ nlohmann::json Spectrum::update(nlohmann::json data) {
   m_frequency = data::get_float(data, "frequency");
   m_amplitude = data::get_float(data, "amplitude");
   m_phase     = data::get_float(data, "phase");
+  m_tilt      = data::get_float(data, "tilt");
 
   m_data = data;
 
@@ -112,13 +113,14 @@ cv::Mat Spectrum::audio(cv::Mat& audio, std::size_t index) {
 
   Sine sine(audio.cols, audio.rows, index, m_shape, frequency, m_phase, m_tilt, "audio");
 
-  cv::parallel_for_(cv::Range(0, audio.rows), [&](const cv::Range &range) {
-    for (int y = range.start; y < range.end; y++) {
+  // cv::parallel_for_(cv::Range(0, audio.rows), [&](const cv::Range &range) {
+  //   for (int y = range.start; y < range.end; y++) {
+    for (int y = 0; y < audio.rows; y++) {
       for (int x = 0; x < audio.cols; x++) {
         film.ptr<double>(y)[x] = sine.point(y, x) * m_amplitude;
       }
     }
-  });
+  // });
 
   return film;
 }

@@ -162,7 +162,7 @@ bool data::get_bool(nlohmann::json& data, std::string name) {
   std::size_t size = array_size(data);
 
   for (std::size_t i = 0; i < size; i++) {
-    if (data[i]["name"] == name) {
+    if (data[i].is_object() && data[i]["name"] == name) {
       select = data[i];
       break;
     }

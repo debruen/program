@@ -8,6 +8,8 @@ class Filter {
 
   private:
 
+    std::string _name = "filter";
+
     nlohmann::json m_data = nlohmann::json::array();
 
     std::vector< Layer* > m_layer;

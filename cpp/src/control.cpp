@@ -1,8 +1,8 @@
 
 #include "control.h"
 
-Control::Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
-    : m_play(buffer, buffer_mutex, info), m_record(buffer, buffer_mutex, info) {
+Control::Control(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
+    : m_play(buffer, buffer_mutex, info), m_record(buffer, buffer_mutex, info, info_mutex) {
 
 }
 

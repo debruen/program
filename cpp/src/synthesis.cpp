@@ -1,8 +1,8 @@
 
 #include "synthesis.h"
 
-Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
-    : m_buffer{buffer}, m_buffer_mutex{buffer_mutex}, m_info{info} {
+Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
+    : m_buffer{buffer}, m_buffer_mutex{buffer_mutex}, m_info{info}, m_info_mutex{info_mutex} {
 
   m_data["settings"] = m_settings.data();
   m_data["filter"]   = m_filter.data();
@@ -23,7 +23,6 @@ Synthesis::Synthesis(std::vector<frame>& buffer, std::mutex& buffer_mutex, info&
 }
 
 void Synthesis::create_frame(std::size_t frame_index) {
-
   m_mutex.lock();
   std::string type = data::get_str(m_data["settings"], "type");
 
@@ -31,14 +30,18 @@ void Synthesis::create_frame(std::size_t frame_index) {
   cv::Mat audio = m_settings.audio();
 
   // filter
-  if(type == "audio") {
+  if(type == "ai") {
     m_filter.audio(audio, frame_index);
-    // m_output.audio_frame(image, audio, frame_index);
+    m_filter.image(image, frame_index);
+
+  } else if(type == "audio") {
+    m_filter.audio(audio, frame_index);
+    m_output.audio_frame(image, audio, frame_index);
 
   } else {
     m_filter.image(image, frame_index);
 
-    // m_output.image_frame(image, audio, frame_index);
+    m_output.image_frame(image, audio, frame_index);
   }
 
   m_settings.flip(image, true);
@@ -50,7 +53,6 @@ void Synthesis::create_frame(std::size_t frame_index) {
   m_buffer_mutex.lock();
   m_buffer.push_back(new_frame);
   m_buffer_mutex.unlock();
-
 }
 
 void Synthesis::create_buffer() {
@@ -61,9 +63,9 @@ void Synthesis::create_buffer() {
 
   if(size < m_frames + 1) {
     m_full = false;
-    // m_info_mutex.lock();
+    m_info_mutex.lock();
     m_info.full = m_full;
-    // m_info_mutex.unlock();
+    m_info_mutex.unlock();
     std::size_t new_frame_index{0};
 
     if(size != 0) {
@@ -74,11 +76,10 @@ void Synthesis::create_buffer() {
 
   } else {
     m_full = true;
-    // m_info_mutex.lock();
+    m_info_mutex.lock();
     m_info.full = m_full;
-    // m_info_mutex.unlock();
+    m_info_mutex.unlock();
   }
-
 }
 
 std::size_t Synthesis::last_index() {
@@ -113,7 +114,6 @@ void Synthesis::clear_buffer() {
   m_buffer_mutex.lock();
   m_buffer = temp_buffer;
   m_buffer_mutex.unlock();
-
 }
 
 void Synthesis::thread() {
@@ -155,7 +155,6 @@ nlohmann::json Synthesis::data(nlohmann::json data) {
 }
 
 bool Synthesis::quit() {
-
   m_quit = true;
   m_thread.join();
 

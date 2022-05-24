@@ -54,9 +54,9 @@ cv::Mat Gradient::frame(cv::Mat& mask, std::size_t frame_index, std::string type
   double frequency;
 
   set_area_frequency(frequency);
-  if (type == "image") {
-    frequency = frequency * 2;
-  }
+  // if (type == "image") {
+  //   frequency = frequency * 2;
+  // }
 
   Sine sine(mask.cols, mask.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 
@@ -84,6 +84,9 @@ void Gradient::process(cv::Mat& mask, std::size_t frame_index, std::string type)
   amplitude = m_amplitude;
 
   set_area_frequency(frequency);
+  // if (type == "image") {
+  //   frequency = frequency * 2;
+  // }
 
   Sine sine(mask.cols, mask.rows, frame_index, m_shape, frequency, m_phase, m_tilt, type);
 

@@ -25,9 +25,6 @@ class Output {
 
     void audio_frame(cv::Mat& image, cv::Mat& audio, std::size_t frame_index);
 
-
-    void process(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
 };
 
 #endif /* output_h */

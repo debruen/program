@@ -1,8 +1,8 @@
 
 #include "record.h"
 
-Record::Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info)
-    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info) {
+Record::Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex)
+    : m_buffer(buffer), m_buffer_mutex(buffer_mutex), m_info(info), m_info_mutex(info_mutex) {
 
   m_path = getenv("HOME");
   m_path = m_path + "/Desktop/output/";
@@ -143,7 +143,6 @@ void Record::init(nlohmann::json& data) {
 
 bool Record::record() {
   start();
-  std::cout << "m_frames:" << m_frames << '\n';
   for(std::size_t i = 0; i < m_frames; i++) {
     save(i);
   }

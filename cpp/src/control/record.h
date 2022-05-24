@@ -20,6 +20,7 @@ class Record {
     std::mutex& m_buffer_mutex;
 
     info& m_info;
+    std::mutex& m_info_mutex;
 
     std::string m_path, m_name, m_image, m_audio;
 
@@ -45,7 +46,7 @@ class Record {
 
 
   public:
-    Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info);
+    Record(std::vector<frame>& buffer, std::mutex& buffer_mutex, info& info, std::mutex& info_mutex);
 
     void init(nlohmann::json& data);
 
