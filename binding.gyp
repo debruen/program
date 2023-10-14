@@ -1,6 +1,6 @@
 {
     "targets": [{
-        "target_name": "emit_from_cpp",
+        "target_name": "ia",
         "cflags!": [ "-fno-exceptions" ],
         "cflags_cc!": [ "-fno-exceptions" ],
         'conditions': [
@@ -9,34 +9,24 @@
                     '-std': 'c++11',
                     '-stdlib': 'libc++',
                     'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'MACOSX_DEPLOYMENT_TARGET': '12.1'
+                    'MACOSX_DEPLOYMENT_TARGET': '13.0'
                 }
             }]
         ],
         "sources": [
             "cpp/main.cpp",
-
-            # program
-            "cpp/src/functionality/math.cpp",
-            "cpp/src/functionality/data.cpp",
-
-            "cpp/src/program.cpp",
-
-            "cpp/src/synthesis.cpp",
-                "cpp/src/synthesis/settings.cpp",
-                "cpp/src/synthesis/filter.cpp",
-                    "cpp/src/synthesis/filter/sine.cpp",
-                    "cpp/src/synthesis/filter/spectrum.cpp",
-                    "cpp/src/synthesis/filter/blend.cpp",
-                    "cpp/src/synthesis/filter/gradient.cpp",
-                "cpp/src/synthesis/output.cpp",
-                    "cpp/src/synthesis/output/out.cpp",
-                    "cpp/src/synthesis/output/hsl.cpp",
-
-            "cpp/src/control.cpp",
-                "cpp/src/control/play.cpp",
-                "cpp/src/control/record.cpp"
-
+            "cpp/nodeclass.cpp",
+            "cpp/wtc.cpp",
+            "cpp/who.cpp",
+            "cpp/ia.cpp",
+            "cpp/image_filter.cpp",
+            "cpp/image_synth.cpp",
+            "cpp/image_out.cpp",
+            "cpp/audio_filter.cpp",
+            "cpp/audio_synth.cpp",
+            "cpp/audio_out.cpp",
+            "cpp/synthesis/functions.cpp",
+            "cpp/synthesis/sine.cpp"
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
