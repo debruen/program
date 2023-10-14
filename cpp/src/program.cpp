@@ -1,59 +1,46 @@
 
 #include "program.h"
 
-Program::Program() {
-
-  m_data["settings"]  = m_settings.init();
-  m_data["filter"] = m_filter.init();
-  m_data["output"] = m_output.init();
+Program::Program()
+    : m_synthesis(m_buffer, m_buffer_mutex, m_info, m_info_mutex), m_control(m_buffer, m_buffer_mutex, m_info, m_info_mutex) {
 
 }
 
-nlohmann::json Program::init() {
-  return m_data;
-} // data()
 
-nlohmann::json Program::update(nlohmann::json data) {
+nlohmann::json Program::init_synthesis() {
+  return m_synthesis.init();
+}
 
-  std::string type = data::get_string(data["settings"], "type");
+nlohmann::json Program::data_synthesis(nlohmann::json data) {
+  return m_synthesis.data(data);
+}
 
-  m_data["settings"]  = m_settings.update(data["settings"]);
-  m_data["filter"] = m_filter.update(data["filter"], type);
-  m_data["output"] = m_output.update(data["output"], type);
 
-  return m_data;
-} // data()
+nlohmann::json Program::init_control() {
+  return m_control.init();
+}
 
-nlohmann::json Program::get() {
+nlohmann::json Program::data_control(nlohmann::json data) {
+  return m_control.data(data);
+}
 
-  return m_data;
-} // get()
 
-void Program::preview(std::vector<cv::Mat>& images, stk::StkFrames& audio) {
+nlohmann::json Program::new_frame() {
+  return m_control.new_frame();
+}
 
-  m_settings.preview(images, audio);
+void Program::display(cv::Mat& image, cv::Mat& left, cv::Mat& right) {
+  m_control.display(image, left, right);
+}
 
-  m_filter.process(images, audio);
+bool Program::record() {
+  return m_control.record();
+}
 
-  m_output.process(images, audio);
+bool Program::quit() {
+  bool quit{false};
 
-  m_settings.flip_back(images);
+  if (m_synthesis.quit()) quit = true;
 
-} // preview()
-
-void Program::save() {
-
-  std::vector<cv::Mat> images;
-  stk::StkFrames audio;
-
-  m_settings.file(images, audio);
-
-  m_filter.process(images, audio);
-
-  m_output.process(images, audio);
-
-  m_settings.flip_back(images);
-
-  m_settings.save(images, audio);
-
-} // save
+  return quit;
+}

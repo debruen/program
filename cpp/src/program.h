@@ -2,35 +2,36 @@
 #ifndef program_h
 #define program_h
 
-#include <string>
-
-#include "settings.h"
-#include "filter.h"
-#include "output.h"
+#include "synthesis.h"
+#include "control.h"
 
 class Program {
 
   private:
 
-    nlohmann::json m_data;
+    std::vector<frame> m_buffer;
+    std::mutex m_buffer_mutex;
 
-    Settings  m_settings;
-    Filter m_filter;
-    Output m_output;
+    info m_info;
+    std::mutex m_info_mutex;
+
+    Synthesis m_synthesis;
+    Control   m_control;
 
   public:
     Program();
 
-    nlohmann::json init();
+    nlohmann::json init_synthesis();
+    nlohmann::json data_synthesis(nlohmann::json data);
 
-    nlohmann::json update(nlohmann::json data);
+    nlohmann::json init_control();
+    nlohmann::json data_control(nlohmann::json data);
 
-    nlohmann::json get();
+    nlohmann::json new_frame();
+    void display(cv::Mat& image, cv::Mat& left, cv::Mat& right);
+    bool record();
 
-    void preview(std::vector<cv::Mat>& images, stk::StkFrames& audio);
-
-    void save();
-
+    bool quit();
 };
 
 #endif /* program_h */

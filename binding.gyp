@@ -15,33 +15,27 @@
         ],
         "sources": [
             "cpp/main.cpp",
-            "cpp/async.cpp",
 
             # program
-            "cpp/src/math.cpp",
-            "cpp/src/data.cpp",
+            "cpp/src/functionality/math.cpp",
+            "cpp/src/functionality/data.cpp",
 
             "cpp/src/program.cpp",
 
-            "cpp/src/settings.cpp",
+            "cpp/src/synthesis.cpp",
+                "cpp/src/synthesis/settings.cpp",
+                "cpp/src/synthesis/filter.cpp",
+                    "cpp/src/synthesis/filter/sine.cpp",
+                    "cpp/src/synthesis/filter/spectrum.cpp",
+                    "cpp/src/synthesis/filter/blend.cpp",
+                    "cpp/src/synthesis/filter/gradient.cpp",
+                "cpp/src/synthesis/output.cpp",
+                    "cpp/src/synthesis/output/out.cpp",
+                    "cpp/src/synthesis/output/hsl.cpp",
 
-            "cpp/src/filter.cpp",
-            "cpp/src/filter/layer.cpp",
-
-            "cpp/src/filter/film.cpp",
-            "cpp/src/filter/coat.cpp",
-            "cpp/src/filter/spectrum.cpp",
-
-            "cpp/src/filter/blend.cpp",
-            "cpp/src/filter/mask.cpp",
-            "cpp/src/filter/gradient.cpp",
-
-            "cpp/src/output.cpp",
-
-            "cpp/src/out/out.cpp",
-            "cpp/src/out/hsl.cpp",
-            "cpp/src/out/specone.cpp"
-
+            "cpp/src/control.cpp",
+                "cpp/src/control/play.cpp",
+                "cpp/src/control/record.cpp"
 
         ],
         'include_dirs': [
@@ -60,6 +54,7 @@
             '-ltiff',
             '-ljpeg',
             '-lstk',
+            '-lrtaudio',
             '-lfftw3'
         ],
         'dependencies': [

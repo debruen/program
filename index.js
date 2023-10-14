@@ -1,62 +1,88 @@
 
-const {program_init, program_update, program_preview, program_save} = require('./build/Release/emit_from_cpp.node')
+const {
+  program_init_synthesis,
+  program_data_synthesis,
+
+  program_init_control,
+  program_data_control,
+
+  program_new_frame,
+  program_display,
+  program_record,
+
+  program_quit } = require('./build/Release/emit_from_cpp.node')
 
 class Program{
+  constructor() {}
 
-  constructor() {
-  } // constructor
-
-  init() {
-
+  initSynthesis() {
     return new Promise((resolve) => {
-      program_init((err, result) => {
-
-        // convert result to JSON
+      program_init_synthesis((err, result) => {
         const json = JSON.parse(result)
-
         resolve(json)
       })
     })
-
-  } // init
-
-  update(data) {
-
-    // convert data to string
+  }
+  dataSynthesis(data) {
     const string = JSON.stringify(data)
-
     return new Promise((resolve) => {
-      program_update(string, (err, result) => {
-
-        // convert result to JSON
+      program_data_synthesis(string, (err, result) => {
         const json = JSON.parse(result)
-
         resolve(json)
       })
     })
+  }
 
-  } // data
-
-  preview(images, left, right) {
-
+  initControl() {
     return new Promise((resolve) => {
-      program_preview(images, left, right, (err, result) => {
+      program_init_control((err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
+  dataControl(data) {
+    const string = JSON.stringify(data)
+    return new Promise((resolve) => {
+      program_data_control(string, (err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
+
+  newFrame() {
+    return new Promise((resolve) => {
+      program_new_frame((err, result) => {
+        const json = JSON.parse(result)
+        resolve(json)
+      })
+    })
+  }
+
+  record() {
+    return new Promise((resolve) => {
+      program_record((err, result) => {
         resolve(result)
       })
     })
+  }
 
-  } // preview
-
-  save() {
-
+  display(data, image, left, right) {
+    const string = JSON.stringify(data)
     return new Promise((resolve) => {
-      program_save((err, result) => {
+      program_display(string, image, left, right, (err, result) => {
         resolve(result)
       })
     })
+  }
 
-  } // save
-
-} // Program
-
+  quit() {
+    return new Promise((resolve) => {
+      program_quit((err, result) => {
+        resolve(result)
+      })
+    })
+  }
+}
 module.exports = Program;
