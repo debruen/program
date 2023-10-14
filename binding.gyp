@@ -1,6 +1,6 @@
 {
     "targets": [{
-        "target_name": "ia",
+        "target_name": "program",
         "cflags!": [ "-fno-exceptions" ],
         "cflags_cc!": [ "-fno-exceptions" ],
         'conditions': [
@@ -9,30 +9,38 @@
                     '-std': 'c++11',
                     '-stdlib': 'libc++',
                     'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'MACOSX_DEPLOYMENT_TARGET': '13.0'
+                    'MACOSX_DEPLOYMENT_TARGET': '13.5'
                 }
             }]
         ],
         "sources": [
             "cpp/main.cpp",
-            "cpp/nodeclass.cpp",
-            "cpp/wtc.cpp",
-            "cpp/who.cpp",
-            "cpp/ia.cpp",
-            "cpp/image_filter.cpp",
-            "cpp/image_synth.cpp",
-            "cpp/image_out.cpp",
-            "cpp/audio_filter.cpp",
-            "cpp/audio_synth.cpp",
-            "cpp/audio_out.cpp",
-            "cpp/synthesis/functions.cpp",
-            "cpp/synthesis/sine.cpp"
+            "cpp/nodeprogram.cpp",
+
+            "cpp/src/functions.cpp",
+
+            "cpp/src/program.cpp",
+
+            "cpp/src/input.cpp",
+
+            "cpp/src/filtration.cpp",
+            "cpp/src/filter/filter.cpp",
+            "cpp/src/filter/fill.cpp",
+            "cpp/src/filter/random.cpp",
+            "cpp/src/filter/gradient.cpp",
+            "cpp/src/filter/rectangle.cpp",
+
+            "cpp/src/output.cpp",
+
+            "cpp/src/output/out.cpp",
+            "cpp/src/output/hsl.cpp"
+
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
             "/usr/include/lib",
             "/opt/homebrew/lib",
-            "/opt/homebrew/include/",
+            "/opt/homebrew/include",
             "/opt/homebrew/include/opencv4"
         ],
         'libraries': [
@@ -44,7 +52,6 @@
             '-ltiff',
             '-ljpeg',
             '-lstk',
-            '-lrtaudio',
             '-lfftw3'
         ],
         'dependencies': [

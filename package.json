@@ -1,5 +1,5 @@
 {
-  "name": "ia",
+  "name": "program",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -8,12 +8,20 @@
     "build": "node-gyp rebuild",
     "clean": "node-gyp clean"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whyturbocharge/program.git"
+  },
   "author": "Florian de Brün",
-  "license": "MIT",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/whyturbocharge/program/issues"
+  },
+  "homepage": "https://github.com/whyturbocharge/program#readme",
   "devDependencies": {
-    "node-gyp": "^9.0.0"
+    "node-gyp": "^9.4.0"
   },
   "dependencies": {
-    "node-addon-api": "^5.0.0"
+    "node-addon-api": "^7.0.0"
   }
 }
