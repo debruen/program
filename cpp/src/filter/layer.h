@@ -1,10 +1,11 @@
 
-#ifndef output_h
-#define output_h
+#ifndef layer_h
+#define layer_h
 
-#include "out/hsl.h"
+#include "blend.h"
+#include "film.h"
 
-class Output {
+class Layer {
 
   private:
 
@@ -12,12 +13,14 @@ class Output {
 
     nlohmann::json m_data;
 
-    Out* m_base;
+    Blend* m_blend;
+    Film* m_film;
 
   public:
-    Output();
 
-    nlohmann::json init();
+    Layer();
+
+    nlohmann::json init(std::string type);
 
     nlohmann::json update(nlohmann::json data, std::string type);
 
@@ -25,4 +28,4 @@ class Output {
 
 };
 
-#endif /* output_h */
+#endif // layer_h END

@@ -10,18 +10,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/whyturbocharge/program.git"
+    "url": "git+https://github.com/debruen/program.git"
   },
   "author": "Florian de Brün",
   "license": "",
   "bugs": {
-    "url": "https://github.com/whyturbocharge/program/issues"
+    "url": "https://github.com/debruen/program/issues"
   },
-  "homepage": "https://github.com/whyturbocharge/program#readme",
+  "homepage": "https://github.com/debruen/program#readme",
   "devDependencies": {
-    "node-gyp": "^9.4.0"
+    "node-gyp": "^9.0.0"
   },
   "dependencies": {
-    "node-addon-api": "^7.0.0"
+    "node-addon-api": "^5.0.0"
   }
 }

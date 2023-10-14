@@ -1,6 +1,6 @@
 {
     "targets": [{
-        "target_name": "program",
+        "target_name": "emit_from_cpp",
         "cflags!": [ "-fno-exceptions" ],
         "cflags_cc!": [ "-fno-exceptions" ],
         'conditions': [
@@ -9,38 +9,46 @@
                     '-std': 'c++11',
                     '-stdlib': 'libc++',
                     'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
-                    'MACOSX_DEPLOYMENT_TARGET': '13.5'
+                    'MACOSX_DEPLOYMENT_TARGET': '13.0'
                 }
             }]
         ],
         "sources": [
             "cpp/main.cpp",
-            "cpp/nodeprogram.cpp",
+            "cpp/async.cpp",
 
-            "cpp/src/functions.cpp",
+            # program
+            "cpp/src/math.cpp",
+            "cpp/src/data.cpp",
 
             "cpp/src/program.cpp",
 
-            "cpp/src/input.cpp",
+            "cpp/src/settings.cpp",
 
-            "cpp/src/filtration.cpp",
-            "cpp/src/filter/filter.cpp",
-            "cpp/src/filter/fill.cpp",
-            "cpp/src/filter/random.cpp",
+            "cpp/src/filter.cpp",
+            "cpp/src/filter/layer.cpp",
+
+            "cpp/src/filter/film.cpp",
+            "cpp/src/filter/coat.cpp",
+            "cpp/src/filter/spectrum.cpp",
+
+            "cpp/src/filter/blend.cpp",
+            "cpp/src/filter/mask.cpp",
             "cpp/src/filter/gradient.cpp",
-            "cpp/src/filter/rectangle.cpp",
 
             "cpp/src/output.cpp",
 
-            "cpp/src/output/out.cpp",
-            "cpp/src/output/hsl.cpp"
+            "cpp/src/out/out.cpp",
+            "cpp/src/out/hsl.cpp",
+            "cpp/src/out/specone.cpp"
+
 
         ],
         'include_dirs': [
             "<!@(node -p \"require('node-addon-api').include\")",
             "/usr/include/lib",
             "/opt/homebrew/lib",
-            "/opt/homebrew/include",
+            "/opt/homebrew/include/",
             "/opt/homebrew/include/opencv4"
         ],
         'libraries': [
