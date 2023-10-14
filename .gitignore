@@ -1,4 +1,5 @@
 .DS_Store
 build
+doxygen
 node_modules
 package-lock.json
